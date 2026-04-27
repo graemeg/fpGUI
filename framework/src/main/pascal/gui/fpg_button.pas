@@ -43,6 +43,7 @@ type
     FImageLayout: TImageLayout;
     FFlat: Boolean;
     FImageName: string;
+    FImageSize: integer;
     FClicked: Boolean;
     FShowImage: Boolean;
     FClickOnPush: Boolean;    { Used for group buttons where click happens on "down" state. Normal buttons, the click happens on "release" state }
@@ -54,6 +55,7 @@ type
     procedure   SetFlat(const AValue: Boolean);
     procedure   SetImageLayout(const AValue: TImageLayout);
     procedure   SetImageName(const AValue: string);
+    procedure   SetImageSize(AValue: integer);
     procedure   SetText(const AValue: string);
     procedure   SetDown(AValue: Boolean);
     procedure   SetImageMargin(const Value: integer);
@@ -102,6 +104,9 @@ type
     property    GroupIndex: integer read FGroupIndex write FGroupIndex default 0;
     property    ImageMargin: integer read FImageMargin write SetImageMargin default 3;
     property    ImageName: string read FImageName write SetImageName;
+    { Logical icon size in pixels at 96 DPI (default 16).  Used when ImageName
+      resolves to an HVIF icon in fpgIcons. }
+    property    ImageSize: integer read FImageSize write SetImageSize default 16;
     property    ImageSpacing: integer read FImageSpacing write SetImageSpacing default -1;
     property    ImageLayout: TImageLayout read FImageLayout write SetImageLayout default ilImageLeft;
     property    ModalResult: TfpgModalResult read FModalResult write FModalResult default mrNone;
@@ -148,6 +153,7 @@ type
     property    ImageLayout;
     property    ImageMargin;
     property    ImageName;
+    property    ImageSize;
     property    ImageSpacing;
     property    Left;
     property    MaxHeight;
@@ -184,6 +190,7 @@ function CreateButton(AOwner: TComponent; x, y, w: TfpgCoord; AText: string;
 implementation
 
 uses
+  fpg_iconstore,
   fpg_form; {$Note Try and remove this fpg_form dependency.}
 
 function CreateButton(AOwner: TComponent; x, y, w: TfpgCoord; AText: string;
@@ -487,8 +494,23 @@ end;
 procedure TfpgBaseButton.SetImageName(const AValue: string);
 begin
   FImageName := AValue;
-  FImage     := fpgImages.GetImage(FImageName);
+  if Assigned(fpgIcons) and fpgIcons.HasIcon(FImageName) then
+    FImage := fpgIcons.GetIcon(FImageName, FImageSize)
+  else
+    FImage := fpgImages.GetImage(FImageName);
   Repaint;
+end;
+
+procedure TfpgBaseButton.SetImageSize(AValue: integer);
+begin
+  if AValue <= 0 then
+    AValue := 16;
+  if FImageSize = AValue then
+    Exit;
+  FImageSize := AValue;
+  { Re-resolve image in case ImageName is registered as an HVIF icon }
+  if FImageName <> '' then
+    SetImageName(FImageName);
 end;
 
 procedure TfpgBaseButton.SetDefault(const AValue: boolean);
@@ -557,6 +579,7 @@ begin
   FGroupIndex   := 0;
   FImage        := nil;
   FImageName    := '';
+  FImageSize    := 16;
   FShowImage    := True;
   FImageLayout  := ilImageLeft;
   FImageMargin  := 3;   // image is 3 pixels from edge of button. -1 will centre image.
@@ -607,7 +630,13 @@ begin
     Include(lBtnFlags, btfDisabled);
 
   // In the UI Designer we want the button more visible
-  if not (csDesigning in ComponentState) then
+  if (csDesigning in ComponentState) then
+  begin
+    { while in the designer we want hover effect all the time }
+    if FFlat then
+      Include(lBtnFlags, btfHover);
+  end
+  else
   begin
     if FFlat and (FState = 1) then  // mouse over
       Include(lBtnFlags, btfHover)
@@ -619,12 +648,6 @@ begin
       if FState = 1 then
         Include(lBtnFlags, btfHover);
     end;
-  end
-  else
-  begin
-    { while in the designer we want hover effect all the time }
-    if FFlat then
-      Include(lBtnFlags, btfHover);
   end;
 
   if (not FFlat) and FDefault then

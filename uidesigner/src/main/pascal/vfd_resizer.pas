@@ -117,7 +117,7 @@ end;
 constructor TwgResizer.Create(ACompDesigner: TObject; adirection: integer);
 begin
   inherited Create(TWidgetDesigner(aCompDesigner).Widget.Parent);
-  FBackgroundColor := $404040;
+  FBackgroundColor := $FF404040;
   wgdesigner := aCompDesigner;
   FDragging := False;
   FWidth    := 5;

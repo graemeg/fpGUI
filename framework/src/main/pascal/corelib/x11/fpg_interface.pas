@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2026 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -22,12 +22,20 @@ unit fpg_interface;
 interface
 
 uses
-  fpg_x11;
+  fpg_x11
+  {$ifdef AGGCanvas}
+  , fpg_x11_buffer_manager
+  {$endif}
+  ;
 
 type
   TfpgFontResourceImpl  = class(TfpgX11FontResource);
   TfpgImageImpl         = class(TfpgX11Image);
+  { Suppress deprecation hint: TfpgCanvasImpl retains the native canvas
+    during the transition period. Remove once THybridCanvas is the sole base. }
+  {$NOTES OFF}
   TfpgCanvasImpl        = class(TfpgX11Canvas);
+  {$NOTES ON}
   TfpgWindowImpl        = class(TfpgX11Window);
   TfpgApplicationImpl   = class(TfpgX11Application);
   TfpgClipboardImpl     = class(TfpgX11Clipboard);
@@ -39,6 +47,17 @@ type
   TfpgSystemTrayHandler = class(TfpgX11SystemTrayHandler);
 
 implementation
+
+{$ifdef AGGCanvas}
+uses
+  fpg_hybrid_canvas,
+  fpg_fontmanager,
+  fpg_freetype_agg_fontresource;
+
+initialization
+  CreateBufferManager  := @CreateX11BufferManager;
+  AggFontResourceClass := TfpgFreeTypeFontResource;
+{$endif}
 
 end.
 

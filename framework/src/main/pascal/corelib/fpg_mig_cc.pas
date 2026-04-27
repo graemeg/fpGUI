@@ -776,7 +776,9 @@ end;
 function TfpgMigCC.Grow: TfpgMigCC;
 begin
   FHor.SetGrowPriority(100);
+  FHor.SetGrowWeight(100.0);
   FVer.SetGrowPriority(100);
+  FVer.SetGrowWeight(100.0);
   Result := Self;
 end;
 

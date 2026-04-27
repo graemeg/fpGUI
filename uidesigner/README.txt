@@ -38,6 +38,14 @@ Features
   Forms from scratch.
 
 
+Using different languages
+=========================
+
+To test with Afrikaans, run from the target/ directory:
+
+  cd uidesigner/target
+  LANG=af_ZA.UTF-8 ./uidesigner
+
 
 Graeme Geldenhuys - September 2007
 

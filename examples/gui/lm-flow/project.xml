@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-lmflow</name>
+
+  <build>
+    <mainSource>lm-flow.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>lm-flow</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

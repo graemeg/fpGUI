@@ -42,7 +42,7 @@ begin
 
   // Create MigLayout with Fill to make cells fill container
   mig := TfpgMigLayoutManager.Create;
-  mig.LC.SetWrapAfter(3);  // 3 columns
+  mig.LC.WrapAfter(3);  // 3 columns
   mig.LC.Fill;             // Cells fill available space
   if FDebug then
     mig.LC.Debug;

@@ -117,12 +117,13 @@ end;
 
 procedure TMainWindow.DoAllocateWindowHandle;
 var
-  WindowAttributes: TWindowAttributes;
+  pm: TfpgRect;
 begin
+  { Position the window one-third down on the primary monitor }
+  pm := fpgApplication.Desktop.AvailableGeometry(fpgApplication.Desktop.PrimaryScreen);
+  Left := pm.Left + (pm.Width  - Width) div 2;
+  Top  := pm.Top  + (pm.Height - Height) div 3;
   inherited DoAllocateWindowHandle;
-  WindowAttributes := Window.WindowAttributes;
-  Include(WindowAttributes, waOneThirdDownPos);
-  Window.WindowAttributes := WindowAttributes;
 end;
 
 

@@ -549,6 +549,9 @@ begin
     cc.Grow;
     AssertEquals('Horizontal grow priority should be 100', 100, cc.Horizontal.GetGrowPriority);
     AssertEquals('Vertical grow priority should be 100', 100, cc.Vertical.GetGrowPriority);
+    { .Grow must also set default grow weights, matching the behaviour of .GrowX and .GrowY }
+    AssertEquals('Horizontal grow weight should be 100.0', 100.0, cc.Horizontal.GetGrowWeight, 0.001);
+    AssertEquals('Vertical grow weight should be 100.0', 100.0, cc.Vertical.GetGrowWeight, 0.001);
   finally
     cc.Free;
   end;

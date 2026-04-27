@@ -14,7 +14,7 @@
       We use GGI's key definitions; the names just
       have been somewhat pascalified...
       GGI info at <http://www.ggi-project.org>
-      GII info at <http://www.ggi-project.org/packages/libgii.html>
+      GII info at <https://web.archive.org/web/20120321171901/http://www.ggi-project.org/packages/libgii.html>
 }
 
 {%mainunit fpg_base.pas}
@@ -32,6 +32,32 @@ const
   keyEscape		    = $1b;
   keyDelete		    = $7f;
   keySpace        = $20;
+  keyA            = $41; // 65 dec
+  keyB            = $42; // 66 dec
+  keyC            = $43; // 67 dec
+  keyD            = $44; // 68 dec
+  keyE            = $45; // 69 dec
+  keyF            = $46; // 70 dec
+  keyG            = $47; // 71 dec
+  keyH            = $48; // 72 dec
+  keyI            = $49; // 73 dec
+  keyJ            = $4A; // 74 dec
+  keyK            = $4B; // 75 dec
+  keyL            = $4C; // 76 dec
+  keyM            = $4D; // 77 dec
+  keyN            = $4E; // 78 dec
+  keyO            = $4F; // 79 dec
+  keyP            = $50; // 80 dec
+  keyQ            = $51; // 81 dec
+  keyR            = $52; // 82 dec
+  keyS            = $53; // 83 dec
+  keyT            = $54; // 84 dec
+  keyU            = $55; // 85 dec
+  keyV            = $56; // 86 dec
+  keyW            = $57; // 87 dec
+  keyX            = $58; // 88 dec
+  keyY            = $59; // 89 dec
+  keyZ            = $5A; // 90 dec
 
   // special keys
 

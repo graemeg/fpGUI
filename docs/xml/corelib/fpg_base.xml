@@ -718,6 +718,31 @@ but others (found in <link id="#fpgui.fpg_extinterpolation">fpg_extinterpolation
 be used too, by using the <link id="#fpgui.fpg_base.TfpgCanvasBase.InterpolationFilter">InterpolationFilter</link> property of the Canvas.</descr>
 </element>
 
+<element name="TfpgCanvasBase.DrawString">
+<short>Draws a text string at the specified coordinates using the current TextColor</short>
+<descr><printshort id="#fpgui.fpg_base.TfpgCanvasBase.DrawString"/>.
+This is the low-level text drawing primitive. It renders the given string at the
+exact pixel coordinates (<var>x</var>, <var>y</var>) without any alignment,
+wrapping or clipping to a bounding rectangle. It honours the current
+<var>Canvas.TextColor</var> directly — no style or theme override is applied.
+
+<p>Use <var>DrawString</var> when you need full control over text colour and
+positioning, for example in custom-painted widgets such as text editors, syntax
+highlighters or any component that manages its own colour scheme. Because
+<var>DrawString</var> bypasses the active <link id="fpg_base.TfpgStyle">TfpgStyle</link>,
+the colour you set via <var>Canvas.TextColor</var> is exactly the colour that
+will be rendered.</p>
+
+<p>If you need automatic text alignment (left, centre, right), word wrapping or
+themed text rendering, use <link id="fpg_main.TfpgCanvas.DrawText">DrawText</link>
+instead.</p>
+</descr>
+<seealso>
+<link id="fpg_main.TfpgCanvas.DrawText"/>
+</seealso>
+</element>
+
+
 <!-- function Visibility: default -->
 <element name="KeycodeToText">
 <short>Returns the text representation of a keycode.</short>

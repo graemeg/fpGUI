@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>fpgui-ide</name>
+  <author>Graeme Geldenhuys</author>
+  <license>BSD-3-Clause</license>
+
+  <build>
+    <projectType>application</projectType>
+    <mainSource>ide.main.pas</mainSource>
+    <executableName>maximus</executableName>
+  </build>
+
+  <test>
+    <testSource>TestRunner.pas</testSource>
+    <framework>fpcunit</framework>
+    <frameworkOptions>
+      <option>--all</option>
+      <option>--format=plain</option>
+    </frameworkOptions>
+  </test>
+
+  <moduleDependencies>
+    <module>../framework</module>
+  </moduleDependencies>
+
+<!--
+  <dependencies>
+    <dependency>
+      <name>opdf-lib</name>
+      <version>0.3.1</version>
+    </dependency>
+    <dependency>
+      <name>pdr-core</name>
+      <version>0.3.1</version>
+    </dependency>
+    <dependency>
+      <name>pdr-adapters</name>
+      <version>0.3.1</version>
+    </dependency>
+  </dependencies>
+-->
+
+</project>

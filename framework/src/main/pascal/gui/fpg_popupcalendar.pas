@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2025 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2026 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -183,8 +183,8 @@ type
     property    HolidayColor: TfpgColor read FHolidayColor write SetHolidayColor;
     property    SelectedColor: TfpgColor read FSelectedColor write SetSelectedColor;
   end;
-  
-  
+
+
   TfpgCalendarCombo = class(TfpgBaseStaticCombo)
   private
     FDate: TDateTime;
@@ -352,7 +352,7 @@ begin
   Canvas.Clear(BackgroundColor);
 //  Canvas.SetColor(clWindowBackground);
 //  Canvas.DrawRectangle(0, 0, Width, Height);  // black rectangle border
-  Canvas.DrawButtonFace(0, 0, Width, Height, []);  // 3d rectangle inside black border
+  fpgStyle.DrawButtonFace(Canvas, 0, 0, Width, Height, []);
   Canvas.EndDraw;
 end;
 
@@ -376,10 +376,9 @@ begin
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: YearSelectForm}
   Name := 'YearSelectForm';
-  SetPosition(439, 401, 130, 122);
-//  WindowTitle := 'YearSelectForm';
-//  Hint := '';
-//  Sizeable := False;
+  Left := 439;
+  Top := 401;
+  PreferredSize := fpgSize(130, 122);
 
   btnMinus10 := TfpgButton.Create(self);
   with btnMinus10 do
@@ -802,12 +801,12 @@ begin
     // do nothing - test passed
   else
     lDate := FMinDate;
-    
+
   if (trunc(AValue) <= trunc(FMaxDate)) then
     // do nothing - test passed
   else
     lDate := FMaxDate;
-    
+
   FDate := lDate;
   UpdateCalendar;
 end;
@@ -1034,7 +1033,7 @@ begin
           consumed := True;
         end;
   end;
-  
+
   if not consumed then
   begin
     if keycode = keyEnter then
@@ -1048,7 +1047,7 @@ begin
       Close;
     end;
   end;
-  
+
   if not consumed then
     inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
@@ -1332,7 +1331,7 @@ begin
   if FMinDate = AValue then
     Exit; //==>
   FMinDate := AValue;
-  
+
   // correct min/max values
   if AValue > FMaxDate then
     FMaxDate := IncMonth(AValue, 12); // one year more

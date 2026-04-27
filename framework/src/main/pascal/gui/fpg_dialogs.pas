@@ -1251,7 +1251,7 @@ begin
     OnDoubleClick := @GridDblClicked;
     OnHeaderClick := @GridHeaderClicked;
   end;
-  mig.AddLayoutComponent(grid, TfpgMigCC.Create().GrowX().GrowY().SpanX(2).Wrap());
+  mig.AddLayoutComponent(grid, TfpgMigCC.Create().GrowX().GrowY().SpanX(2).PushY.Wrap());
 
   { Create lower Panel details - spans 2 columns, only grows horizontally }
   pnlFileInfo := TfpgPanel.Create(self);

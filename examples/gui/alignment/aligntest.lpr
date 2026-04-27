@@ -59,7 +59,7 @@ begin
   WindowTitle := 'Alignment Example';
 
   mig := TfpgMigLayoutManager.Create;
-  mig.LC.SetWrapAfter(1);
+  mig.LC.WrapAfter(1);
   LayoutManager := mig;
 
   btnBasic := TfpgButton.Create(self);

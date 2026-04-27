@@ -1,0 +1,1215 @@
+= fpGUI Icon Format Analysis: HVIF vs Custom Binary Format
+Graeme Geldenhuys
+2026-04-08
+:toc: left
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+:sectanchors:
+:sectlinks:
+:docstatus: APPROVED
+
+== Executive Summary
+
+fpGUI needs a compact binary vector icon format for embedding icons in `.res`
+resource files inside compiled executables. This document analyses three
+candidate strategies — adopting HVIF directly, building a custom Pascal-native
+format (FPVIF), and adopting TinyVG — and recommends *adopting HVIF*.
+
+*Recommendation: Adopt HVIF* as the embedded shipping format, with SVG as the
+on-disk/authoring format for the Icon-O-Matic tool. The canonical format
+reference is the Haiku OS C++ source (`src/libs/icon/Archive.cpp` and
+`PathSource.cpp`), not any third-party parser.
+See https://git.haiku-os.org/haiku/tree/src/libs/icon and this very useful
+article https://blog.leahhanson.us/post/recursecenter2016/haiku_icons.html
+
+For convenience, I've cloned the Haiku git repository to:
+  /data/devel/haiku
+and the HVIF icon code is located in the subdirectory src/libs/icon
+
+I believe these is a very small test code in:
+  /data/devel/haiku/src/test/libs/icon/flat_icon/
+
+
+[cols="3,1,1,1", options="header"]
+|===
+| Criterion
+| HVIF (Adopt)
+| FPVIF (Custom packed records)
+| TinyVG (Adopt)
+
+| Typical icon size
+| 500–700 bytes
+| 700–900 bytes
+| 1–2 KB
+
+| Spec work required
+| None (Haiku source is canon)
+| Full (design + maintain)
+| None (open spec)
+
+| Pascal tooling exists
+| No (must write reader)
+| No (must write everything)
+| No (must write reader)
+
+| Authoring tool required
+| Yes (Icon-O-Matic for fpGUI)
+| Yes
+| Yes
+
+| Existing icon libraries
+| Yes (Haiku's entire icon set)
+| No
+| Limited
+
+| HiDPI friendly
+| Yes (vector math scales)
+| Yes
+| Yes
+
+| Implementation risk
+| Low
+| High
+| Medium
+|===
+
+== Background: Why Not SVG?
+
+SVG is the obvious first choice — it is a standard, human-readable vector
+format with extensive tooling. However, for embedded icon resources in compiled
+binaries it has significant drawbacks:
+
+* *Size:* A typical Material Design SVG icon is 500 bytes to 2 KB when
+  hand-optimised (e.g. by `svgo`), but tool-generated SVGs routinely reach
+  3–10 KB. The XML encoding of path data as ASCII text is inherently wasteful:
+  the number `10.5` costs 4 bytes as text vs 2 bytes as a quantised integer.
+
+* *XML namespace overhead:* Every SVG file carries `xmlns="http://www.w3.org/2000/svg"`
+  (36+ bytes) plus optional `xmlns:xlink`. This is pure overhead for embedded icons.
+
+* *Parsing cost:* Loading an SVG requires a full XML parser. For binary resources
+  loaded at application startup this is measurably slower than reading a packed
+  binary stream.
+
+* *No mandatory style table:* SVG supports `<defs>` and `<use>` for fill reuse,
+  but in practice tool-generated and simple icon SVGs repeat fill values per shape.
+  A binary format with a global indexed style table always amortises color storage
+  across all shapes by design.
+
+.SVG vs Binary format size comparison (Material Design icon set, 961 icons)
+[cols="2,1", options="header"]
+|===
+| Format
+| Total size
+
+| SVG (uncompressed)
+| 312,887 bytes (~325 bytes/icon average)
+
+| IconVG (Google binary)
+| 122,012 bytes (~127 bytes/icon average)
+
+| PNG 24×24
+| 190,840 bytes
+
+| PNG 48×48
+| 318,219 bytes
+|===
+
+NOTE: The "SVG average" above is for Google's Material Design icons which are
+      already heavily optimised single-path icons. More complex icons (gradients,
+      multiple paths, transforms) scale to 2–10 KB per file in SVG.
+
+== The HVIF Format
+
+=== History and Design Philosophy
+
+HVIF (Haiku Vector Icon Format) was created by Stephan Aßmus for the Haiku OS
+project circa 2006. The design goal was a format so compact that icons could
+be stored entirely in the filesystem's extended attributes (BFS EA streams),
+which have a practical limit of roughly 1 KB. The result: typical Haiku icons
+occupy *500–700 bytes*.
+
+The canonical implementation is in the Haiku OS source tree:
+
+* `src/libs/icon/Archive.cpp` — serialiser/deserialiser (the authoritative spec)
+* `src/libs/icon/PathSource.cpp` — path segment reading
+
+=== Binary Structure
+
+An HVIF file consists of three consecutive sections with no explicit section
+header — the format relies on self-describing counts and flag bytes rather than
+length-prefixed blocks.
+
+[source]
+----
+[Magic: 4 bytes "ncif"]
+[Styles section]
+  [style count: 1 byte]
+  [style[0]..style[N-1]]
+[Paths section]
+  [path count: 1 byte]
+  [path[0]..path[N-1]]
+[Shapes section]
+  [shape count: 1 byte]
+  [shape[0]..shape[N-1]]
+----
+
+Maximum 256 styles and 256 paths — single-byte indexing throughout.
+
+=== Variable-Length Coordinate Encoding
+
+This is the most important size optimisation. HVIF maps icon geometry onto a
+*64×64 native coordinate space*. The encoding uses the *low bit of the first byte
+as a continuation flag*, not a traditional N-bit integer: when bit 0 is 0, only
+one byte is used; when bit 0 is 1, a second byte follows for extended range or
+sub-pixel precision.
+
+For the common case — integer coordinates in the range −32 to +95 — a coordinate
+is encoded in *1 byte*:
+
+[source]
+----
+value_stored = (coordinate + 32) * 2     { maps [-32..+95] → [0..254] }
+                                          { bit 0 = 0: 1-byte encoding }
+----
+
+When sub-pixel precision or coordinates outside this range are needed, bit 0
+of the byte is set as a flag indicating that a *second byte follows*, expanding
+to a 2-byte coordinate with 1/64 sub-pixel granularity and range −128 to +192.
+
+*Effect:* In practice, >80% of icon coordinates fit in 1 byte. A 4-corner
+rectangle at integer positions costs:
+
+[source]
+----
+1 byte  : point count
+1 byte  : 4 path commands × 2 bits each (packed)
+2 bytes : first point (x, y — each 1 byte)
+3 bytes : 3 remaining corners (relative, each 1 byte each)
+= 7 bytes total for a complete rectangle
+----
+
+Compare this with SVG: `<path d="M10 10 L90 10 L90 90 L10 90 Z"/>` is 40
+bytes of ASCII, not counting the surrounding tag.
+
+*HiDPI note:* The 64×64 native canvas is NOT a rendering resolution — it is
+a coordinate quantisation grid. At runtime the renderer scales all coordinates
+via a floating-point transformation matrix, so the icon renders crisp at any
+DPI or zoom level. This is identical to how SVG's `viewBox` works.
+
+=== Path Command Encoding
+
+HVIF distinguishes three path types to optimise for common cases:
+
+. *Generic paths:* Mixed segment types (any combination)
+. *Line-only paths:* Rectilinear shapes (no curves stored)
+. *Curve-only paths:* Smooth shapes (no line commands stored)
+
+Path commands are encoded 4-per-byte using 2 bits each:
+
+[cols="2,1,1", options="header"]
+|===
+| Command | Encoding | Coordinate bytes required
+| Horizontal line | 00 | 1 (x only)
+| Vertical line | 01 | 1 (y only)
+| Straight line | 10 | 2 (x, y)
+| Cubic Bézier | 11 | 6 (3 control points × 2 coords)
+|===
+
+=== Style (Color) Encoding
+
+The styles section uses a *type byte* that selects the color storage layout.
+No empty fields are stored:
+
+[cols="2,1,1", options="header"]
+|===
+| Color type | Bytes used | Notes
+| Solid RGB | 3 | No alpha channel stored if fully opaque
+| Solid RGBA | 4 |
+| Solid grayscale | 1 | Single K byte
+| Solid grayscale + alpha | 2 |
+| Two-stop gradient | N | Stop offsets omitted (implicit 0% and 100%)
+| Multi-stop gradient | N | Full stop list
+|===
+
+=== Transformation Encoding and the 3-Byte Float Format
+
+Affine transformation matrices (6 values: a, b, c, d, tx, ty) use a custom
+*3-byte floating-point format* per value, giving 18 bytes per full transform —
+vs 24 bytes for standard float32 or 48 bytes for float64.
+
+The 3-byte float bit layout (24 bits total):
+
+[source]
+----
+Bit 23      : sign bit (0 = positive, 1 = negative)
+Bits 22–16  : 7-bit exponent, biased by 64 (range: 2^-64 to 2^63)
+Bits 15–0   : 16-bit mantissa (implicit leading 1 not stored)
+
+Decoded value = (-1)^sign × 2^(exponent - 64) × (1 + mantissa/65536)
+----
+
+In FPC, `ReadFloat24` decodes this as:
+
+[source,pascal]
+----
+function THvifReader.ReadFloat24: Single;
+var
+  b0, b1, b2: Byte;
+  sign: Integer;
+  exp: Integer;
+  mantissa: LongWord;
+begin
+  b0 := ReadByte;  { bits 23..16 }
+  b1 := ReadByte;  { bits 15..8  }
+  b2 := ReadByte;  { bits 7..0   }
+  sign     := (b0 shr 7) and 1;
+  exp      := (b0 and $7F);
+  mantissa := (LongWord(b1) shl 8) or b2;
+  if exp = 0 then
+    Result := 0.0
+  else
+    Result := (1.0 + mantissa / 65536.0) * Power(2.0, exp - 64);
+  if sign <> 0 then
+    Result := -Result;
+end;
+----
+
+NOTE: Verify this bit layout against `Archive.cpp` in the Haiku source before
+      shipping — the exponent bias and mantissa width are the most format-version-
+      sensitive parts.
+
+When a shape is only translated (no rotation/scale/skew), only the 2-component
+translation is stored using the coordinate encoding above (2–4 bytes total).
+
+=== Why HVIF Beats SVG: Size Breakdown
+
+[cols="3,1,1,1", options="header"]
+|===
+| Encoding aspect | SVG | HVIF | Typical saving
+| Format | Text XML | Binary | ~50%
+| Coordinate (common case) | 4+ bytes ASCII | 1 byte | ~75%
+| Transform matrix | 24 bytes (float32) | 18 bytes (3-byte float) | 25%
+| Color | 7 bytes hex text | 1–4 bytes | ~70%
+| Path commands | Text chars + spaces | 2 bits/command packed | ~85%
+| Metadata | Repeated attribute names | Flag byte | ~60%
+| Shared styles/paths | Per-shape | Global indexed list | ~40%
+|===
+
+=== Known Implementations (non-Pascal)
+
+* *C++ (canonical):* `src/libs/icon/` in Haiku OS source — this is the spec.
+* *Rust:* `hvif` crate on crates.io — uses `nom` parser combinator; has
+  optional Cairo rendering. Good reading for understanding the format.
+* *Haskell:* `hvif` package by aisamanra — includes `hvif2svg` converter.
+* *JavaScript:* `haikon-js` — browser-compatible parser.
+* *Tools:* `hvif-tools` (threedeyes) — cross-platform SVG ↔ HVIF conversion CLI.
+
+== Candidate Approaches
+
+=== Approach A: Adopt HVIF (Recommended)
+
+Implement an HVIF binary stream reader in Object Pascal. Use SVG as the
+authoring/on-disk format for the Icon-O-Matic tool, with a converter to HVIF
+for the embedded `.res` format.
+
+[source,pascal]
+----
+{ Rough sketch of the HVIF reader interface }
+type
+  THvifReader = class
+  public
+    { Read from a stream; render to AggPas canvas at given scale factor }
+    procedure LoadFromStream(AStream: TStream);
+    procedure Render(ACanvas: TfpgAggCanvas; AScale: Double);
+  end;
+----
+
+*Key implementation notes:*
+
+* Reference the Haiku C++ source (`Archive.cpp`, `PathSource.cpp`) as the
+  authoritative byte-level specification — not the Rust crate.
+* Map HVIF's 3-byte custom float to FPC's `Single` (32-bit) at read time;
+  no need to store the custom format internally.
+* AggPas already provides all necessary primitives: `MoveTo`, `LineTo`,
+  `Curve4` (cubic Bézier), linear and radial gradients.
+* The 64×64 native canvas maps to a `TAggTransAffine` scale matrix applied
+  before any other shape transform.
+
+[cols="2,3", options="header"]
+|===
+| Property | Value
+| Estimated Pascal LOC | ~800–1000 (reader + AggPas renderer, linear/radial gradients only)
+| Icon size | 500–700 bytes
+| Spec design effort | None (use Haiku C++ source)
+| Authoring tool | Still required (SVG → HVIF converter or custom editor)
+| Existing icon assets | Yes (Haiku's entire icon library)
+| HiDPI | Yes (vector, scale at render time)
+| Risk | Low–Medium (see gradient note below)
+| AggPas required | Yes (`agg` build profile mandatory for rendering)
+|===
+
+*Pros:*
+
+* Zero spec design work — the format is fully specified by the Haiku source.
+* Proven: thousands of Haiku icons exercise every format feature.
+* Existing converter tools (hvif-tools, hvif2svg/svg2hvif).
+* The Haiku icon library is available for reuse in fpGUI.
+* Compact format (~500–700 bytes) suits both `.res` embedding and distribution.
+
+*Cons:*
+
+* Haiku's aesthetic defaults (64×64, specific gradient types) may constrain
+  some icon designs, though the format itself is not limited to these.
+* No Pascal tooling exists — the reader must be written from scratch.
+* Building Icon-O-Matic for fpGUI is still required (same as any other format).
+* The format does not support all SVG features (e.g. text, patterns).
+* *Gradient risk (v1 mitigation):* HVIF supports 5 gradient types (linear,
+  radial, diamond, conic, XY). AggPas provides linear and radial natively.
+  Diamond/conic/XY require custom `TAggSpanGenerator` subclasses (est. +200–400 LOC
+  and Medium complexity). *v1 recommendation: fall back to the first gradient stop's
+  solid colour for diamond/conic/XY gradients, document the limitation, and implement
+  these in a later iteration.* Most Haiku icons use only linear and radial gradients.
+* Renderer is *AggPas-only* — requires the `agg` build profile. Non-AggPas
+  builds (e.g. native X11 canvas without `agg`) cannot render HVIF icons.
+  A stub `THvifRenderer` that raises a clear compile-time or runtime error
+  should be provided for non-AggPas builds.
+
+=== Approach B: Custom FPVIF Format (FPC Packed Records)
+
+Design an HVIF-inspired binary format using FPC's `packed record` and `enum`
+types as the primary serialisation primitive. The goal is faster decoding by
+avoiding bit-level manipulation at the cost of slightly larger files.
+
+Example sketch of a packed record layout (schematic — dynamic arrays inside packed
+records are not directly serialisable with `TStream.Read`; real implementation would
+use fixed-size arrays or a length-prefixed block after the header record):
+
+[source,pascal]
+----
+{$PACKRECORDS 1}
+type
+  TFPVIFCoord = packed record
+    X, Y: Byte;     { 8-bit quantised: 256x256 native grid, 0..255 }
+  end;
+
+  TFPVIFCommandType = (ctHLine = 0, ctVLine = 1, ctLine = 2, ctCurve = 3);
+
+  { Header portion — directly serialisable: }
+  TFPVIFCommandHeader = packed record
+    CmdType: TFPVIFCommandType;  { 1 byte (enum) }
+    NumPoints: Byte;
+    { Followed in stream by NumPoints × SizeOf(TFPVIFCoord) bytes }
+  end;
+{$PACKRECORDS DEFAULT}
+----
+
+[cols="2,3", options="header"]
+|===
+| Property | Value
+| Estimated Pascal LOC | ~1500–2500 (spec design + reader + converter + tooling)
+| Icon size | 700–900 bytes (~15–25% larger than HVIF)
+| Spec design effort | Full (design, document, maintain)
+| Authoring tool | Required (no existing converters)
+| HiDPI | Yes (vector)
+| Risk | High
+|===
+
+*Pros:*
+
+* FPC packed records allow direct `TStream.Read(rec, SizeOf(rec))` serialisation.
+* No bit-level manipulation — faster decoding for resource-constrained scenarios.
+* Full control: can add fpGUI-specific extensions (named colours, layer groups).
+* Coordinate space can be 256×256 (8-bit) instead of 64×64 (7-bit), giving
+  slightly better sub-pixel precision without extra complexity.
+
+*Cons:*
+
+* *15–25% larger than HVIF* — FPC enum types occupy a full byte; HVIF encodes
+  4 path commands in a single byte (2 bits each). This alignment difference
+  alone explains most of the size increase.
+* *Cross-platform packed record risk:* `{$PACKRECORDS 1}` is portable within
+  FPC, but the format must be documented as strictly little-endian to avoid
+  issues on big-endian targets.
+* *No tooling, no icons, no spec documentation* — the entire ecosystem must
+  be built from scratch, including a converter from SVG.
+* The Icon-O-Matic authoring tool must still be built.
+* Future maintenance burden: any format change requires updating spec docs,
+  version negotiation, and migration converters.
+
+*On LEB128/variable-length integers:*
+
+LEB128 encoding is not yet in FPC's core library (as of FPC 3.2.2 — it was
+proposed in FPC issue #35327 but not merged). For icon-scale coordinate data
+where values are already small integers, LEB128 adds decoding complexity
+(loop + shift per byte) for minimal gain over fixed 1-byte quantisation.
+HVIF's 7-bit scheme already achieves nearly optimal compression for this
+value range without the decoding overhead. *LEB128 is not recommended.*
+
+=== Approach C: Adopt TinyVG
+
+TinyVG is a modern (2021+), openly specified compact binary vector format
+designed explicitly as a smaller alternative to SVG.
+
+[cols="2,3", options="header"]
+|===
+| Property | Value
+| Typical icon size | 1–2 KB (20–50% of equivalent SVG)
+| Pascal tooling | None (must write reader)
+| Spec | Open, well-documented at tinyvg.tech
+| Authoring tool | Still required
+| HiDPI | Yes (vector)
+| Risk | Medium
+|===
+
+*Pros:*
+
+* Modern, clean specification (not limited to Haiku's icon aesthetic).
+* Not icon-specific — handles general vector illustrations too.
+* Configurable coordinate precision (tradeoff: size vs accuracy).
+
+*Cons:*
+
+* *1–2 KB per icon* — roughly 2–3× larger than HVIF for icon-scale content.
+  TinyVG is optimised for general vector use, not the extreme compactness of
+  icons.
+* Young ecosystem; fewer existing assets.
+* Still requires writing a Pascal reader from scratch.
+* For the `.res` embedding use case, the extra size is not justified.
+
+== Decision Rationale: Why HVIF Wins
+
+The key insight is that *all three approaches require building an Icon-O-Matic
+authoring tool for fpGUI*. This eliminates the one argument that most favours
+a custom format (that you would need custom tooling anyway).
+
+Given that authoring tooling must be built regardless:
+
+. *HVIF's format is already specified* in the Haiku C++ source. There is
+  nothing to invent, no decisions to make about encoding, and no format
+  documentation to write.
+
+. *500–700 bytes per icon* is already excellent for `.res` embedding. The
+  15–25% size saving of a perfectly tuned custom format is irrelevant at
+  this scale: saving 100–150 bytes per icon matters less than developer
+  time and maintainability.
+
+. *Haiku's icon library is immediately reusable.* fpGUI applications could
+  ship with a set of Haiku-compatible icons out of the box.
+
+. *The authoring format and shipping format are separate concerns.* Icon-O-Matic
+  for fpGUI can save/load SVG natively (verbose, human-readable, tool-friendly)
+  and export HVIF for `.res` embedding. This decoupling is the key architectural
+  decision — it means the shipping format's size is the only metric that matters
+  for the binary, and HVIF wins on that metric.
+
+== Authoring Format Recommendation
+
+SVG is the authoring format — human-readable, diff-friendly, and compatible
+with every vector editor (Inkscape, Figma, Affinity Designer). HVIF is the
+compiled shipping format embedded in `.res` resource files.
+
+NOTE: Haiku's own Icon-O-Matic uses HVIF as both the authoring *and* storage
+      format (it is a purpose-built HVIF editor). fpGUI's toolchain takes a
+      different approach: use SVG for authoring (leverage existing editors)
+      and compile to HVIF for embedding. This is a deliberate fpGUI-specific
+      choice, not a deviation from the HVIF spec.
+
+=== MVP Toolchain
+
+The MVP does *not* include a GUI icon editor. Instead, two paths get icons
+into `.res` files:
+
+[source]
+----
+MVP toolchain:
+
+  Path 1 — existing fpGUI SVG icons, or any SVG from Inkscape/Figma:
+  [SVG file]  →  svg2hvif (CLI)  →  [.hvif file]  →  .rc / .res  →  executable
+
+  Path 2 — icons authored directly (advanced):
+  [.hvif file]  →  .rc / .res  →  executable
+
+  Optional PNG export (for platform icon formats):
+  [.hvif file]  →  hvif2png (later, not MVP)  →  PNG @ 16/24/32/48/64/128 px
+----
+
+`svg2hvif` is a command-line tool: it takes one or more SVG files and writes
+`.hvif` binary files. It is the critical MVP deliverable that enables
+adoption and migration of existing fpGUI SVG icons.
+
+The GUI Icon-O-Matic editor is post-MVP scope.
+
+== Implementation Plan: HVIF Reader in Object Pascal
+
+=== Engineering Review Summary (2026-04-08)
+
+The following decisions were locked in during the engineering review pass:
+
+[cols="2,3", options="header"]
+|===
+| Decision | Rationale
+| Unit location: `corelib/fpg_hvif.pas` | Matches all image format units (fpg_imgfmt_png, fpg_imgfmt_bmp, fpg_imgfmt_jpg). Not a widget — not gui/.
+| No `{$IFDEF}` needed | `agg_2D.pas` is unconditionally compiled in all platform `fpg_interface.pas` files. `{$IFDEF AggCanvas}` exists but is not needed for HVIF.
+| Factory methods: `CreateFromStream/File/Resource` | Object Pascal convention for heap-allocating factories. Signals ownership: caller must Free.
+| `THvifReader` is private | No public reader class. `THvifIcon` class functions own the parsing. Matches `LoadImage_PNG` pattern.
+| Rendering: off-screen Agg2D → TfpgImage | `FAgg` is private in `THybridCanvas`. `Agg2D.attach(buf,w,h,stride)` creates a standalone off-screen canvas. Result is a `TfpgImage` any canvas can draw.
+| Gradient transform: decode in v1 | HVIF gradient styles carry a 6×Float24 affine transform. Skipping it would mis-parse subsequent stream bytes even if the value were unused.
+| Image cache in THvifIcon | `array of record (Width, Height: Integer; Image: TfpgImage)` linear scan — 5 items max in practice.
+| Canonical source: three files | `FlatIconImporter.cpp` (wire parser) + `Archive.cpp` + `PathSource.cpp` (data model). All from Haiku r1beta5.
+| Pixel format: BGRA = ARGB on LE | Agg2D BGRA32 buffer is byte-compatible with TfpgImage ARGB on little-endian (x86/x64/ARM64). Documented in unit header; BE unsupported.
+| Thread safety: main thread only | GetImage modifies image cache. Document in unit header.
+| `svg2hvif` CLI tool in MVP | Without a converter there is no practical path from SVG to `.res`. The HVIF writer (`fpg_hvif_writer.pas`) needed by the tool is the format serialiser — it would be needed for any authoring tool later anyway.
+|===
+
+=== Phase 1: Public API
+
+[source,pascal]
+----
+{ framework/src/main/pascal/corelib/fpg_hvif.pas }
+unit fpg_hvif;
+
+{$mode objfpc}{$H+}
+
+{
+  HVIF (Haiku Vector Icon Format) reader and renderer for fpGUI.
+
+  Canonical format references (Haiku r1beta5):
+    src/libs/icon/flat_icon/FlatIconImporter.cpp  -- binary wire format parser
+    src/libs/icon/Archive.cpp                      -- data model serialiser
+    src/libs/icon/PathSource.cpp                   -- path segment abstraction
+
+  Rendering requires AggPas (agg_2D.pas) — always compiled in fpGUI.
+  Pixel format: Agg2D renders BGRA32; TfpgImage stores ARGB.
+  On little-endian targets (x86/x64/ARM64) these are byte-identical.
+  Big-endian targets are NOT supported without a channel-swap in RenderIntoImage.
+
+  Thread safety: NOT thread-safe. Use from fpGUI main thread only.
+  THvifIcon.GetImage modifies the internal image cache.
+}
+
+interface
+
+uses
+  Classes, SysUtils, Math,
+  fpg_base,     { TfpgImage, TfpgColor }
+  agg_2D;       { Agg2D, Color, trans_affine }
+
+type
+  EHvifFormatError = class(Exception);
+  EHvifParseError  = class(EHvifFormatError);
+
+  THvifColorType = (
+    hctSolidGrayNoAlpha,    { 1 byte  }
+    hctSolidGrayAlpha,      { 2 bytes }
+    hctSolidColorNoAlpha,   { 3 bytes }
+    hctSolidColor,          { 4 bytes }
+    hctLinearGradient,      { stops + 6×Float24 gradient transform }
+    hctCircularGradient,    { stops + 6×Float24 gradient transform }
+    hctDiamondGradient,     { stops + 6×Float24 — v1: falls back to solid }
+    hctConicGradient,       { stops + 6×Float24 — v1: falls back to solid }
+    hctXYGradient           { stops + 6×Float24 — v1: falls back to solid }
+  );
+
+  THvifColor = packed record
+    R, G, B, A: Byte;
+  end;
+
+  THvifGradientStop = record
+    Offset: Single;
+    Color: THvifColor;
+  end;
+
+  THvifStyle = record
+    StyleType: THvifColorType;
+    Alpha: Byte;
+    Stops: array of THvifGradientStop;
+    { Gradient transform (present for all gradient types — always decoded): }
+    GradTransform: array[0..5] of Single;
+    HasGradTransform: Boolean;
+  end;
+
+  THvifPoint = record
+    X, Y: Single;  { decoded from quantised coords at parse time }
+  end;
+
+  THvifCommandKind = (hckHLine, hckVLine, hckLine, hckCurve);
+
+  THvifCommand = record
+    Kind: THvifCommandKind;
+    Points: array of THvifPoint;
+  end;
+
+  THvifPath = record
+    Closed: Boolean;
+    Commands: array of THvifCommand;
+  end;
+
+  THvifShape = record
+    PathIndices: array of Byte;        { bounds-checked vs FPaths at parse time }
+    StyleIndex: Byte;
+    Transform: array[0..5] of Single;  { decoded 6×Float24 affine matrix }
+    HasTransform: Boolean;
+  end;
+
+  THvifCachedImage = record
+    Width, Height: Integer;
+    Image: TfpgImage;
+  end;
+
+  { THvifIcon — the public API surface.
+    Caller owns the returned instance and must Free it.
+    Example:
+      FIcon := THvifIcon.CreateFromResource(HInstance, 'BTN_OPEN');
+      Canvas.DrawImage(FIcon.GetImage(24, 24), x, y);
+      FIcon.Free;
+  }
+  THvifIcon = class
+  private
+    FStyles: array of THvifStyle;
+    FPaths:  array of THvifPath;
+    FShapes: array of THvifShape;
+    FCachedImages: array of THvifCachedImage;
+    function  FindCachedImage(AW, AH: Integer): TfpgImage;
+    procedure RenderIntoImage(AImg: TfpgImage);
+    procedure RenderShape(AAgg: Agg2D; const AShape: THvifShape;
+                          AScale: Double);
+  public
+    destructor Destroy; override;
+    { Factory class functions — caller must Free the result }
+    class function CreateFromStream(AStream: TStream): THvifIcon;
+    class function CreateFromFile(const AFileName: string): THvifIcon;
+    class function CreateFromResource(AInstance: THandle;
+                                      const AName: string): THvifIcon;
+    { Returns a cached TfpgImage rendered at (AWidth × AHeight) pixels.
+      The returned image is owned by THvifIcon — do not free it. }
+    function GetImage(AWidth, AHeight: Integer): TfpgImage;
+  end;
+
+const
+  HVIF_MAGIC: array[0..3] of Byte = ($6E, $63, $69, $66);  { "ncif" }
+
+implementation
+{ ... private reader/renderer implementation ... }
+end.
+----
+
+=== Phase 1b: Error Handling Strategy
+
+The reader parses data from `.res` resources which could theoretically be
+malformed (e.g. corrupted binary, wrong resource type). Minimum requirements:
+
+* Check magic bytes on open; raise `EHvifFormatError` if not `ncif`.
+* Validate style/path/shape counts are within bounds (0–255 each).
+* Wrap all stream reads in `try/except`; convert `EReadError` to
+  `EHvifParseError` with position context.
+* *Do not silently skip* unknown style types or path types — raise an error
+  so format version differences are caught early during development.
+
+[source,pascal]
+----
+type
+  EHvifFormatError = class(Exception);
+  EHvifParseError  = class(EHvifFormatError);
+
+const
+  HVIF_MAGIC: array[0..3] of Byte = ($6E, $63, $69, $66);  { "ncif" }
+----
+
+=== Phase 2: AggPas Rendering Pipeline
+
+The renderer uses a *standalone* `Agg2D` object attached to a heap-allocated
+BGRA buffer. It never touches `THybridCanvas` or `FAgg` (which is private).
+The result is a `TfpgImage` any canvas can draw.
+
+[source]
+----
+THvifIcon.GetImage(W, H)
+  │
+  ├── FindCachedImage(W, H)
+  │     ├── found → return cached TfpgImage (fast path)
+  │     └── not found → continue
+  │
+  ├── Allocate pixel buffer: SetLength(buf, W * H * 4)  { BGRA32 }
+  ├── agg.Construct
+  ├── agg.attach(@buf[0], W, H, W * 4)
+  │
+  ├── RenderIntoImage:
+  │   │
+  │   │   scale := Min(W, H) / 64.0      { map 64×64 native canvas to output }
+  │   │
+  │   ├── for each shape in FShapes:
+  │   │   │
+  │   │   ├── Build transform:
+  │   │   │     agg.resetTransformations
+  │   │   │     agg.scale(scale, scale)
+  │   │   │     if shape.HasTransform:
+  │   │   │       agg.affine(@shape.Transform[0])  { compose with scale }
+  │   │   │
+  │   │   ├── Set fill from FStyles[shape.StyleIndex]:
+  │   │   │     hctSolidGray*     → agg.fillColor(gray, gray, gray, alpha)
+  │   │   │     hctSolidColor*    → agg.fillColor(r, g, b, a)
+  │   │   │     hctLinearGradient → agg.fillLinearGradient(
+  │   │   │                           x0, y0, x1, y1,       { from GradTransform }
+  │   │   │                           stop[0].Color,
+  │   │   │                           stop[last].Color)
+  │   │   │     hctCircularGradient → agg.fillRadialGradient(
+  │   │   │                             cx, cy, r,
+  │   │   │                             stop[0].Color,
+  │   │   │                             stop[last].Color)
+  │   │   │     hctDiamond/Conic/XY  → v1: use stop[0].Color as solid fill
+  │   │   │                            {$IFDEF DEBUG} WriteLn warning {$ENDIF}
+  │   │   │
+  │   │   ├── agg.noLine
+  │   │   │
+  │   │   └── For each path index in shape.PathIndices:
+  │   │         path := FPaths[pathIdx]   { bounds-checked }
+  │   │         agg.resetPath
+  │   │         for each command in path.Commands:
+  │   │           hckHLine → agg.lineTo(coord.X, current_y)
+  │   │           hckVLine → agg.lineTo(current_x, coord.Y)
+  │   │           hckLine  → agg.lineTo(coord.X, coord.Y)
+  │   │           hckCurve → agg.cubicCurveTo(p[0],p[1], p[2],p[3], p[4],p[5])
+  │   │         if path.Closed: agg.closePolygon
+  │   │         agg.drawPath(AGG_FillOnly)
+  │   │
+  │   └── end for
+  │
+  ├── Create TfpgImage:
+  │     img := TfpgImage.Create
+  │     img.AllocateImage(32, W, H)      { 32bpp ARGB }
+  │     Move(buf[0], img.ImageData^, W * H * 4)  { BGRA32 = ARGB on LE }
+  │     img.UpdateImage                  { notify platform layer }
+  │
+  ├── agg.Destruct
+  ├── Cache: FCachedImages += (W, H, img)
+  └── return img
+----
+
+[cols="2,3", options="header"]
+|===
+| HVIF concept | Agg2D API call
+| Scale 64×64 canvas | `agg.scale(W/64, H/64)` before shape transforms
+| Cubic Bézier | `agg.cubicCurveTo(x1, y1, x2, y2, x3, y3)`
+| H/V/straight line | `agg.lineTo(x, y)`
+| Solid color | `agg.fillColor(r, g, b, a)` + `agg.noLine`
+| Linear gradient | `agg.fillLinearGradient(x0, y0, x1, y1, c1, c2)`
+| Radial gradient | `agg.fillRadialGradient(cx, cy, r, c1, c2)`
+| Shape affine transform | `agg.affine(ptr_to_6_doubles)`
+| Path fill rule | `agg.drawPath(AGG_FillOnly)` — no stroke for icons
+| Closed path | `agg.closePolygon` before `drawPath`
+| Gradient transform | Applied to gradient coordinates from `style.GradTransform`
+|===
+
+=== Phase 3: Resource Embedding
+
+[source,pascal]
+----
+{ In application's .rc file: }
+{ MYAPP_ICON_OPEN  RCDATA  "icons/open.hvif" }
+
+{ At runtime: }
+var
+  res: TResourceStream;
+  reader: THvifReader;
+begin
+  res := TResourceStream.Create(HInstance, 'MYAPP_ICON_OPEN', RT_RCDATA);
+  try
+    reader := THvifReader.Create;
+    try
+      reader.LoadFromStream(res);
+      { render to button icon etc. }
+    finally
+      reader.Free;
+    end;
+  finally
+    res.Free;
+  end;
+end;
+----
+
+=== Phase 4: Validation Test Plan
+
+Before declaring the reader production-ready, validate against known-good data:
+
+. *Magic check:* Feed a file with wrong magic bytes — expect `EHvifFormatError`.
+. *Round-trip check:* Take 10–20 real Haiku icons from the Haiku OS repository
+  (MIT-licensed), parse with the Pascal reader, render to a PNG buffer, and
+  compare visually against the Rust `hvif` crate's rendering at 64×64.
+. *Float24 check:* Encode known transform values (identity matrix, 2× scale,
+  45° rotation) in 3-byte float format, decode with `ReadFloat24`, and assert
+  against the expected floats within ±0.001 tolerance.
+. *Gradient check:* Test one icon using each gradient type (linear, radial);
+  ensure diamond/conic/XY fall back to solid colour with a logged warning.
+. *HiDPI check:* Render a single icon at 16, 32, 64, and 128 physical pixels;
+  assert no rounding artefacts or off-by-one clipping at edges.
+. *Resource embedding check:* Compile a minimal FPC test program that embeds
+  one HVIF icon as `RCDATA`, loads it at runtime, and renders it without error.
+
+=== Phase 5: HVIF Writer (`fpg_hvif_writer.pas`)
+
+The writer is the HVIF binary serialiser — the inverse of the reader. It is
+shared between the `svg2hvif` CLI tool and any future GUI editor.
+
+[source,pascal]
+----
+{ framework/src/main/pascal/corelib/fpg_hvif_writer.pas }
+unit fpg_hvif_writer;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, fpg_hvif;  { reuses THvifIcon model types }
+
+type
+  THvifWriter = class
+  private
+    FStream: TStream;
+    procedure WriteByte(B: Byte);
+    procedure WriteCoord(V: Single);     { encodes to 1-byte or 2-byte }
+    procedure WriteFloat24(V: Single);   { encodes to 3-byte custom float }
+    procedure WriteStyles(const AStyles: array of THvifStyle);
+    procedure WritePaths(const APaths: array of THvifPath);
+    procedure WriteShapes(const AShapes: array of THvifShape);
+  public
+    procedure SaveToStream(const AIcon: THvifIcon; AStream: TStream);
+    procedure SaveToFile(const AIcon: THvifIcon; const AFileName: string);
+  end;
+
+implementation
+{ ... }
+end.
+----
+
+*Key encoding details:*
+
+* `WriteCoord` — inverse of `ReadCoord`:
+  - If value is in −32..+95 (integer): write `(round(V) + 32) shl 1` (1 byte, bit 0 = 0)
+  - Otherwise: write 2-byte extended encoding (bit 0 = 1, second byte carries fractional)
+* `WriteFloat24` — inverse of `ReadFloat24`:
+  - Extract sign, compute 7-bit biased exponent (bias=64), 16-bit mantissa
+  - Write 3 bytes: `[sign|exp(7b)][mantissa(16b) high byte][mantissa low byte]`
+* Path commands: pack 4 commands per byte (2 bits each) before writing coordinates
+* Gradient transform: always write 6×Float24 for gradient styles (even if identity)
+
+=== Phase 6: SVG-to-HVIF Converter (`svg2hvif`)
+
+[source]
+----
+tools/svg2hvif/
+├── svg2hvif.lpr          main CLI program
+├── svg2hvif.pas          top-level converter (TfpgSvgToHvif class)
+├── svg_path_parser.pas   SVG path 'd' command handler + arc-to-Bézier
+└── extrafpc.cfg          FPC build config
+
+Reused from extras/aggpas/svg/ (same AggPas license):
+  agg_svg_path_tokenizer.pas  — 'd' attribute tokeniser (used directly)
+  agg_svg_path_renderer.pas   — reference for command dispatch patterns
+  agg_svg_parser.pas          — reference for color/transform parsing
+                                (NOT used directly — depends on expat;
+                                 fpg version uses FPC's built-in XMLRead)
+----
+
+==== 6a. SVG Subset Supported (MVP)
+
+[cols="2,3,1", options="header"]
+|===
+| SVG feature | Handling | Priority
+
+| `<path d="...">` | Full parse: M/m, L/l, H/h, V/v, C/c, Q/q, A/a (arc→cubic approx), Z/z | Must have
+| `<rect>` | Convert to 4-line path | Must have
+| `<circle>`, `<ellipse>` | Convert to 4-cubic-Bézier path approximation | Must have
+| `<polygon>`, `<polyline>` | Convert to line path | Must have
+| `<line>` | Convert to 2-point line path | Must have
+| `<g>` groups | Flatten — push transform down to children | Must have
+| `fill` (hex, rgb(), named) | Map to `hctSolidColor` style | Must have
+| `fill-opacity`, `opacity` | Map to style alpha | Must have
+| `<linearGradient>` + `<stop>` | Map to `hctLinearGradient` style | Must have
+| `<radialGradient>` + `<stop>` | Map to `hctCircularGradient` style | Must have
+| `transform` attribute | Parse translate/scale/rotate/matrix → affine | Must have
+| `viewBox` | Compute normalisation transform → HVIF 64×64 space | Must have
+| `display:none`, `visibility:hidden` | Skip element | Must have
+| `fill:none` | Skip element (no fill → not an HVIF shape) | Must have
+| `stroke` | *Ignored* — HVIF icons are fill-only | Out of scope
+| `<text>`, `<image>` | *Not supported* — skip with warning | Out of scope
+| CSS stylesheets / `<style>` | *Not supported* — inline `style=""` only | Out of scope
+| SVG filters, masks, clip-paths | *Not supported* — skip with warning | Out of scope
+| `currentColor`, `inherit` | *Not supported* — skip with warning | Out of scope
+|===
+
+==== 6b. SVG Path `d` Parser
+
+`extras/aggpas/svg/agg_svg_path_tokenizer.pas` handles tokenisation of the
+`d` attribute string entirely — this is ~325 LOC of code we do *not* write.
+It yields `(command_char, number)` pairs from any SVG path string.
+
+`svg_path_parser.pas` only needs to handle *command dispatch*: consuming
+the tokeniser's output and building HVIF path commands.
+
+[source,pascal]
+----
+{ svg_path_parser.pas — wraps agg_svg_path_tokenizer }
+uses
+  agg_svg_path_tokenizer,  { reused from extras/aggpas/svg/ }
+  fpg_hvif;
+
+{ ParseSvgPathD: consumes a 'd' string via path_tokenizer,
+  appends THvifCommand records to APath.Commands.
+  Quadratics are converted to cubics inline.
+  Arcs are approximated with 1–4 cubic Béziers.
+  Raises ESvgPathParseError on malformed input. }
+procedure ParseSvgPathD(const D: string; var APath: THvifPath);
+----
+
+*Key handling notes from `agg_svg_path_renderer.pas` (reference):*
+
+* Smooth cubic S/s: control point 1 = reflection of previous curve's CP2 ✓
+* Smooth quadratic T/t: control point = reflection of previous Q's CP ✓
+* Both are already handled in the AggPas renderer — adapt the pattern
+* Arc A/a: explicitly *not implemented* in AggPas (raises exception) — must
+  write the standard arc-to-cubic conversion (~100 LOC)
+
+*Estimated LOC:* ~180 for `svg_path_parser.pas` (command handler + arc-to-cubic only;
+tokeniser is reused from AggPas).
+
+==== 6c. Coordinate Normalisation
+
+SVG uses the `viewBox` coordinate system; HVIF uses a 64×64 native canvas.
+The normalisation computes a single affine transform applied to all coordinates
+before quantisation:
+
+[source,pascal]
+----
+{ Given SVG viewBox="minX minY width height", compute the transform that
+  maps SVG coordinates into HVIF's [0..64] space. }
+procedure ComputeViewBoxTransform(
+    MinX, MinY, VBWidth, VBHeight: Double;
+    out ScaleX, ScaleY, OffsetX, OffsetY: Double);
+begin
+  ScaleX  := 64.0 / VBWidth;
+  ScaleY  := 64.0 / VBHeight;
+  OffsetX := -MinX * ScaleX;
+  OffsetY := -MinY * ScaleY;
+end;
+----
+
+All SVG element transforms are pre-multiplied with this viewBox transform
+before being stored in `THvifShape.Transform`.
+
+==== 6d. Style Deduplication
+
+To keep HVIF files compact, identical styles are merged into a single style
+index. A simple O(n²) scan over the styles list is sufficient — icon files
+typically have fewer than 16 styles.
+
+[source,pascal]
+----
+{ Returns the index of an existing matching style, or appends a new one. }
+function TfpgSvgToHvif.FindOrAddStyle(
+    const AStyle: THvifStyle): Byte;
+----
+
+==== 6e. CLI Interface
+
+[source]
+----
+Usage:
+  svg2hvif [options] input.svg [input2.svg ...]
+
+Options:
+  -o <dir>     Output directory (default: same as input file)
+  -v           Verbose: print style/path/shape counts per file
+  --overwrite  Overwrite existing .hvif files (default: skip if exists)
+
+Examples:
+  svg2hvif icons/open.svg                   → icons/open.hvif
+  svg2hvif -o build/icons/ icons/*.svg      → build/icons/*.hvif
+  svg2hvif -v icons/complex.svg             → verbose diagnostic output
+----
+
+==== 6f. Converter Test Plan (additions to `tchvif.pas`)
+
+Additional FPCUnit tests for the converter path:
+
+. *Path parser — basic commands:* Parse `"M10 20 L30 40 Z"` → verify 3 commands
+  (MoveTo, LineTo, Close) with correct absolute coordinates.
+. *Path parser — relative commands:* Parse `"m10 20 l20 0"` → verify
+  coordinates converted to absolute.
+. *Path parser — implicit repetition:* Parse `"M10 20 30 40 50 60"` → verify
+  MoveTo + 2 implicit LineTo commands.
+. *Path parser — quadratic to cubic:* Parse `"M0 0 Q50 100 100 0"` → verify
+  output is a single `spcCubicTo` with correct control points.
+. *Path parser — arc to cubic:* Parse a simple `A` arc command → verify
+  output is 1–4 cubic Bézier segments (no crash, no zero-length curves).
+. *viewBox normalisation:* SVG with `viewBox="0 0 100 100"`, a shape at (50,50)
+  → verify HVIF coordinate is (32, 32) (maps to centre of 64×64 canvas).
+. *Style deduplication:* Two SVG elements with identical fill colour → verify
+  only one `THvifStyle` in the output icon.
+. *Round-trip:* Parse a simple 2-path SVG → write HVIF → read HVIF back →
+  verify style/path/shape counts match.
+. *Unknown element warning:* SVG with `<text>` element → no crash, warning
+  printed, other shapes still converted.
+
+*Golden-file test (manual step):* Convert 5 existing fpGUI SVG icons with
+`svg2hvif`, render each with `THvifIcon.GetImage(32, 32)`, compare visually
+with the original SVG rendered at 32×32 in a browser.
+
+== HiDPI Considerations
+
+HVIF icons are inherently resolution-independent because all geometry is stored
+as vector paths. The rendering path for HiDPI is:
+
+. Determine the target icon size in *physical pixels* (e.g. 48×48 at 2× DPI
+  = 96×96 physical pixels).
+. Build a `TAggTransAffine` scale matrix: `scale = 96 / 64` (physical size
+  divided by HVIF native canvas size).
+. Apply this matrix before any per-shape transforms when rendering.
+. The result is a perfectly sharp icon at any DPI without storing multiple
+  bitmap sizes.
+
+[source,pascal]
+----
+procedure THvifRenderer.Render(ADestRect: TfpgRect);
+var
+  scale: Double;
+  transform: TAggTransAffine;
+begin
+  { Compute uniform scale from 64x64 native canvas to dest rect }
+  scale := Min(ADestRect.Width, ADestRect.Height) / 64.0;
+  transform := TAggTransAffine.Create;
+  transform.Scale(scale, scale);
+  transform.Translate(ADestRect.Left, ADestRect.Top);
+  { ... apply transform and render each shape ... }
+end;
+----
+
+== Open Questions
+
+. *HVIF version pinning (resolved):* Pin to Haiku r1beta5. The unit header
+  documents three canonical source files:
+  `FlatIconImporter.cpp` (binary wire decoder — primary reference),
+  `Archive.cpp` (data model serialiser), and `PathSource.cpp` (path abstraction).
+  Any future format change requires a deliberate version bump in fpGUI.
+
+. *SVG subset for authoring:* What SVG elements should Icon-O-Matic accept?
+  Recommendation: support the SVG 1.1 Tiny profile (paths, basic shapes,
+  linear/radial gradients, transforms) — this maps cleanly to HVIF's model.
+
+. *Gradient types (resolved for v1):* HVIF supports linear, radial, diamond,
+  conic, and XY gradients. AggPas supports linear and radial natively.
+  Diamond/conic/XY require custom `TAggSpanGenerator` subclasses (est. +200–400
+  LOC). *v1 decision: fall back to the first gradient stop's solid colour for
+  diamond/conic/XY. Implement full gradient support in v2.*
+
+. *Export pipeline:* Will Icon-O-Matic embed an `svg2hvif` converter, or will
+  it write HVIF natively? Native HVIF writing is simpler to implement and
+  avoids a round-trip through SVG text encoding.
+
+. *Existing Haiku icon licence:* Haiku's icon library is MIT-licensed. Bundling
+  a selection with fpGUI requires confirming attribution requirements.
+
+== Appendix A: HVIF vs SVG — Byte-Level Example
+
+A simple coloured circle:
+
+*SVG (86 bytes):*
+[source,xml]
+----
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="24" fill="#4488FF"/>
+</svg>
+----
+
+*HVIF (estimated ~28 bytes):*
+
+NOTE: The magic bytes are `ncif` (the format's internal name, `6E 63 69 66` in hex),
+      not `HVIF`. The name "HVIF" is used only in prose — the on-wire identifier is `ncif`.
+
+NOTE: The circle coordinate count below uses *absolute* coordinates for the first
+      point and *relative* delta coordinates for subsequent Bézier control points.
+      Each Bézier curve requires 3 control points × 2 coordinates = 6 bytes; 4 curves
+      = 24 coordinate bytes. With relative encoding and 1-byte quantisation most
+      deltas fit in 1 byte. The exact byte count depends on the specific Bézier
+      approximation used. "~28 bytes" includes 4-byte magic, 1 style (5 bytes),
+      1 path header + 4 curve commands (2 bytes) + ~12 coordinate bytes, and 1 shape
+      header (3 bytes).
+
+[source]
+----
+6E 63 69 66       magic "ncif" (not "HVIF")
+01                style count = 1
+  02              type = STYLE_TYPE_SOLID_COLOR
+  44 88 FF FF     aRGB = 0xFF4488FF
+01                path count = 1
+  03              path type = PATH_CLOSED_CURVES_ONLY
+  04              4 curve commands (circle approximated as 4 cubic Béziers)
+  [~12 bytes of 1-byte quantised coordinates]
+01                shape count = 1
+  00 00           path index = 0, style index = 0
+  [no transform — default identity]
+----
+
+== Appendix B: Comparison Table
+
+[cols="3,1,1,1,1", options="header"]
+|===
+| Format
+| Icon size
+| Spec status
+| Pascal reader LOC
+| Tooling exists?
+
+| SVG (text)
+| 1–10 KB
+| W3C standard
+| ~5000+ (XML parser)
+| Yes (extensive)
+
+| HVIF (adopt)
+| 500–700 bytes
+| Haiku C++ source
+| ~800–1000 (binary reader + AggPas)
+| Partial (hvif-tools)
+
+| FPVIF (custom packed)
+| 700–900 bytes
+| Must be written
+| ~1500–2500 (reader + spec + tooling)
+| No (build from scratch)
+
+| TinyVG (adopt)
+| 1–2 KB
+| Open spec (tinyvg.tech)
+| ~800 (binary reader)
+| Partial (tinyvg-tools)
+
+| IconVG (Google)
+| ~400–700 bytes
+| Open spec (iconvg-spec)
+| ~1200 (VM-based)
+| Partial (iconvg Go tools)
+|===
+
+NOTE: *Why IconVG was not recommended:* IconVG uses a register-based virtual
+      machine bytecode as its rendering model. While this achieves excellent
+      compression (~127 bytes/icon for Material Design), implementing a correct
+      VM in Pascal is significantly more complex than a direct binary reader
+      (estimated ~1200 LOC vs ~800–1000 for HVIF). The complexity is not
+      justified given HVIF's comparable size and simpler format.
+
+== References
+
+* Haiku OS source: `src/libs/icon/Archive.cpp`, `PathSource.cpp`
+* https://www.haiku-os.org/articles/2006-11-13_why_haiku_vector_icons_are_so_small/[Why Haiku Vector Icons Are So Small] — Haiku Project, 2006
+* https://en.wikipedia.org/wiki/Haiku_Vector_Icon_Format[HVIF — Wikipedia]
+* https://github.com/threedeyes/hvif-tools[hvif-tools] — SVG ↔ HVIF conversion utilities
+* https://github.com/aisamanra/hvif[hvif Haskell library] — includes `hvif2svg`
+* https://tinyvg.tech/[TinyVG specification]
+* https://github.com/google/iconvg[IconVG specification] — Google
+* Free Pascal Compiler documentation: `{$PACKRECORDS}` directive, FCL-res library
+* https://www.w3.org/TR/SVG11/paths.html#PathData[SVG 1.1 Path Data specification] — `d` attribute mini-language
+* https://www.w3.org/TR/SVG11/shapes.html[SVG 1.1 Basic Shapes] — `<rect>`, `<circle>`, `<ellipse>`, `<polygon>`, `<line>`
+* https://mortoray.com/converting-an-svg-elliptical-arc-to-bezier-curves/[Arc to Bézier conversion algorithm] — standard approach for SVG `A`/`a` commands

@@ -8,8 +8,10 @@
 {$WARN 5024 off : Parameter "$1" not used}
 
 
-// To enable the AggPas powered Canvas class
-{.$define AGGCanvas}
+// The AggPas hybrid canvas is the default canvas on all platforms.
+// Font rendering uses FreeType on Linux/FreeBSD/macOS (system library) and
+// the Win32 GDI TrueType engine on Windows (no external DLL required).
+{$define AggCanvas}
 
 
 // **** Feature specific defines ****
@@ -31,4 +33,7 @@
 {.$Define DEBUGKEYS}        // Debug key input - currently GDI testing
 // *************  DEBUG use only - [end]    *************
 
-
+// Check if we are specifically on the Development/Main branch (3.3.x)
+{$IF FPC_FULLVERSION >= 30300}
+	{$DEFINE FPC_IS_MAIN}
+{$ENDIF}

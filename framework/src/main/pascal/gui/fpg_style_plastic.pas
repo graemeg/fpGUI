@@ -196,6 +196,7 @@ begin
   fpgSetNamedColor(clHilite1, FPlasticColors^[3]);
   fpgSetNamedColor(clHilite2, FPlasticColors^[3]);
   fpgSetNamedColor(clText1, FPlasticColors^[4]);
+  fpgSetNamedColor(clText2, FPlasticColors^[8]);   { accent text — for emphasis/category labels }
   fpgSetNamedColor(clText4, FPlasticColors^[2]);
   fpgSetNamedColor(clSelection, FPlasticColors^[5]);
   fpgSetNamedColor(clSelectionText, FPlasticColors^[4]);
@@ -240,7 +241,7 @@ begin
   lOldColor := ACanvas.TextColor;
   if not AEnabled then
     ACanvas.SetTextColor(clText4)
-  else
+  else if fpgIsNamedColor(lOldColor) then
     ACanvas.SetTextColor(clText1);
   if lOldColor = clShadow1 then
     ACanvas.SetTextColor(clHilite2);
@@ -254,13 +255,14 @@ var
   r: TfpgRect;
 begin
   ACanvas.SetLineStyle(1, lsSolid);
-  r.SetRect(x, y, w, h);
-  ACanvas.GradientFill(r, clWindowBackground, clScrollBar, gdVertical);
+  { Outer corner pixels }
   ACanvas.Pixels[x, y + h - 1] := FPlasticColors^[9];
   ACanvas.Pixels[x + w - 1, y + h - 1] := FPlasticColors^[9];
+  { Inner frame rectangle }
   ACanvas.SetColor(clGridLines);
   r.SetRect(x + 1, y + 1, w - 2, h - 2);
   ACanvas.DrawRectangle(r);
+  { Inner corner pixels }
   ACanvas.Pixels[x + 1, y + 1] := FPlasticColors^[10];
   ACanvas.Pixels[x + w - 2, y + 1] := FPlasticColors^[10];
   ACanvas.Pixels[x + 1, y + h - 2] := FPlasticColors^[10];

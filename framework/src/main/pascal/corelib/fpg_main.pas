@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 by Graeme Geldenhuys.
+    Copyright (c) 2006-2026 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -46,6 +46,8 @@ type
 
   TfpgMenuItemFlags = set of (mifSelected, mifHasFocus, mifSeparator,
     mifEnabled, mifChecked, mifSubMenu, mifHeader);
+
+  TfpgCheckBoxFlags = set of (cbfChecked, cbfPressed, cbfEnabled, cbfReadOnly, cbfHasFocus);
 
   TfpgTextFlags = set of (txtLeft, txtHCenter, txtRight, txtTop, txtVCenter,
     txtBottom, txtWrap, txtDisabled, txtAutoSize);
@@ -95,6 +97,17 @@ type
   end;
 
 
+  TfpgStyleDrawProgressBar = record
+    Rect: TfpgRect;
+    Position: longint;
+    Min: longint;
+    Max: longint;
+    ShowCaption: boolean;
+    Font: TfpgFontResourceBase;
+    BackgroundColor: TfpgColor;
+    TextColor: TfpgColor;
+  end;
+
   TfpgStyleDrawTab = record
     TabSheet: TObject;
     TabPosition: TfpgTabPosition;
@@ -111,6 +124,7 @@ type
   TfpgCanvas = class;
   TfpgTimer = class;
   TfpgDrag = class;
+  TfpgDesktop = class;
 
 
   TfpgNativeWindow = class(TfpgWindowImpl)
@@ -143,6 +157,10 @@ type
     function    GetImage(const imgid: string): TfpgImage;
     function    AddBMP(const imgid: string; bmpdata: pointer; bmpsize: integer): TfpgImage;
     function    AddMaskedBMP(const imgid: string; bmpdata: pointer; bmpsize: integer; mcx, mcy: integer): TfpgImage;
+    function    AddPNGFromResource(const AImageID: string; AInst: THandle;
+                                   const AResName: string): TfpgImage;
+    function    AddBMPFromResource(const AImageID: string; AInst: THandle;
+                                   const AResName: string): TfpgImage;
     procedure   ListImages(var sl: TStringList);
   end;
 
@@ -155,13 +173,13 @@ type
     destructor  Destroy; override;
 
     // As soon as TfpgStyle has moved out of CoreLib, these must go!
-    procedure   DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TfpgButtonFlags); overload;
-    procedure   DrawButtonFace(r: TfpgRect; AFlags: TfpgButtonFlags); overload;
-    procedure   DrawBevel(x, y, w, h: TfpgCoord; ARaised: Boolean = True); overload;
-    procedure   DrawBevel(r: TfpgRect; ARaised: Boolean = True); overload;
-    procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: TArrowDirection); overload;
-    procedure   DrawDirectionArrow(r: TfpgRect; direction: TArrowDirection); overload;
-    procedure   DrawFocusRect(r: TfpgRect);
+    procedure   DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TfpgButtonFlags); overload; deprecated 'Use fpgStyle instead. Since: 2026-04-01';
+    procedure   DrawButtonFace(r: TfpgRect; AFlags: TfpgButtonFlags); overload; deprecated 'Use fpgStyle instead. Since: 2026-04-01';
+    procedure   DrawBevel(x, y, w, h: TfpgCoord; ARaised: Boolean = True); overload; deprecated 'Use fpgStyle instead. Since: 2026-04-01';
+    procedure   DrawBevel(r: TfpgRect; ARaised: Boolean = True); overload; deprecated 'Use fpgStyle instead. Since: 2026-04-01';
+    procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: TArrowDirection); overload; deprecated 'Use fpgStyle instead. Since: 2026-04-01';
+    procedure   DrawDirectionArrow(r: TfpgRect; direction: TArrowDirection); overload; deprecated 'Use fpgStyle instead. Since: 2026-04-01';
+    procedure   DrawFocusRect(r: TfpgRect); deprecated 'Use fpgStyle instead. Since: 2026-04-01';
     function    DrawText(x, y, w, h: TfpgCoord; const AText: TfpgString; AFlags: TfpgTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer; overload;
     function    DrawText(x, y: TfpgCoord; const AText: TfpgString; AFlags: TfpgTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer; overload;
     function    DrawText(r: TfpgRect; const AText: TfpgString; AFlags: TfpgTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer; overload;
@@ -231,15 +249,21 @@ type
     procedure   DrawInternalComboBoxButton(ACanvas: TfpgCanvas; r: TfpgRect; const IsEnabled: Boolean; const IsPressed: Boolean); virtual;
     { Checkbox }
     function    GetCheckBoxSize: integer; virtual;
-    procedure   DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord); virtual;
+    procedure   DrawCheckBox(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags); virtual;
+    { RadioButton }
+    function    GetRadioButtonSize: integer; virtual;
+    procedure   DrawRadioButton(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags); virtual;
     { PageControl & Tabs }
     function    GetTabBorders: TRect; virtual;
     function    GetDefaultTabHeight: TfpgCoord; virtual;
     procedure   DrawTabBackground(ACanvas: TfpgCanvas; ABGColor: TfpgColor); virtual;
+    procedure   DrawPageControlBody(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
     procedure   DrawPageControlTab(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawTab); virtual;
     { Listbox }
     procedure   DrawListBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor); virtual;
     procedure   DrawListBoxItem(ACanvas: TfpgCanvas; r: TfpgRect; const IsFocusedItem: Boolean; const HasFocus: Boolean); virtual;
+    { ProgressBar }
+    procedure   DrawProgressBar(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawProgressBar); virtual;
   end;
 
 
@@ -247,6 +271,26 @@ type
     Dest: TObject;
     Listener: TObject;
     MsgCode: integer;
+  end;
+
+
+  { Qt QDesktopWidget-inspired class: owns all screen topology information.
+    Populated once by TfpgApplication.Create from the platform backend. }
+  TfpgDesktop = class(TObject)
+  private
+    FScreens: array of TfpgScreenInfo;
+    function  GetScreenCount: Integer;
+    function  GetPrimaryScreen: Integer;
+    function  GetVirtualGeometry: TfpgRect;
+  public
+    procedure Populate(const AScreens: array of TfpgScreenInfo);
+    function  ScreenGeometry(AScreen: Integer): TfpgRect;
+    function  AvailableGeometry(AScreen: Integer): TfpgRect;
+    { Per-screen DPI. Falls back to fpgApplication.Screen_dpi when DpiX = 0. }
+    function  Screen_dpi(AScreen: Integer): Integer;
+    property  ScreenCount: Integer read GetScreenCount;
+    property  PrimaryScreen: Integer read GetPrimaryScreen;
+    property  VirtualGeometry: TfpgRect read GetVirtualGeometry;
   end;
 
 
@@ -274,6 +318,7 @@ type
     FDisplayParams: string;
     FScreenWidth: integer;
     FScreenHeight: integer;
+    FDesktop: TfpgDesktop;
     FFontManager: TfpgFontManager;  // centralized font management
     FMessageHookList: TFPList;
     procedure   InternalInit;
@@ -294,6 +339,7 @@ type
     procedure   ShowException(E: Exception);
     procedure   ShowBacktrace(sender: TObject; E: Exception);
     procedure   UnsetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
+    property    Desktop: TfpgDesktop read FDesktop;
     property    HintPause: Integer read FHintPause write SetHintPause;
     property    HintWindow: TfpgWidgetBase read FHintWindow;
     property    ScreenWidth: integer read FScreenWidth;
@@ -438,6 +484,11 @@ procedure fpgSendMessage(Sender, Dest: TObject; MsgCode: integer); overload;
 function  fpgPeekMessage(Dest: TObject; MsgCode: integer; Msg: PfpgMessageRec = nil): Boolean;
 procedure fpgDeliverMessage(var msg: TfpgMessageRec);
 procedure fpgDeliverMessages;
+{ Coalesce duplicate FPGM_PAINT and FPGM_RESIZE messages in the queue.
+  For each (Dest, MsgCode) pair that is coalescable, only the last message
+  is kept. Call this before fpgDeliverMessages to reduce redundant paint
+  and resize processing. }
+procedure fpgCoalesceMessages;
 function  fpgGetFirstMessage: PfpgMessageRec;
 procedure fpgDeleteFirstMessage;
 
@@ -532,12 +583,15 @@ uses
   strutils,
   math,
 {$ifdef AGGCanvas}
-  Agg2D,
+  fpg_hybrid_canvas,
 {$endif}
 {$IFDEF GDEBUG}
   fpg_dbugintf,
 {$ENDIF}
   fpg_imgfmt_bmp,
+  fpg_imgfmt_png,
+  fpg_iconstore,
+  fpg_stdicons,
   fpg_stdimages,
   fpg_translations,
   fpg_widget,
@@ -550,10 +604,13 @@ uses
   fpg_dnd_window,
   fpg_stylemanager,
   fpg_style_win2k,   // TODO: This needs to be removed!
+//  fpg_style_win8,
   fpg_style_motif,   // TODO: This needs to be removed!
   fpg_style_carbon,
   fpg_style_plastic,
-  fpg_tab;
+  fpg_style_fusion,
+  fpg_tab,
+  fpg_async;
 
 var
   fpgTimers: TList;
@@ -1049,16 +1106,10 @@ begin
     spacing += '  ';
   FClassName := AClassName;
   FMethodName := AMethodName;
-  {$IFDEF GDEBUG}
-  SendDebug(Format('%s>> %s.%s', [spacing, FClassName, FMethodName]));
-  {$ENDIF}
 end;
 
 destructor TPrintCallTrace.Destroy;
 begin
-  {$IFDEF GDEBUG}
-  SendDebug(Format('%s<< %s.%s', [spacing, FClassName, FMethodName]));
-  {$ENDIF}
   dec(iCallTrace);
   inherited Destroy;
 end;
@@ -1401,15 +1452,13 @@ var
   n: integer;
 begin
   for n := 0 to fpgNamedFonts.Count - 1 do
+  begin
     if (lowercase(TNamedFontItem(fpgNamedFonts[n]).FontID) = lowercase(afontid)) then
     begin // found
       Result := TNamedFontItem(fpgNamedFonts[n]).FontDesc;
       Exit; //==>
     end;
-
-  {$IFDEF GDEBUG}
-  SendDebug('GetNamedFontDesc error: "' + afontid + '" is missing. Default is used.');
-  {$ENDIF}
+  end;
   Result := FPG_DEFAULT_FONT_DESC;
 end;
 
@@ -1449,11 +1498,101 @@ begin
   fpgApplication.WaitWindowMessage(500);
 end;
 
+
+{ TfpgDesktop }
+
+function TfpgDesktop.GetScreenCount: Integer;
+begin
+  Result := Length(FScreens);
+end;
+
+function TfpgDesktop.GetPrimaryScreen: Integer;
+var
+  i: Integer;
+begin
+  Result := 0;  // fallback: index 0 is primary
+  for i := 0 to High(FScreens) do
+    if FScreens[i].Primary then
+    begin
+      Result := i;
+      Exit;
+    end;
+end;
+
+function TfpgDesktop.GetVirtualGeometry: TfpgRect;
+var
+  i: Integer;
+  minX, minY, maxX, maxY: Integer;
+begin
+  if Length(FScreens) = 0 then
+  begin
+    Result.SetRect(0, 0, 0, 0);
+    Exit;
+  end;
+  minX := FScreens[0].Bounds.Left;
+  minY := FScreens[0].Bounds.Top;
+  maxX := FScreens[0].Bounds.Right;
+  maxY := FScreens[0].Bounds.Bottom;
+  for i := 1 to High(FScreens) do
+  begin
+    if FScreens[i].Bounds.Left   < minX then minX := FScreens[i].Bounds.Left;
+    if FScreens[i].Bounds.Top    < minY then minY := FScreens[i].Bounds.Top;
+    if FScreens[i].Bounds.Right  > maxX then maxX := FScreens[i].Bounds.Right;
+    if FScreens[i].Bounds.Bottom > maxY then maxY := FScreens[i].Bounds.Bottom;
+  end;
+  Result.SetRect(minX, minY, maxX - minX, maxY - minY);
+end;
+
+procedure TfpgDesktop.Populate(const AScreens: array of TfpgScreenInfo);
+var
+  i: Integer;
+begin
+  SetLength(FScreens, Length(AScreens));
+  for i := 0 to High(AScreens) do
+    FScreens[i] := AScreens[i];
+end;
+
+function TfpgDesktop.ScreenGeometry(AScreen: Integer): TfpgRect;
+begin
+  if (AScreen >= 0) and (AScreen < Length(FScreens)) then
+    Result := FScreens[AScreen].Bounds
+  else
+    Result := GetVirtualGeometry;
+end;
+
+function TfpgDesktop.AvailableGeometry(AScreen: Integer): TfpgRect;
+begin
+  if (AScreen >= 0) and (AScreen < Length(FScreens)) then
+    Result := FScreens[AScreen].WorkArea
+  else
+    Result := GetVirtualGeometry;
+end;
+
+function TfpgDesktop.Screen_dpi(AScreen: Integer): Integer;
+begin
+  if (AScreen >= 0) and (AScreen < Length(FScreens)) then
+  begin
+    if (FScreens[AScreen].DpiX > 0) and (FScreens[AScreen].DpiY > 0) then
+      Result := (FScreens[AScreen].DpiX + FScreens[AScreen].DpiY) div 2
+    else if FScreens[AScreen].DpiX > 0 then
+      Result := FScreens[AScreen].DpiX
+    else
+      Result := fpgApplication.Screen_dpi
+  end
+  else
+    Result := fpgApplication.Screen_dpi;
+end;
+
+
 constructor TfpgApplication.Create(const AParams: string);
+var
+  i: Integer;
+  screens: array of TfpgScreenInfo;
 begin
   fpgInitMsgQueue;
 
   FFontManager    := TfpgFontManager.Create;
+  FDesktop        := TfpgDesktop.Create;
   FDisplayParams  := AParams;
   FScreenWidth    := -1;
   FScreenHeight   := -1;
@@ -1469,8 +1608,19 @@ begin
     inherited Create(AParams);
     if IsInitialized then
     begin
-      FScreenWidth  := GetScreenWidth;
-      FScreenHeight := GetScreenHeight;
+      { Populate desktop topology from platform backend }
+      SetLength(screens, GetMonitorCount);
+      for i := 0 to High(screens) do
+        screens[i] := GetMonitorInfo(i);
+      FDesktop.Populate(screens);
+      { ScreenWidth/ScreenHeight backed by virtual desktop bounds }
+      FScreenWidth  := FDesktop.VirtualGeometry.Width;
+      FScreenHeight := FDesktop.VirtualGeometry.Height;
+      { Fallback if Desktop is empty (e.g. backend returned no monitors) }
+      if FScreenWidth <= 0 then
+        FScreenWidth  := GetScreenWidth;
+      if FScreenHeight <= 0 then
+        FScreenHeight := GetScreenHeight;
     end;
   except
     on E: Exception do
@@ -1512,6 +1662,8 @@ begin
 
   // Free font manager (will free all cached fonts)
   FFontManager.Free;
+
+  FreeAndNil(FDesktop);
 
   FreeAndNil(FModalFormStack);
 
@@ -1748,13 +1900,19 @@ begin
   { If the end-user passed in a style, try and create an instance of it }
   if Supports(self, ICmdLineParams, cmd) then
     if cmd.HasOption('style') then
+    begin
+      writeln('detected the --style command line parameter');
       fpgStyleManager.SetStyle(cmd.GetOptionValue('style'));
+    end;
   fpgStyle := fpgStyleManager.Style;
 
   fpgCaret      := TfpgCaret.Create;
   fpgImages     := TfpgImages.Create;
+  fpgIcons      := TfpgIconStore.Create;
+  fpgIcons.SetDPI(Screen_dpi);
 
   fpgCreateStandardImages;
+  fpgRegisterStandardIcons;
 
   // This will process Application and fpGUI Toolkit translation (*.po) files
   TranslateResourceStrings(ApplicationName, ExtractFilePath(ParamStr(0)), '');
@@ -1778,6 +1936,9 @@ begin
     WaitWindowMessage(250);
     Flush;
   end;
+  { Always process invoke queue — items may be pending even when
+    no platform messages exist }
+  fpgProcessInvokeQueue;
 end;
 
 procedure TfpgApplication.SetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
@@ -1835,9 +1996,6 @@ end;
 
 procedure TfpgApplication.HideHint;
 begin
-  {$IFDEF GDEBUG}
-  SendDebug('HideHint');
-  {$ENDIF}
   FHintTimer.Enabled := False;
   if Assigned(FHintWindow) and TfpgHintWindow(FHintWindow).Visible then
     TfpgHintWindow(FHintWindow).Hide;
@@ -1869,6 +2027,7 @@ begin
 
   DoWaitWindowMessage(fpgClosestTimer(GetTickCount64, atimeoutms));
   fpgDeliverMessages;
+  fpgProcessInvokeQueue;
   fpgCheckTimers;
 end;
 
@@ -2138,10 +2297,10 @@ begin
   fpgSetNamedColor(clShadow2, $FF424142);       // dark
   fpgSetNamedColor(clHilite1, $FFE0E0E0);       // light
   fpgSetNamedColor(clHilite2, $FFFFFFFF);       // white
-  fpgSetNamedColor(clText1, $FF000000);
-  fpgSetNamedColor(clText2, $FF000040);
-  fpgSetNamedColor(clText3, $FF800000);
-  fpgSetNamedColor(clText4, $FF404000);
+  fpgSetNamedColor(clText1, $FF000000);  // normal text
+  fpgSetNamedColor(clText2, $FF000040);  // accent text — for emphasis/category labels
+  fpgSetNamedColor(clText3, $FF800000);  // url links etc
+  fpgSetNamedColor(clText4, $FF404000);  // draw a lot of attention
   fpgSetNamedColor(clSelection, $FF08246A);
   fpgSetNamedColor(clSelectionText, $FFFFFFFF);
   fpgSetNamedColor(clInactiveSel, $FF99A6BF);  // win 2000 buttonface = $D4D0C8
@@ -2490,29 +2649,54 @@ end;
 procedure TfpgStyle.DrawMenuItemImage(ACanvas: TfpgCanvas; x, y: TfpgCoord; r: TfpgRect; AFlags: TfpgMenuItemFlags);
 var
   img: TfpgImage;
+  imgOwned: Boolean;  { True when caller must free img }
   lx: TfpgCoord;
   ly: TfpgCoord;
 begin
   if mifChecked in AFlags then
   begin
-    img := fpgImages.GetImage('stdimg.check');    // Do NOT localize
-    if mifSelected in AFlags then
-      img.Invert;  // invert modifies the original image, so we must restore it later
-    ACanvas.DrawImage(x, y, img);
-    if mifSelected in AFlags then
-      img.Invert;  // restore image to original state
+    imgOwned := False;
+    if Assigned(fpgIcons) and fpgIcons.HasIcon('stdimg.check') then
+    begin
+      { GetIconCopy returns a new image; invert is safe and caller frees it }
+      img := fpgIcons.GetIconCopy('stdimg.check', 16);
+      imgOwned := True;
+    end
+    else
+      img := fpgImages.GetImage('stdimg.check');    // Do NOT localize
+    if img <> nil then
+    begin
+      if mifSelected in AFlags then
+        img.Invert;
+      ACanvas.DrawImage(x, y, img);
+      if (not imgOwned) and (mifSelected in AFlags) then
+        img.Invert;  // restore borrowed image to original state
+      if imgOwned then
+        img.Free;
+    end;
   end;
   if mifSubMenu in AFlags then
   begin
-    img := fpgImages.GetImage('sys.sb.right');    // Do NOT localize
-    lx := (r.height div 2) - 3;
-    lx := r.right-lx-2;
-    ly := y + ((r.Height-img.Height) div 2);
-    if mifSelected in AFlags then
-      img.Invert;  // invert modifies the original image, so we must restore it later
-    ACanvas.DrawImage(lx, ly, img);
-    if mifSelected in AFlags then
-      img.Invert;  // restore image to original state
+    imgOwned := False;
+    if Assigned(fpgIcons) and fpgIcons.HasIcon('sys.sb.right') then
+    begin
+      img := fpgIcons.GetIconCopy('sys.sb.right', 16);
+      imgOwned := True;
+    end
+    else
+      img := fpgImages.GetImage('sys.sb.right');    // Do NOT localize
+    if img <> nil then
+    begin
+      lx := r.right - img.Width - Round(4 * fpgApplication.Screen_dpi / 96.0);  { 4px padding, scaled for HiDPI }
+      ly := y + ((r.Height-img.Height) div 2);
+      if mifSelected in AFlags then
+        img.Invert;
+      ACanvas.DrawImage(lx, ly, img);
+      if (not imgOwned) and (mifSelected in AFlags) then
+        img.Invert;  // restore borrowed image to original state
+      if imgOwned then
+        img.Free;
+    end;
   end;
 end;
 
@@ -2623,14 +2807,53 @@ begin
   Result := 13; // 13x13 - it is always a rectangle
 end;
 
-procedure TfpgStyle.DrawCheckbox(ACanvas: TfpgCanvas; x, y: TfpgCoord; ix, iy: TfpgCoord);
+procedure TfpgStyle.DrawCheckBox(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags);
 var
   img: TfpgImage;
   size: integer;
+  ix: integer;
 begin
   img := fpgImages.GetImage('sys.checkboxes');    // Do NOT localize - return value is a reference only
   size := GetCheckBoxSize;
-  ACanvas.DrawImagePart(x, y, img, ix, iy, size, size);
+  { Map flags to sprite sheet index:
+      0 = unchecked, 1 = checked,
+      2 = unchecked pressed/disabled, 3 = checked pressed/disabled }
+  if (cbfEnabled in AFlags) and not (cbfReadOnly in AFlags) then
+  begin
+    ix := Ord(cbfChecked in AFlags);
+    if cbfPressed in AFlags then
+      Inc(ix, 2);
+  end
+  else
+    ix := (2 + (Ord(cbfChecked in AFlags) * 2)) - Ord(cbfChecked in AFlags);
+  ACanvas.DrawImagePart(r.Left, r.Top, img, ix * size, 0, size, size);
+end;
+
+function TfpgStyle.GetRadioButtonSize: integer;
+begin
+  Result := 12; // 12x12 - it is always a rectangle
+end;
+
+procedure TfpgStyle.DrawRadioButton(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgCheckBoxFlags);
+var
+  img: TfpgImage;
+  size: integer;
+  ix: integer;
+begin
+  img := fpgImages.GetImage('sys.radiobuttons');    // Do NOT localize - return value is a reference only
+  size := GetRadioButtonSize;
+  { Map flags to sprite sheet index:
+      0 = unselected, 1 = selected,
+      2 = unselected pressed/disabled, 3 = selected pressed/disabled }
+  if (cbfEnabled in AFlags) and not (cbfReadOnly in AFlags) then
+  begin
+    ix := Ord(cbfChecked in AFlags);
+    if cbfPressed in AFlags then
+      Inc(ix, 2);
+  end
+  else
+    ix := (2 + (Ord(cbfChecked in AFlags) * 2)) - Ord(cbfChecked in AFlags);
+  ACanvas.DrawImagePart(r.Left, r.Top, img, ix * size, 0, size, size);
 end;
 
 function TfpgStyle.GetTabBorders: TRect;
@@ -2639,13 +2862,22 @@ begin
 end;
 
 function TfpgStyle.GetDefaultTabHeight: TfpgCoord;
+var
+  lScreenDpi: integer;
 begin
-  Result := 21;
+  { Font height + DPI-scaled vertical padding (4px top + 4px bottom at 96 DPI) }
+  lScreenDpi := fpgApplication.Desktop.Screen_dpi(fpgApplication.Desktop.PrimaryScreen);
+  Result := GetTabFont.GetHeight + Round(8 * lScreenDpi / fpgApplication.DesignedDPI);
 end;
 
 procedure TfpgStyle.DrawTabBackground(ACanvas: TfpgCanvas; ABGColor: TfpgColor);
 begin
   ACanvas.Clear(ABGColor);
+end;
+
+procedure TfpgStyle.DrawPageControlBody(ACanvas: TfpgCanvas; r: TfpgRect);
+begin
+  DrawButtonFace(ACanvas, r, []);
 end;
 
 procedure TfpgStyle.DrawPageControlTab(ACanvas: TfpgCanvas; AParams: TfpgStyleDrawTab);
@@ -2782,6 +3014,58 @@ begin
       ACanvas.SetTextColor(clInactiveSelText);
     end;
     ACanvas.FillRectangle(r);
+  end;
+end;
+
+procedure TfpgStyle.DrawProgressBar(ACanvas: TfpgCanvas;
+  AParams: TfpgStyleDrawProgressBar);
+var
+  r: TfpgRect;
+  diff: integer;
+  aPos: integer;
+  pos: integer;
+  percent: integer;
+  txt: string;
+  x, y: TfpgCoord;
+begin
+  r := AParams.Rect;
+  ACanvas.Clear(AParams.BackgroundColor);
+
+  { Calculate position }
+  diff    := AParams.Max - AParams.Min;
+  aPos    := AParams.Position - AParams.Min;
+  percent := round(((100 / diff) * aPos));
+  pos     := round(percent * (r.Width - 2) / 100);
+
+  { Bluecurve theme — outer dark border }
+  ACanvas.SetColor(fpgColor(153, 153, 153));
+  ACanvas.SetLineStyle(1, lsSolid);
+  ACanvas.DrawRectangle(r);
+  r.InflateRect(-1, -1);
+  r.Width := pos;
+  if AParams.Position > AParams.Min then
+  begin
+    { Left and top highlight }
+    ACanvas.SetColor(fpgColor(152, 178, 237));
+    ACanvas.DrawLine(r.Left, r.Bottom, r.Left, r.Top);  // left
+    ACanvas.DrawLine(r.Left, r.Top, r.Right, r.Top);    // top
+    { Right and bottom shadow }
+    ACanvas.SetColor(fpgColor(59, 76, 113));
+    ACanvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);   // right
+    ACanvas.DrawLine(r.Right, r.Bottom, r.Left, r.Bottom); // bottom
+    { Interior gradient fill }
+    r.InflateRect(-1, -1);
+    ACanvas.GradientFill(r, fpgColor(66, 93, 155), fpgColor(151, 176, 232), gdVertical);
+  end;
+  { Paint percentage text if required }
+  if AParams.ShowCaption then
+  begin
+    txt := IntToStr(percent) + '%';
+    x := AParams.Rect.Left + (AParams.Rect.Width - AParams.Font.GetTextWidth(txt)) div 2;
+    y := AParams.Rect.Top + (AParams.Rect.Height - AParams.Font.GetHeight) div 2;
+    ACanvas.SetTextColor(AParams.TextColor);
+    ACanvas.SetFont(AParams.Font);
+    ACanvas.DrawString(x, y, txt);
   end;
 end;
 
@@ -2968,6 +3252,37 @@ begin
     sl.Assign(FImages);
 end;
 
+function TfpgImages.AddPNGFromResource(const AImageID: string; AInst: THandle;
+  const AResName: string): TfpgImage;
+begin
+  Result := LoadImage_PNG(AInst, AResName, RT_RCDATA);
+  if Result <> nil then
+    AddImage(AImageID, Result);
+end;
+
+function TfpgImages.AddBMPFromResource(const AImageID: string; AInst: THandle;
+  const AResName: string): TfpgImage;
+var
+  res: TResourceStream;
+  ms:  TMemoryStream;
+begin
+  Result := nil;
+  res := TResourceStream.Create(AInst, AResName, RT_RCDATA);
+  try
+    ms := TMemoryStream.Create;
+    try
+      ms.CopyFrom(res, res.Size);
+      Result := CreateImage_BMP(ms.Memory, ms.Size);
+    finally
+      ms.Free;
+    end;
+  finally
+    res.Free;
+  end;
+  if Result <> nil then
+    AddImage(AImageID, Result);
+end;
+
 
 { TfpgImage }
 
@@ -3125,7 +3440,12 @@ initialization
   iCallTrace      := -1;
 
 {$ifdef AGGCanvas}
-  DefaultCanvasClass := TAgg2D;
+  { Hybrid canvas is available when platform buffer manager factories
+    are registered (done in fpg_interface.pas initialization). }
+  if Assigned(fpg_hybrid_canvas.CreateBufferManager) then
+    DefaultCanvasClass := THybridCanvas
+  else
+    DefaultCanvasClass := TfpgCanvas;  { fallback if no buffer manager }
 {$else}
   DefaultCanvasClass := TfpgCanvas;
 {$endif}

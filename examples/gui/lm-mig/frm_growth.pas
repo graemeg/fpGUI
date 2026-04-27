@@ -55,16 +55,12 @@ begin
   // Title
   lbl1 := TfpgLabel.Create(Self);
   lbl1.Text := 'Growth Demo - Resize window to see growth behavior';
-  lbl1.Width := 350;
-  lbl1.Height := 20;
   mig.AddLayoutComponent(lbl1, TfpgMigCC.Create().SpanX(2).AlignX('center'));
 
   // Row 1: Label (no grow) + Edit (grows)
   lbl2 := TfpgLabel.Create(Self);
   lbl2.Text := 'No Grow:';
-  lbl2.Width := 80;
-  lbl2.Height := 20;
-  mig.AddLayoutComponent(lbl2, TfpgMigCC.Create());
+  mig.AddLayoutComponent(lbl2, TfpgMigCC.Create().MinWidth('70lp'));
 
   btn1 := TfpgButton.Create(Self);
   btn1.Text := 'Fixed Width Button';
@@ -75,8 +71,6 @@ begin
   // Row 2: Label + Edit with GrowX
   lbl3 := TfpgLabel.Create(Self);
   lbl3.Text := 'Grows:';
-  lbl3.Width := 80;
-  lbl3.Height := 20;
   mig.AddLayoutComponent(lbl3, TfpgMigCC.Create());
 
   edt1 := TfpgEdit.Create(Self);
@@ -88,8 +82,6 @@ begin
   // Row 3: Three buttons - left fixed, middle grows, right fixed
   lbl4 := TfpgLabel.Create(Self);
   lbl4.Text := 'Mixed:';
-  lbl4.Width := 80;
-  lbl4.Height := 20;
   mig.AddLayoutComponent(lbl4, TfpgMigCC.Create());
 
   btn2 := TfpgButton.Create(Self);

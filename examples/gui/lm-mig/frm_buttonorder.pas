@@ -89,6 +89,7 @@ begin
   lblTitle := TfpgLabel.Create(Self);
   lblTitle.Name := 'lblTitle';
   lblTitle.Text := 'Select a platform to see different button ordering:';
+  lblTitle.FontDesc := '#Label2';
   mig.AddLayoutComponent(lblTitle, TfpgMigCC.Create().SpanX().Wrap());
 
   // Platform selection label
@@ -109,7 +110,7 @@ begin
 
   rbMacOSX := TfpgRadioButton.Create(Self);
   rbMacOSX.Name := 'rbMacOSX';
-  rbMacOSX.Text := 'Mac OSX';
+  rbMacOSX.Text := 'MacOS';
   rbMacOSX.PreferredSize := fpgSize(130, 24);
   rbMacOSX.GroupIndex := 1;
   rbMacOSX.Checked := (currentPlatform = PLATFORM_MAC_OSX);

@@ -1288,6 +1288,15 @@ Grid implementation is approximately **85-90% complete** with all core layout fe
 * ✓ Gap handling (basic)
 * ✓ Linked dimension groups
 
+**✅ ADDITIONAL FIXES (post-initial completion):**
+
+* ✓ PushX/PushY now correctly drive column/row growth (2026-03-07)
+  - `GetDefaultGrowWeights()` was incorrectly reading CC grow weights instead of CC push weights
+  - Fixed to port Java `getDefaultPushWeights()` correctly: uses `CC.PushWeightX`/`CC.PushWeightY`
+  - `hasPushX`/`hasPushY` now detected during first pass (matching Java Grid.java lines 285-286)
+  - `TestGrow` updated: `PushX` drives column growth, `GrowX` makes component fill the column
+  - Semantic distinction clarified: `GrowX` = component grows within cell; `PushX` = column grows
+
 **❌ MISSING FEATURES (via TODO analysis):**
 
 * ✗ Absolute positioning (adjustSizeForAbsolute, doAbsoluteCorrections, getAbsoluteDimBounds)
@@ -1331,7 +1340,7 @@ Direct port using `TfpgWidgetBase` - no wrapper classes needed (unlike Java whic
 * ✓ LayoutInOneDim() - one-dimensional layout algorithm
 * ✓ CalcGridSizes() - calculates grid sizes
 * ✓ CalculateDimensionSizes() - calculates dimension sizes
-* ✓ GetDefaultGrowWeights() - calculates grow weights
+* ✓ GetDefaultGrowWeights() - calculates push weights (port of Java getDefaultPushWeights)
 * ✓ DivideIntoLinkedGroups() - groups linked components
 * ✓ BuildIndexes() - builds row/column indexes
 * ✓ BuildDimensionGroups() - builds dimension groups

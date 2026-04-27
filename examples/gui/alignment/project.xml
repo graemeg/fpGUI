@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-alignment</name>
+
+  <build>
+    <mainSource>aligntest.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>aligntest</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
   <name>fpgui</name>
-  <version>2.0.3</version>
+  <version>2.1.0</version>
   <author>Graeme Geldenhuys</author>
   <license>LGPL</license>
 
@@ -11,8 +11,92 @@
 
   <!-- List child modules in build order -->
   <modules>
+    <module>tools/svg2hvif</module>
     <module>framework</module>
-<!--    <module>docview</module> -->
+    <module>ide</module>
+    <module>docview</module>
     <module>uidesigner</module>
+    <module>tools/vertex</module>
+    <module activeByDefault="false">examples</module>
+    <module activeByDefault="false">tools/docs-compile</module>
+    <module activeByDefault="false">tools/hvif_dump</module>
+    <module activeByDefault="false">tools/imageconvert</module>
+    <module activeByDefault="false">tools/vertex-canvas-demo</module>
   </modules>
+
+  <profiles>
+    <profile>
+      <id>debug</id>
+      <defines>
+        <define>DEBUG</define>
+      </defines>
+      <compilerOptions>
+        <option>-gw</option>
+        <option>-gl</option>
+        <option>-O-</option>
+      </compilerOptions>
+    </profile>
+
+    <profile>
+      <id>debug-opdf</id>
+      <defines>
+        <define>DEBUG</define>
+      </defines>
+      <compilerOptions>
+        <option>-gO</option>
+        <option>-gl</option>
+        <option>-O-</option>
+      </compilerOptions>
+    </profile>
+
+    <profile>
+      <id>memleak</id>
+      <compilerOptions>
+        <option>-gh</option>
+      </compilerOptions>
+    </profile>
+
+    <profile>
+      <id>profiler</id>
+      <compilerOptions>
+        <option>-pg</option>
+        <option>-O-</option>
+      </compilerOptions>
+    </profile>
+
+    <profile>
+      <id>release</id>
+      <defines>
+        <define>RELEASE</define>
+      </defines>
+      <compilerOptions>
+        <option>-O3</option>
+        <option>-CX</option>
+      </compilerOptions>
+    </profile>
+
+    <profile>
+      <id>unix</id>
+      <defines>
+         <define>X11</define>
+         <define>UseCThreads</define>
+      </defines>
+    </profile>
+
+    <profile>
+      <id>windows</id>
+      <defines>
+         <define>GDI</define>
+      </defines>
+    </profile>
+
+    <profile>
+      <id>macos</id>
+      <defines>
+         <define>cocoa</define>
+      </defines>
+    </profile>
+
+  </profiles>
+
 </project>

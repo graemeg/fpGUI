@@ -2,15 +2,26 @@
 .* :encoding=IBM850:wrap=hard:tabSize=2:noTabs=true:
 
 .* =============================================
-.* Copyright (c) 2016 by Graeme Geldenhuys
+.* Copyright (c) 2016-2026 by Graeme Geldenhuys
 .* =============================================
+
+.*  Formatting conventions for this book:
+.*  - :cgraphic. box-drawing headers for each :h4. section
+.*  - :hp2. for bold, :hp1. for italic
+.*  - :color fc=darkred. for Pascal identifiers, :color fc=darkcyan. for comments in code
+.*  - :xmp./:exmp. for code blocks (no line numbers as requested)
+.*  - Reserved words in code samples bolded with :hp2./:ehp2.
+.*  - :table. for reference tables
+.*  - &colon., &endash., &fpg. symbols for common book macros
+.*  - :nt./:ent. for the NOTE callout
+.*  - :font facename='System Monospaced'. for inline monospace paths
 
 :userdoc.
 :docprof toc=1234.
 :title.A Quick Guide to fpGUI
 
 .* This as a marco definition
-.nameit symbol=pubdate text='August 2015'
+.nameit symbol=pubdate text='March 2026'
 .nameit symbol=dv text='Docview'
 .nameit symbol=fpg text='fpGUI Toolkit'
 .nameit symbol=fpc text='Free Pascal Compiler'
@@ -22,7 +33,8 @@ http://www.freepascal.org/docs.var
 :efn.
 
 :h1.A Quick Guide to using &fpg.
-:font facename='Helvetica-20:antialias=true'.
+.* OS/2 and IPF convention is HxW and sizes are in points (same as fpGUI).
+:font facename='Helvetica' size=20x10.
 .* :artwork name='img0.bmp' align=center.
 :lines align=center.
 A Quick Guide to using
@@ -36,7 +48,7 @@ Written by Graeme Geldenhuys
 :artwork align=center name='images/wizard_pink.bmp'.
 .br
 .br
-All Rights Reserved. Copyright (c) 2015-2016 by Graeme Geldenhuys
+All Rights Reserved. Copyright (c) 2015-2026 by Graeme Geldenhuys
 .br
 :elines.
 
@@ -45,7 +57,7 @@ All Rights Reserved. Copyright (c) 2015-2016 by Graeme Geldenhuys
 :table cols='13 20'.
 :row.
 :c.Version
-:c.v0.1
+:c.v0.2
 :row.
 :c.Pub Date
 :c.&pubdate.
@@ -77,7 +89,7 @@ way) and get started.
 :p.
 :hp2.What is fpGUI:ehp2.
 :p.
-fpGUI Toolkit (or the Free Pascal GUI Toolkit) is a multi-platform toolkit for
+&fpg. (or the Free Pascal GUI Toolkit) is a multi-platform toolkit for
 creating graphical user interfaces. Offering a complete set of custom drawn
 widgets, fpGUI is suitable for projects ranging from small one-off tools to
 complete application suites.
@@ -85,7 +97,7 @@ complete application suites.
 fpGUI is a 32bit and 64bit 2D graphics toolkit that doesn't rely on any huge
 third party graphics libraries like GTK+ or Qt (and its dependencies). It
 talks directly to the underlying graphics system (GDI, X11 etc). fpGUI is
-supported on Unix, Linux, BSD, OpenSolaris, Mac OS X (via X11), Windows, and
+supported on Unix, Linux, BSD, OpenSolaris, MacOS, Windows, and
 embedded systems like ARM-Linux and WinCE.
 :p.
 fpGUI is open source and free software, licensed under a Modified LGPL
@@ -722,7 +734,10 @@ in terms of Object Pascal, is exactly what it is.
 :h3.Implementing Application Functionality
 :h3.Creating Custom Widgets
 :h2.Part II: Intermediate fpGUI
-:h3.Layout Management
+
+.* Chapter on layout managers
+.im layout_management.ipf
+
 :h3.Event Processing
 :h3.2D Graphics with AggPas
 :h3.Drag and Drop
@@ -1004,5 +1019,21 @@ settings to the External Tools item you are setting up.
 :h3.Integration with MSEide
 :h3.Integration with EditPad Pro
 :h3.Integration with FP Text IDE
+
+
+:h2.Change Log
+:cgraphic.
+þþþþþþþþþþþþ
+ Change Log
+þþþþþþþþþþþþ
+:ecgraphic.
+:p.
+
+:dl tsize=15.
+:dt.v0.1 - August 2015
+:dd.Initial book and outline
+:dt.v0.2 - March 2026
+:dd.New chapter on Layout Managers
+:edl.
 
 :euserdoc.

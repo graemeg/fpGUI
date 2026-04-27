@@ -54,7 +54,7 @@ begin
 
   // Create MigLayout with 4 columns for flexible layout
   mig := TfpgMigLayoutManager.Create;
-  mig.LC.SetWrapAfter(4);  // 4 columns
+  mig.LC.WrapAfter(4);  // 4 columns
   mig.LC.Fill;             // Fill both horizontal and vertical space
   if FDebug then
     mig.LC.Debug;
@@ -63,17 +63,13 @@ begin
   // Title spanning all columns
   lblTitle := TfpgLabel.Create(Self);
   lblTitle.Text := 'User Registration Form';
-  lblTitle.Width := 200;
-  lblTitle.Height := 24;
-  lblTitle.FontDesc := '#Label1:bold';
+  lblTitle.FontDesc := '#Label2';
   mig.AddLayoutComponent(lblTitle, TfpgMigCC.Create().SpanX(4).AlignX('center'));
 
   // Name field (label + edit spanning 3 columns)
   lblName := TfpgLabel.Create(Self);
   lblName.Text := 'Full Name:';
-  lblName.Width := 80;
-  lblName.Height := 20;
-  mig.AddLayoutComponent(lblName, TfpgMigCC.Create());
+  mig.AddLayoutComponent(lblName, TfpgMigCC.Create().MinWidth('80lp'));
 
   edtName := TfpgEdit.Create(Self);
   edtName.Width := 250;
@@ -83,8 +79,6 @@ begin
   // Email field (label + edit spanning 3 columns)
   lblEmail := TfpgLabel.Create(Self);
   lblEmail.Text := 'Email:';
-  lblEmail.Width := 80;
-  lblEmail.Height := 20;
   mig.AddLayoutComponent(lblEmail, TfpgMigCC.Create());
 
   edtEmail := TfpgEdit.Create(Self);
@@ -95,8 +89,6 @@ begin
   // Country combobox (label + combo + space)
   lblCountry := TfpgLabel.Create(Self);
   lblCountry.Text := 'Country:';
-  lblCountry.Width := 80;
-  lblCountry.Height := 20;
   mig.AddLayoutComponent(lblCountry, TfpgMigCC.Create());
 
   cmbCountry := TfpgComboBox.Create(Self);
@@ -134,8 +126,6 @@ begin
   // Comments section (label above memo)
   lblComments := TfpgLabel.Create(Self);
   lblComments.Text := 'Comments:';
-  lblComments.Width := 80;
-  lblComments.Height := 20;
   mig.AddLayoutComponent(lblComments, TfpgMigCC.Create().SpanX(4));
 
   // Memo spanning all columns with grow

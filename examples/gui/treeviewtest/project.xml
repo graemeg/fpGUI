@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-treeview</name>
+
+  <build>
+    <mainSource>treeviewtest.pas</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>treeviewtest</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

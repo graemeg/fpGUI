@@ -32,7 +32,11 @@ uses
   tcmig_layoututil,
   tcmig_grid,
   tcmig_quickstart,
-  tctimer;
+  tctimer,
+  tcmsgcoalesce,
+  tcasynctask,
+  tchvif,
+  tchvif_writer;
 
 implementation
 

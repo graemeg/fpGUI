@@ -49,10 +49,13 @@ uses
   {$ENDIF}
   ;
 
-{ Constants missing on windows unit }
+{ Constants missing from the FPC Windows unit }
 const
-  VER_PLATFORM_WIN32_CE = 3;
-  CLEARTYPE_QUALITY     = 5;
+  VER_PLATFORM_WIN32_CE       = 3;
+  CLEARTYPE_QUALITY           = 5;
+  MONITOR_DEFAULTTOPRIMARY    = $00000001;
+
+function MonitorFromPoint(pt: TPOINT; dwFlags: DWORD): HMONITOR; stdcall; external 'user32.dll' name 'MonitorFromPoint';
 
 var
   { Unicode selection variables }
@@ -148,17 +151,18 @@ type
     procedure   DoEndDraw; override;
     function    GetPixel(X, Y: integer): TfpgColor; override;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
-    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
-    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
+    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
     procedure   DoDrawPolygon(const Points: array of TPoint); override;
     function    GetBufferAllocated: Boolean; override;
     procedure   DoAllocateBuffer; override;
+    procedure   DoRestoreFromBuffer(const ARect: TfpgRect); override;
     property    DCHandle: TfpgDCHandle read FDrawGC;
   public
     constructor Create(awidget: TfpgWidgetBase); override;
     destructor  Destroy; override;
     procedure   CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase; var ASrcRect: TfpgRect); override;
-  end;
+  end deprecated 'Native GDI canvas superseded by THybridCanvas (AggCanvas). Will be removed in a future release.';
 
 
   TfpgGDIWindow = class(TfpgWindowBase)
@@ -209,8 +213,8 @@ type
     procedure   SetWindowOpacity(AValue: Single); override;
     {$ENDIF}
     function    GetWindowState: TfpgWindowState; override;
-    property    WinHandle: TfpgWinHandle read FWinHandle;
   public
+    property    WinHandle: TfpgWinHandle read FWinHandle;
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   ActivateWindow; override;
@@ -232,6 +236,8 @@ type
   TfpgGDIApplication = class(TfpgApplicationBase)
   private
     FDrag: TfpgGDIDrag;
+    FMonitorList: array of TfpgScreenInfo;
+    FEffectiveDPI: integer;  { Cached effective DPI resolved at startup }
     procedure   DoWakeMainThread(Sender: TObject);
     procedure   SetDrag(const AValue: TfpgGDIDrag);
     property    Drag: TfpgGDIDrag read FDrag write SetDrag;
@@ -266,14 +272,16 @@ type
     procedure   DoWaitWindowMessage(atimeoutms: integer); override;
     function    MessagesPending: boolean; override;
     procedure   DoFlush; override;
+    function    GetMonitorCount: Integer; override;
+    function    GetMonitorInfo(AIndex: Integer): TfpgScreenInfo; override;
   public
     constructor Create(const AParams: string); override;
     destructor  Destroy; override;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
     function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
-    function    Screen_dpi_x: integer; override;
-    function    Screen_dpi_y: integer; override;
+    function    Screen_dpi_x: integer; override; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
+    function    Screen_dpi_y: integer; override; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
     function    Screen_dpi: integer; override;
     property    Display: HDC read FDisplay;
  end;
@@ -380,6 +388,8 @@ uses
   fpg_stringutils,
   fpg_form,
   fpg_window,
+  fpg_wakeChannel,
+  fpg_gdi_wakechannel,
   math;
 
 
@@ -400,6 +410,27 @@ const
 const
   BUFFER_RESIZE_SIZE = 50;
   ID_ABOUT = 200001;
+
+{ Multi-monitor API declarations — not in the FPC RTL Windows unit }
+const
+  MONITORINFOF_PRIMARY = $00000001;
+
+type
+  tagMONITORINFO = record
+    cbSize:    DWORD;
+    rcMonitor: TRect;
+    rcWork:    TRect;
+    dwFlags:   DWORD;
+  end;
+
+  TMonitorEnumCallback = function(hMonitor: HMONITOR; hdcMonitor: HDC;
+      lprcMonitor: LPRECT; dwData: LPARAM): BOOL; stdcall;
+
+function GetMonitorInfoW(hMonitor: HMONITOR; lpmi: Pointer): BOOL;
+    stdcall; external 'user32.dll' name 'GetMonitorInfoW';
+function EnumDisplayMonitors(hdc: HDC; lprcClip: LPRECT;
+    lpfnEnum: TMonitorEnumCallback; dwData: LPARAM): BOOL;
+    stdcall; external 'user32.dll' name 'EnumDisplayMonitors';
 
 // some required keyboard functions
 {$INCLUDE fpg_keys_gdi.inc}
@@ -957,7 +988,7 @@ begin
         begin
 //          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
           //Writeln('Hittest: ',IntToHex((lParam and $FFFF),4));
-          if Lo(lParam) <= 1 then
+          if LOWORD(lParam) <= 1 then
             w.DoSetMouseCursor
           else
             Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -1130,31 +1161,29 @@ begin
 
           // note that WM_SIZING allows some control on sizing
           //writeln('WM_SIZE: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8));
-          msgp.rect.Width  := Lo(lParam);
-          msgp.rect.Height := Hi(lParam);
+          msgp.rect.Width  := LOWORD(lParam);
+          msgp.rect.Height := HIWORD(lParam);
 
           {$IFDEF GDEBUG}
           DebugLnFmt('%s: WM_SIZE  w=%d  h=%d', [w.ClassName, msgp.rect.width, msgp.rect.Height]);
           {$ENDIF}
           // skip minimize & restore
           if (w.FSize.W <> msgp.rect.Width) or (w.FSize.H <> msgp.rect.Height) then
+          begin
             fpgSendMessage(nil, w, FPGM_RESIZE, msgp);
+            // Update cached size so the next WM_SIZE can detect changes.
+            // Without this, restore-from-maximize goes undetected because
+            // FSize still holds the pre-maximize dimensions.
+            w.FSize := fpgSize(msgp.rect.Width, msgp.rect.Height);
+          end;
         end;
 
 
     WM_SIZING:
         begin
-          { **** NOTE ****
-            This is only here, because WM_SIZE is not working correctly for some
-            odd reason. So this is only a work-around, until I can figure out what
-            is going on with WM_SIZE. }
-          lprc := LPRECT(lparam);
-          PrintRect(lprc^);
-          msgp.rect.Width  := lprc^.Right - lprc^.Left + 1;
-          msgp.rect.Height := lprc^.Bottom - lprc^.Top + 1;
-
-          if (w.FSize.W <> msgp.rect.Width) or (w.FSize.H <> msgp.rect.Height) then
-            fpgSendMessage(nil, w, FPGM_RESIZE, msgp);
+          { WM_SIZING is no longer used for resize handling. WM_SIZE provides
+            the correct client area dimensions via LOWORD/HIWORD(lParam). }
+          Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
         end;
 
     WM_MOVE:
@@ -1175,11 +1204,15 @@ begin
           end
           else
           begin
-            msgp.rect.Left := Lo(lParam);
-            msgp.rect.Top  := Hi(lParam);
+            msgp.rect.Left := LOWORD(lParam);
+            msgp.rect.Top  := HIWORD(lParam);
           end;
 
-          fpgSendMessage(nil, w, FPGM_MOVE, msgp);
+          if (w.FPosition.X <> msgp.rect.Left) or (w.FPosition.Y <> msgp.rect.Top) then
+          begin
+            fpgSendMessage(nil, w, FPGM_MOVE, msgp);
+            w.FPosition := fpgPoint(msgp.rect.Left, msgp.rect.Top);
+          end;
         end;
 
     WM_STYLECHANGED:
@@ -1192,9 +1225,14 @@ begin
     WM_WINDOWPOSCHANGED:
         begin
           {$IFDEF GDEBUG}
-          DebugLnFmt('%s: WM_STYLECHANGED' , [w.ClassName]);
+          DebugLnFmt('%s: WM_WINDOWPOSCHANGED' , [w.ClassName]);
           {$ENDIF}
           w.HandleWM_WINDOWPOSCHANGED(Pointer(lParam));
+          { DefWindowProc MUST be called here. It is responsible for generating
+            the WM_SIZE and WM_MOVE messages from WM_WINDOWPOSCHANGED. Without
+            this call, maximize, restore, and any system-driven resize/move will
+            not produce WM_SIZE/WM_MOVE, so fpGUI would never process them. }
+          Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
         end;
 
     WM_MOUSEWHEEL:
@@ -1328,8 +1366,16 @@ begin
           {$ENDIF}
           if GetUpdateRect(w.WinHandle, r, False) then
             msgp.rect.SetRect(r.Left, r.Top, r.Right-r.Left, r.Bottom-r.Top);
+          { ValidateRect must always be called to clear the update region and
+            prevent Windows from re-posting WM_PAINT continuously. }
           ValidateRect(w.WinHandle, r);
-          fpgSendMessage(nil, w, FPGM_PAINT, msgp);
+          { Fast path: blit the dirty rect from the off-screen buffer directly
+            to the window, bypassing the paint message queue.  This is the
+            correct approach for the alien-windows model where every widget
+            renders into a single shared buffer.  Fall back to a full repaint
+            message only when no buffer exists yet (before the first paint). }
+          if not TfpgWidget(w.Owner).Canvas.RestoreFromBuffer(msgp.rect) then
+            fpgSendMessage(nil, w, FPGM_PAINT, msgp);
         end;
 
     WM_SYSCOMMAND:
@@ -1343,6 +1389,68 @@ begin
       Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
   end;
 end;
+
+{ Monitor enumeration callback for TfpgGDIApplication }
+
+type
+  PMonitorCollector = ^TMonitorCollector;
+  TMonitorCollector = record
+    List: array of TfpgScreenInfo;
+  end;
+
+function MonitorEnumProc(hMonitor: HMONITOR; hdcMonitor: HDC;
+    {%H-}lprcMonitor: LPRECT; dwData: LPARAM): BOOL; stdcall;
+var
+  mi: tagMONITORINFO;
+  info: TfpgScreenInfo;
+  coll: PMonitorCollector;
+  hShCore: THandle;
+  GetDpiForMon: function(hmon: HMONITOR; dpiType: Integer;
+    out dpiX, dpiY: UINT): HRESULT; stdcall;
+  monDpiX, monDpiY: UINT;
+  GotPerMonitorDpi: Boolean;
+begin
+  coll := PMonitorCollector(dwData);
+  FillChar(mi, SizeOf(mi), 0);
+  mi.cbSize := SizeOf(mi);
+  GetMonitorInfoW(hMonitor, @mi);
+  FillChar(info, SizeOf(info), 0);
+  info.Bounds.SetRect(mi.rcMonitor.Left, mi.rcMonitor.Top,
+      mi.rcMonitor.Right  - mi.rcMonitor.Left,
+      mi.rcMonitor.Bottom - mi.rcMonitor.Top);
+  info.WorkArea.SetRect(mi.rcWork.Left, mi.rcWork.Top,
+      mi.rcWork.Right  - mi.rcWork.Left,
+      mi.rcWork.Bottom - mi.rcWork.Top);
+  info.Primary := (mi.dwFlags and MONITORINFOF_PRIMARY) <> 0;
+  { Per-monitor DPI: try GetDpiForMonitor (Win 8.1+) first, then
+    fall back to GetDeviceCaps which reports the same DPI for all
+    monitors on pre-8.1 Windows. }
+  GotPerMonitorDpi := False;
+  hShCore := LoadLibrary('shcore.dll');
+  if hShCore <> 0 then
+  begin
+    Pointer(GetDpiForMon) := GetProcAddress(hShCore, 'GetDpiForMonitor');
+    if Assigned(GetDpiForMon) then
+    begin
+      if GetDpiForMon(hMonitor, 0 {MDT_EFFECTIVE_DPI}, monDpiX, monDpiY) = S_OK then
+      begin
+        info.DpiX := monDpiX;
+        info.DpiY := monDpiY;
+        GotPerMonitorDpi := True;
+      end;
+    end;
+    FreeLibrary(hShCore);
+  end;
+  if not GotPerMonitorDpi then
+  begin
+    info.DpiX := Windows.GetDeviceCaps(hdcMonitor, LOGPIXELSX);
+    info.DpiY := Windows.GetDeviceCaps(hdcMonitor, LOGPIXELSY);
+  end;
+  SetLength(coll^.List, Length(coll^.List) + 1);
+  coll^.List[High(coll^.List)] := info;
+  Result := True;
+end;
+
 
 { TfpgGDIApplication }
 
@@ -1481,9 +1589,10 @@ end;
 
 procedure TfpgGDIApplication.DoWakeMainThread(Sender: TObject);
 begin
-  // WakeMainThread is called during TThread.Synchronize.
-  if Assigned(MainForm) then
-    Windows.PostMessage(TfpgGDIWindow(MainForm.Window).WinHandle, WM_NULL, 0, 0);
+  { Called by the RTL when TThread.Synchronize or TThread.Queue posts
+    work for the main thread. Delegates to the wake channel which posts
+    a message to a hidden window, waking MsgWaitForMultipleObjects. }
+  Self.WakeMainThread;
 end;
 
 procedure TfpgGDIApplication.SetDrag(const AValue: TfpgGDIDrag);
@@ -1521,10 +1630,133 @@ begin
   Result := FHiddenWindow;
 end;
 
+{ Declare per-monitor DPI awareness so Windows reports true DPI values
+  instead of virtualising at 96 DPI. Must be called before any GetDC or
+  GetDeviceCaps calls.
+    - Win 8.1+: SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
+    - Vista/7:  SetProcessDPIAware
+  Both are loaded dynamically to avoid hard dependencies on OS version. }
+procedure DeclareDPIAwareness;
+var
+  hShCore: THandle;
+  hUser32: THandle;
+  SetDpiAwareness: function(value: Integer): HRESULT; stdcall;
+  SetDPIAware: function: BOOL; stdcall;
+begin
+  hShCore := LoadLibrary('shcore.dll');
+  if hShCore <> 0 then
+  begin
+    Pointer(SetDpiAwareness) := GetProcAddress(hShCore, 'SetProcessDpiAwareness');
+    if Assigned(SetDpiAwareness) then
+    begin
+      SetDpiAwareness(2); // PROCESS_PER_MONITOR_DPI_AWARE
+      {$IFDEF DEBUG}
+      writeln('DPI: declared PROCESS_PER_MONITOR_DPI_AWARE via shcore.dll');
+      {$ENDIF}
+      FreeLibrary(hShCore);
+      Exit;
+    end;
+    FreeLibrary(hShCore);
+  end;
+  // Vista/7 fallback — also loaded dynamically
+  hUser32 := LoadLibrary('user32.dll');
+  if hUser32 <> 0 then
+  begin
+    Pointer(SetDPIAware) := GetProcAddress(hUser32, 'SetProcessDPIAware');
+    if Assigned(SetDPIAware) then
+    begin
+      SetDPIAware;
+      {$IFDEF DEBUG}
+      writeln('DPI: declared DPI-aware via user32.dll (Vista/7 fallback)');
+      {$ENDIF}
+    end;
+    FreeLibrary(hUser32);
+  end;
+end;
+
+{  DetectEffectiveDPI
+   Determines the logical DPI using a priority chain:
+     1. FPGUI_SCALE_FACTOR env var  - fpGUI-specific override (fractional, e.g. 1.5)
+     2. GetDpiForMonitor (Win 8.1+) - per-monitor DPI from shcore.dll
+     3. GetDeviceCaps(LOGPIXELSY)   - legacy fallback
+   Returns the effective DPI as an integer (e.g. 96, 120, 144, 192). }
+function DetectEffectiveDPI(ADisplay: HDC): integer;
+
+  function ParseScaleFactor(const S: string; out AValue: Double): Boolean;
+  var
+    Code: Integer;
+  begin
+    Val(S, AValue, Code);
+    Result := (Code = 0) and (AValue > 0);
+  end;
+
+var
+  EnvVal: string;
+  ScaleFactor: Double;
+  hShCore: THandle;
+  GetDpiForMon: function(hmon: HMONITOR; dpiType: Integer;
+    out dpiX, dpiY: UINT): HRESULT; stdcall;
+  Mon: HMONITOR;
+  dpiX, dpiY: UINT;
+  pt: TPOINT;
+begin
+  // 1. FPGUI_SCALE_FACTOR - explicit fpGUI override (fractional, e.g. "1.5")
+  EnvVal := SysUtils.GetEnvironmentVariable('FPGUI_SCALE_FACTOR');
+  if (EnvVal <> '') and ParseScaleFactor(EnvVal, ScaleFactor) then
+  begin
+    Result := Round(96 * ScaleFactor);
+    {$IFDEF DEBUG}
+    writeln('DPI: FPGUI_SCALE_FACTOR=', EnvVal, ' -> ', Result);
+    {$ENDIF}
+    Exit;
+  end;
+
+  // 2. GetDpiForMonitor (Win 8.1+) - per-monitor DPI
+  hShCore := LoadLibrary('shcore.dll');
+  if hShCore <> 0 then
+  begin
+    Pointer(GetDpiForMon) := GetProcAddress(hShCore, 'GetDpiForMonitor');
+    if Assigned(GetDpiForMon) then
+    begin
+      pt.X := 0; pt.Y := 0;
+      Mon := MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY);
+      if GetDpiForMon(Mon, 0 {MDT_EFFECTIVE_DPI}, dpiX, dpiY) = S_OK then
+      begin
+        FreeLibrary(hShCore);
+        Result := dpiY;
+        {$IFDEF DEBUG}
+        writeln('DPI: GetDpiForMonitor -> ', Result);
+        {$ENDIF}
+        Exit;
+      end;
+    end;
+    FreeLibrary(hShCore);
+  end;
+
+  // 3. Legacy fallback
+  Result := GetDeviceCaps(ADisplay, LOGPIXELSY);
+  {$IFDEF DEBUG}
+  writeln('DPI: GetDeviceCaps fallback -> ', Result);
+  {$ENDIF}
+end;
+
 constructor TfpgGDIApplication.Create(const AParams: string);
+var
+  coll: TMonitorCollector;
 begin
   inherited Create(AParams);
+  DeclareDPIAwareness;
   FDisplay        := Windows.GetDC(0);
+  FEffectiveDPI   := DetectEffectiveDPI(FDisplay);
+
+  { Enumerate connected monitors. This runs before TfpgApplication.Create
+    calls GetMonitorCount/GetMonitorInfo (those are called after inherited returns). }
+  FillChar(coll, SizeOf(coll), 0);
+  EnumDisplayMonitors(0, nil, @MonitorEnumProc, LPARAM(@coll));
+  FMonitorList := coll.List;
+  { Safety fallback if EnumDisplayMonitors returned nothing }
+  if Length(FMonitorList) = 0 then
+    SetLength(FMonitorList, 1);
   Terminated := False;
 
   with WindowClass do
@@ -1572,13 +1804,24 @@ begin
 
   FIsInitialized := True;
   wapplication   := TfpgApplication(self);
-  WakeMainThread := @DoWakeMainThread;
+
+  { Create the wake channel. On Windows this posts WM_FPGUI_WAKE to
+    a hidden message-only window, waking MsgWaitForMultipleObjects. }
+  WakeChannel := TfpgGDIWakeChannel.Create;
+  WakeChannel.Open;
+
+  { Hook the RTL's WakeMainThread so TThread.Queue/Synchronize wake
+    the event loop via our channel instead of the old MainForm approach }
+  Classes.WakeMainThread := @DoWakeMainThread;
 
 end;
 
 destructor TfpgGDIApplication.Destroy;
 begin
-  WakeMainThread := nil;
+  Classes.WakeMainThread := nil;
+  if WakeChannel <> nil then
+    WakeChannel.Close;
+  WakeChannel := nil;
   if Assigned(FDrag) then
     FDrag.Free;
   UnhookWindowsHookEx(ActivationHook);
@@ -1629,21 +1872,13 @@ begin
 end;
 
 function TfpgGDIApplication.GetScreenWidth: TfpgCoord;
-var
-  r: TRECT;
 begin
-  GetWindowRect(GetDesktopWindow, r);
-  Result := r.Right - r.Left;
-  // Result := Windows.GetSystemMetrics(SM_CXSCREEN);
+  Result := Windows.GetSystemMetrics(SM_CXVIRTUALSCREEN);
 end;
 
 function TfpgGDIApplication.GetScreenHeight: TfpgCoord;
-var
-  r: TRECT;
 begin
-  GetWindowRect(GetDesktopWindow, r);
-  Result := r.Bottom - r.Top;
-  // Result := Windows.GetSystemMetrics(SM_CYSCREEN);
+  Result := Windows.GetSystemMetrics(SM_CYVIRTUALSCREEN);
 end;
 
 function TfpgGDIApplication.GetScreenPixelColor(APos: TPoint): TfpgColor;
@@ -1656,17 +1891,30 @@ end;
 
 function TfpgGDIApplication.Screen_dpi_x: integer;
 begin
-  Result := GetDeviceCaps(wapplication.display, LOGPIXELSX)
+  Result := FEffectiveDPI;
 end;
 
 function TfpgGDIApplication.Screen_dpi_y: integer;
 begin
-  Result := GetDeviceCaps(wapplication.display, LOGPIXELSY)
+  Result := FEffectiveDPI;
 end;
 
 function TfpgGDIApplication.Screen_dpi: integer;
 begin
-  Result := Screen_dpi_y;
+  Result := FEffectiveDPI;
+end;
+
+function TfpgGDIApplication.GetMonitorCount: Integer;
+begin
+  Result := Length(FMonitorList);
+end;
+
+function TfpgGDIApplication.GetMonitorInfo(AIndex: Integer): TfpgScreenInfo;
+begin
+  if (AIndex >= 0) and (AIndex < Length(FMonitorList)) then
+    Result := FMonitorList[AIndex]
+  else
+    FillChar(Result, SizeOf(Result), 0);
 end;
 
 { TfpgGDIWindow }
@@ -2046,19 +2294,6 @@ begin
   SetWindowOpacity(WindowOpacity);
   {$ENDIF}
 
-  if waScreenCenterPos in FWindowAttributes then
-  begin
-    FPosition.X := (wapplication.ScreenWidth - FSize.W) div 2;
-    FPosition.Y  := (wapplication.ScreenHeight - FSize.H) div 2;
-    DoMoveWindow(FPosition.X, FPosition.Y);
-  end
-  else if waOneThirdDownPos in FWindowAttributes then
-  begin
-    FPosition.X := (wapplication.ScreenWidth - FSize.W) div 2;
-    FPosition.Y  := (wapplication.ScreenHeight - FSize.H) div 3;
-    DoMoveWindow(FPosition.X, FPosition.Y);
-  end;
-
   DoSetWindowAttributes(FWindowAttributes, FWindowAttributes, True);
 
   // the forms require some adjustments before the Window appears
@@ -2127,9 +2362,21 @@ end;
 procedure TfpgGDIWindow.DoSetWindowVisible(const AValue: Boolean);
 var
   r: TRect;
+  msgp: TfpgMessageParams;
 begin
   if AValue then
   begin
+    { X11 sends a configure-notify when a window is first mapped, which
+      triggers the layout manager before the first paint. Windows does not
+      generate WM_SIZE on first show when the window is already at its
+      constructed size (the deduplication guard in the WM_SIZE handler
+      swallows it). Send an explicit FPGM_RESIZE *before* ShowWindow so
+      any pending layout pass runs before UpdateWindow forces the first
+      paint — matching X11 behaviour. }
+    msgp.rect.Width  := FSize.W;
+    msgp.rect.Height := FSize.H;
+    fpgSendMessage(nil, PrimaryWidget, FPGM_RESIZE, msgp);
+
     FSkipResizeMessage := True;
     BringWindowToTop(FWinHandle);
 
@@ -2138,9 +2385,7 @@ begin
     else
       Windows.ShowWindow(FWinHandle, SW_SHOWNORMAL);
 
-    if (waAutoPos in FWindowAttributes) or
-      (waScreenCenterPos in FWindowAttributes) or
-      (waOneThirdDownPos in FWindowAttributes) then
+    if (waAutoPos in FWindowAttributes) then
     begin
       GetWindowRect(FWinHandle, r);
       FPosition.X := r.Left;
@@ -2556,7 +2801,7 @@ begin
   Windows.SetPixel(FDrawGC, X, Y, fpgColorToWin(AValue));
 end;
 
-procedure TfpgGDICanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgGDICanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
 var
   SX, SY, EX, EY: Longint;
 begin
@@ -2580,7 +2825,7 @@ begin
   {$ENDIF}
 end;
 
-procedure TfpgGDICanvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgGDICanvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double);
 var
   SX, SY, EX, EY: Longint;
 begin
@@ -2620,7 +2865,7 @@ end;
 
 function TfpgGDICanvas.GetBufferAllocated: Boolean;
 begin
-  if FCanvasTarget <> Self then
+  if (FCanvasTarget <> nil) and (FCanvasTarget <> Self) then
     Result := TfpgGDICanvas(FCanvasTarget).GetBufferAllocated
   else
   begin
@@ -2674,6 +2919,24 @@ begin
   // Only the top level window canvas puts the buffer to the screen so no delta needed
   if (FBufferBitmap > 0) and (w > 0) and (h > 0) then
     BitBlt(FWinGC, x, y, w, h, FDrawGC, x, y, SRCCOPY);
+end;
+
+procedure TfpgGDICanvas.DoRestoreFromBuffer(const ARect: TfpgRect);
+var
+  dc: Windows.HDC;
+begin
+  { Blit the exposed rect from the off-screen buffer DC (FDrawGC) directly to
+    the window.  FDrawGC is valid whenever the buffer has been allocated, which
+    RestoreFromBuffer guarantees before calling here.  We obtain a fresh window
+    DC so this is safe to call outside of a BeginDraw/EndDraw pair. }
+  if (ARect.Width < 1) or (ARect.Height < 1) then
+    Exit;
+  dc := Windows.GetDC(WinHandle);
+  if dc = 0 then
+    Exit;
+  BitBlt(dc, ARect.Left, ARect.Top, ARect.Width, ARect.Height,
+      FDrawGC, ARect.Left, ARect.Top, SRCCOPY);
+  Windows.ReleaseDC(WinHandle, dc);
 end;
 
 procedure TfpgGDICanvas.DoAddClipRect(const ARect: TfpgRect);

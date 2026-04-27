@@ -23,7 +23,7 @@
 // 23.06.2006-Milano: ptrcomp adjustments
 // 06.03.2006-Milano: Unit port establishment
 //
-{ agg_span_pattern_resample_gray.pas {untested}
+{ CAUTION: Untested }
 unit
  agg_span_pattern_resample_gray ;
 
@@ -68,7 +68,7 @@ type
 
   end;
 
- span_pattern_resample_gray_ptr = ^span_pattern_resample_gray; 
+ span_pattern_resample_gray_ptr = ^span_pattern_resample_gray;
  span_pattern_resample_gray = object(span_image_resample )
    m_wrap_mode_x ,
    m_wrap_mode_y : wrap_mode_ptr;

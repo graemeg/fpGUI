@@ -1,7 +1,7 @@
 {
     This unit is part of the fpGUI Toolkit project.
 
-    Copyright (c) 2006 - 2015 by Graeme Geldenhuys.
+    Copyright (c) 2006 - 2026 by Graeme Geldenhuys.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about redistributing fpGUI.
@@ -36,7 +36,7 @@ type
   TScrollNotifyEvent = procedure(Sender: TObject; position: integer) of object;
 
   TfpgScrollStyle = (ssNone, ssHorizontal, ssVertical, ssBoth, ssAutoHorizontal, ssAutoVertical, ssAutoBoth);
-  
+
   TfpgScrollBarPart = (sbpNone, sbpUpBack, sbpPageUpBack, sbpSlider, sbpDownForward, sbpPageDownForward);
 
 
@@ -99,6 +99,9 @@ type
 
 
 implementation
+
+uses
+  fpg_iconstore;
 
 const
   cMinSliderLength = 20;
@@ -222,7 +225,10 @@ begin
     FPosition := AValue;
 
   if WindowAllocated then
-    Invalidate;//    DrawSlider(False);
+  begin
+    FRecalc := True;
+    Invalidate;
+  end;
 end;
 
 procedure TfpgScrollBar.Step(ASteps: Integer);
@@ -343,7 +349,10 @@ begin
     dy := 0;
   end;
   Canvas.SetColor(clText1);
-  img := fpgImages.GetImage(imgname);
+  if Assigned(fpgIcons) and fpgIcons.HasIcon(imgname) then
+    img := fpgIcons.GetIcon(imgname, 16)
+  else
+    img := fpgImages.GetImage(imgname);
   if img <> nil then
   begin
     if ButtonEnabled then
@@ -512,7 +521,7 @@ begin
       StepPage(1);
     end;
   end;
-  
+
   if FScrollbarDownPart = sbpSlider then
   begin
     FSliderDragStart := FSliderPos;
@@ -532,12 +541,12 @@ var
 begin
   inherited;
   ReleaseMouse;
-  
+
   WasPressed := FScrollbarDownPart <> sbpNone;
   FScrollTimer.Enabled := False;
 
   FScrollbarDownPart := sbpNone;
-  
+
   if WasPressed then
     Invalidate;
 end;
@@ -553,7 +562,7 @@ begin
 
   FMousePosition.X := x;
   FMousePosition.Y := y;
-  
+
   if (FScrollbarDownPart <> sbpSlider) or ((btnstate and MOUSE_LEFT) = 0) then
     Exit;
 

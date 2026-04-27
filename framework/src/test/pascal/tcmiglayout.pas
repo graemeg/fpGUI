@@ -110,8 +110,8 @@ begin
 
   container.Realign;
 
-  CheckEquals(12, w1.Left, 'w1.Left');
-  CheckEquals(12, w1.Top, 'w1.Top');
+  CheckEquals(6, w1.Left, 'w1.Left');
+  CheckEquals(6, w1.Top, 'w1.Top');
 
   container.Free;
 end;
@@ -127,7 +127,7 @@ begin
   container.Width := 200;
   container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
-  lm.LC.SetWrapAfter(1);  // Wrap after each component (vertical stacking)
+  lm.LC.WrapAfter(1);  // Wrap after each component (vertical stacking)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -144,11 +144,11 @@ begin
 
   container.Realign;
 
-  CheckEquals(12, w1.Left, 'w1.Left');
-  CheckEquals(12, w1.Top, 'w1.Top');
+  CheckEquals(6, w1.Left, 'w1.Left');
+  CheckEquals(6, w1.Top, 'w1.Top');
 
-  CheckEquals(12, w2.Left, 'w2.Left');
-  CheckEquals(38, w2.Top, 'w2.Top'); // 12 (top inset) + 20 (w1.height) + 6 (gap)
+  CheckEquals(6, w2.Left, 'w2.Left');
+  CheckEquals(32, w2.Top, 'w2.Top'); // 6 (top inset) + 20 (w1.height) + 6 (gap)
 
   container.Free;
 end;
@@ -164,7 +164,7 @@ begin
   container.Width := 200;
   container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
-  lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
+  lm.LC.WrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -181,11 +181,11 @@ begin
 
   container.Realign;
 
-  CheckEquals(12, w1.Left, 'w1.Left');
-  CheckEquals(12, w1.Top, 'w1.Top');
+  CheckEquals(6, w1.Left, 'w1.Left');
+  CheckEquals(6, w1.Top, 'w1.Top');
 
-  CheckEquals(68, w2.Left, 'w2.Left'); // 12 (left inset) + 50 (w1.width) + 6 (gap)
-  CheckEquals(12, w2.Top, 'w2.Top');
+  CheckEquals(62, w2.Left, 'w2.Left'); // 6 (left inset) + 50 (w1.width) + 6 (gap)
+  CheckEquals(6, w2.Top, 'w2.Top');
 
   container.Free;
 end;
@@ -201,7 +201,7 @@ begin
   container.Width := 300;
   container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
-  lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
+  lm.LC.WrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -225,17 +225,17 @@ begin
   container.Realign;
 
   // w1 is in column 0, row 0
-  CheckEquals(12, w1.Left, 'w1.Left');
-  CheckEquals(12, w1.Top, 'w1.Top');
+  CheckEquals(6, w1.Left, 'w1.Left');
+  CheckEquals(6, w1.Top, 'w1.Top');
 
   // w2 is in column 1, row 0
   // The first column width should be 100 because of w3
-  CheckEquals(118, w2.Left, 'w2.Left'); // 12 (left inset) + 100 (w3.width) + 6 (gap)
-  CheckEquals(12, w2.Top, 'w2.Top');
+  CheckEquals(112, w2.Left, 'w2.Left'); // 6 (left inset) + 100 (w3.width) + 6 (gap)
+  CheckEquals(6, w2.Top, 'w2.Top');
 
   // w3 is in column 0, row 1
-  CheckEquals(12, w3.Left, 'w3.Left');
-  CheckEquals(38, w3.Top, 'w3.Top'); // 12 (top inset) + 20 (max row height) + 6 (gap)
+  CheckEquals(6, w3.Left, 'w3.Left');
+  CheckEquals(32, w3.Top, 'w3.Top'); // 6 (top inset) + 20 (max row height) + 6 (gap)
 
   container.Free;
 end;
@@ -268,12 +268,12 @@ begin
   // The cell is the whole container, so widget should be at the bottom right
   // With inclusive boundaries:
   //   Container: [0, 199] x [0, 199] (200x200 pixels)
-  //   Usable area after 12px insets: [12, 187] x [12, 187] (176x176 pixels)
-  //   Widget (50x20) right-aligned: Right=187, Left=187-50+1=138
-  //   Widget (50x20) bottom-aligned: Bottom=187, Top=187-20+1=168
+  //   Usable area after 6px insets: [6, 193] x [6, 193] (188x188 pixels)
+  //   Widget (50x20) right-aligned: Right=193, Left=193-50+1=144
+  //   Widget (50x20) bottom-aligned: Bottom=193, Top=193-20+1=174
 
-  CheckEquals(138, w1.Left, 'w1.Left');
-  CheckEquals(168, w1.Top, 'w1.Top');
+  CheckEquals(144, w1.Left, 'w1.Left');
+  CheckEquals(174, w1.Top, 'w1.Top');
 
   container.Free;
 end;
@@ -290,7 +290,7 @@ begin
   container.Width := 200;
   container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
-  lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
+  lm.LC.WrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -309,11 +309,11 @@ begin
 
   container.Realign;
 
-  CheckEquals(12, w1.Left, 'w1.Left');
-  CheckEquals(12, w1.Top, 'w1.Top');
+  CheckEquals(6, w1.Left, 'w1.Left');
+  CheckEquals(6, w1.Top, 'w1.Top');
 
-  CheckEquals(12, w2.Left, 'w2.Left');
-  CheckEquals(38, w2.Top, 'w2.Top'); // 12 (top inset) + 20 (w1.height) + 6 (gap)
+  CheckEquals(6, w2.Left, 'w2.Left');
+  CheckEquals(32, w2.Top, 'w2.Top'); // 6 (top inset) + 20 (w1.height) + 6 (gap)
 
   container.Free;
 end;
@@ -330,7 +330,7 @@ begin
   container.Width := 200;
   container.Height := 200;
   lm := TfpgMigLayoutManager.Create;
-  lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
+  lm.LC.WrapAfter(2);  // Wrap after 2 components (2 columns)
   container.LayoutManager := lm;
 
   w1 := TfpgWidget.Create(container);
@@ -355,16 +355,16 @@ begin
 
   container.Realign;
 
-  CheckEquals(12, w1.Left, 'w1.Left');
-  CheckEquals(12, w1.Top, 'w1.Top');
+  CheckEquals(6, w1.Left, 'w1.Left');
+  CheckEquals(6, w1.Top, 'w1.Top');
 
-  CheckEquals(68, w2.Left, 'w2.Left');
-  CheckEquals(12, w2.Top, 'w2.Top');
+  CheckEquals(62, w2.Left, 'w2.Left');
+  CheckEquals(6, w2.Top, 'w2.Top');
 
-  CheckEquals(68, w3.Left, 'w3.Left');
-  // TODO: Investigate 2px discrepancy - expected 38, but spanning calculation distributes
-  // extra space evenly across rows, giving 40. May need to check Java MigLayout behavior.
-  CheckEquals(40, w3.Top, 'w3.Top');
+  CheckEquals(62, w3.Left, 'w3.Left');
+  // TODO: Investigate 2px discrepancy - expected 32, but spanning calculation distributes
+  // extra space evenly across rows, giving 34. May need to check Java MigLayout behavior.
+  CheckEquals(34, w3.Top, 'w3.Top');
 
   container.Free;
 end;
@@ -381,7 +381,7 @@ begin
   container.Width := 200;
   container.Height := 100;
   lm := TfpgMigLayoutManager.Create;
-  lm.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
+  lm.LC.WrapAfter(2);  // Wrap after 2 components (2 columns)
   lm.LC.FillX;  // Make columns fill container width (Java MigLayout v11 way)
   container.LayoutManager := lm;
 
@@ -397,16 +397,17 @@ begin
   w2.Width := 50;
   w2.Height := 20;
   c2 := TfpgMigCC.Create;
-  c2.GrowX;  // GrowX alone provides fill behavior in MigLayout v11
+  c2.PushX;  // PushX makes column 2 grow; GrowX makes w2 fill the grown column
+  c2.GrowX;
   lm.AddLayoutComponent(w2, c2);
 
   container.Realign;
 
-  CheckEquals(12, w1.Left, 'w1.Left');
+  CheckEquals(6, w1.Left, 'w1.Left');
   CheckEquals(50, w1.ActualWidth, 'w1.ActualWidth');
 
-  CheckEquals(68, w2.Left, 'w2.Left');
-  CheckEquals(120, w2.ActualWidth, 'w2.ActualWidth');
+  CheckEquals(62, w2.Left, 'w2.Left');
+  CheckEquals(132, w2.ActualWidth, 'w2.ActualWidth');
 
   container.Free;
 end;
@@ -423,7 +424,7 @@ begin
   container.Height := 200;
 
   lm := TfpgMigLayoutManager.Create;
-  lm.LC.SetWrapAfter(1); // one component per row
+  lm.LC.WrapAfter(1); // one component per row
   container.LayoutManager := lm;
 
   // 1. Create components in one order
@@ -452,7 +453,7 @@ begin
   CheckTrue(btnA.Top > btnB.Top, 'btnA should be below btnB');
 
   // More specific checks
-  CheckEquals(12, btnB.Top, 'btnB.Top should be at top inset');
+  CheckEquals(6, btnB.Top, 'btnB.Top should be at top inset');
   CheckTrue(btnA.Top > 30, 'btnA.Top should be below btnB'); // 12 + 25 + 6 = 43
 
   container.Free;

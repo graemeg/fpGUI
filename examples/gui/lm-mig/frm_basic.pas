@@ -44,7 +44,7 @@ begin
 
   // Create MigLayout with 2-column grid
   mig := TfpgMigLayoutManager.Create;
-  mig.LC.SetWrapAfter(2);  // Wrap after 2 components (2 columns)
+  mig.LC.WrapAfter(2);  // Wrap after 2 components (2 columns)
   if FDebug then
     mig.LC.Debug;       // Enable debug visualization
   LayoutManager := mig;
@@ -53,7 +53,6 @@ begin
   lbl1 := TfpgLabel.Create(Self);
   lbl1.Name := 'lbl1';
   lbl1.Text := 'Name:';
-//  lbl1.PreferredSize := fpgSize(80, 20);
   mig.AddLayoutComponent(lbl1, TfpgMigCC.Create());
 
   edt1 := TfpgEdit.Create(Self);
@@ -65,7 +64,6 @@ begin
   lbl2 := TfpgLabel.Create(Self);
   lbl2.Name := 'lbl2';
   lbl2.Text := 'Email:';
-//  lbl2.PreferredSize := fpgSize(80, 20);
   mig.AddLayoutComponent(lbl2, TfpgMigCC.Create());
 
   edt2 := TfpgEdit.Create(Self);
@@ -77,7 +75,6 @@ begin
   lbl3 := TfpgLabel.Create(Self);
   lbl3.Name := 'lbl3';
   lbl3.Text := 'Phone:';
-//  lbl3.PreferredSize := fpgSize(80, 20);
   mig.AddLayoutComponent(lbl3, TfpgMigCC.Create());
 
   edt3 := TfpgEdit.Create(Self);

@@ -241,7 +241,9 @@ type
     function    PrevVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
     procedure   BeginUpdate;
     procedure   EndUpdate;
+    function    GetNodeRowHeight: Integer;
     property    Font: TfpgFontResourceBase read FFont;
+    property    YOffset: Integer read FYOffset;
     // Invisible node that starts the tree
     property    RootNode: TfpgTreeNode read GetRootNode;
     property    Selection: TfpgTreeNode read FSelection write SetSelection;
@@ -978,14 +980,14 @@ end;
 
 function TfpgTreeview.VisibleWidth: integer;
 begin
-  Result := ActualWidth - 2; // border width = 2 pixels
+  Result := ActualWidth - 4; // 2px border on each side
   if FVScrollbar.Visible then
      dec(Result, FVScrollbar.ActualWidth);
 end;
 
 function TfpgTreeview.VisibleHeight: integer;
 begin
-  Result := ActualHeight - 2; // border width = 2 pixels
+  Result := ActualHeight - 4; // 2px border on each side
   if FShowColumns then
     dec(Result, FColumnHeight);
   if FHScrollbar.Visible then
@@ -1067,7 +1069,12 @@ end;
 
 function TfpgTreeview.GetNodeHeight: integer;
 begin
-  Result := FFont.GetHeight + 2;
+  Result := FFont.GetHeight + 6;
+end;
+
+function TfpgTreeView.GetNodeRowHeight: Integer;
+begin
+  Result := GetNodeHeight;
 end;
 
 function TfpgTreeview.GetNodeWidth(ANode: TfpgTreeNode): integer;
@@ -1202,7 +1209,7 @@ begin
 
   Result := nil;
   i := 0;
-  lTop := y - col - 1 + FYOffset;
+  lTop := y - col - 2 + FYOffset;
   lLeft := x + FXOffset;
   cancel := False;
   last := RootNode;
@@ -1265,6 +1272,7 @@ begin
     end;
     n := NextNode(n);
   until n = nil;
+  ResetScrollbar;
   Repaint;
 end;
 
@@ -1280,6 +1288,7 @@ begin
     end;
     n := NextNode(n);
   until n = nil;
+  ResetScrollbar;
   Repaint;
 end;
 
@@ -1314,6 +1323,10 @@ procedure TfpgTreeview.UpdateScrollbars;
 var
   VBarWasVisible, HBarWasVisible: Boolean;
   OldVPos, OldHPos: Integer;
+  totalContentHeight: integer;
+  totalContentWidth: integer;
+  visH: integer;
+  visW: integer;
 begin
   // Save current visibility state and positions
   VBarWasVisible := FVScrollbar.Visible;
@@ -1321,19 +1334,28 @@ begin
   OldVPos := FVScrollbar.Position;
   OldHPos := FHScrollbar.Position;
 
-  FVScrollbar.Visible := VisibleHeight < (GetNodeHeightSum * GetNodeHeight);
+  totalContentHeight := GetNodeHeightSum * GetNodeHeight;
+  totalContentWidth  := MaxNodeWidth;
+  visH := VisibleHeight;
+  visW := VisibleWidth;
+
+  FVScrollbar.Visible := visH < totalContentHeight;
   FVScrollbar.Min := 0;
-  FVScrollbar.Max := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight;
-  FVScrollbar.PageSize := (VisibleHeight div 4) * 3;  // three quarters of the height
-  FVScrollbar.ScrollStep := GetNodeHeight;  // up/down buttons move the height of the font
+  FVScrollbar.Max := totalContentHeight - visH;
+  FVScrollbar.PageSize := visH;  // one full page per page-scroll operation
+  FVScrollbar.ScrollStep := GetNodeHeight;  // up/down buttons move one row
+  // Set proportional thumb size so the thumb reflects what fraction of content is visible
+  if totalContentHeight > 0 then
+    FVScrollbar.SliderSize := visH / totalContentHeight
+  else
+    FVScrollbar.SliderSize := 1.0;
 
   if FVScrollbar.Visible then
   begin
     // Sync scrollbar position with internal offset
     FVScrollbar.Position := FYOffset;
-    // Only repaint if position actually changed
-    if FVScrollbar.Position <> OldVPos then
-      FVScrollbar.RepaintSlider;
+    // Always repaint: position or slider size may have changed (e.g. node expanded)
+    FVScrollbar.RepaintSlider;
   end
   else
   begin
@@ -1345,17 +1367,21 @@ begin
   end;
 
   FHScrollbar.Min := 0;
-  FHScrollbar.Max := MaxNodeWidth - VisibleWidth;
-  FHScrollbar.PageSize := (VisibleWidth div 4) * 3;  // three quarters of the width
-  FHScrollbar.Visible := MaxNodeWidth > VisibleWidth;
+  FHScrollbar.Max := totalContentWidth - visW;
+  FHScrollbar.PageSize := visW;  // one full page per page-scroll operation
+  FHScrollbar.Visible := totalContentWidth > visW;
+  // Set proportional thumb size so the thumb reflects what fraction of content is visible
+  if totalContentWidth > 0 then
+    FHScrollbar.SliderSize := visW / totalContentWidth
+  else
+    FHScrollbar.SliderSize := 1.0;
 
   if FHScrollbar.Visible then
   begin
     // Sync scrollbar position with internal offset
     FHScrollbar.Position := FXOffset;
-    // Only repaint if position actually changed
-    if FHScrollbar.Position <> OldHPos then
-      FHScrollbar.RepaintSlider;
+    // Always repaint: position or slider size may have changed
+    FHScrollbar.RepaintSlider;
   end
   else
   begin
@@ -1371,19 +1397,19 @@ procedure TfpgTreeview.ResetScrollbar;
 begin
   // Size the scrollbars FIRST so UpdateScrollBars can read their ActualWidth/ActualHeight
   // Use the scrollbar's Width/Height (preferred size) which respects DPI scaling
-  FVScrollbar.Left := ActualWidth - FVScrollbar.Width - 1;
-  FVScrollbar.Top := 1;
+  FVScrollbar.Left := ActualWidth - FVScrollbar.Width - 2;
+  FVScrollbar.Top := 2;
   if FHScrollbar.Visible then
-    FVScrollbar.Height := ActualHeight - 2 - FHScrollbar.Height
+    FVScrollbar.Height := ActualHeight - 4 - FHScrollbar.Height
   else
-    FVScrollbar.Height := ActualHeight - 2;
+    FVScrollbar.Height := ActualHeight - 4;
 
-  FHScrollbar.Left := 1;
-  FHScrollbar.Top := ActualHeight - FHScrollbar.Height - 1;
+  FHScrollbar.Left := 2;
+  FHScrollbar.Top := ActualHeight - FHScrollbar.Height - 2;
   if FVScrollbar.Visible then
-    FHScrollbar.Width := ActualWidth - 2 - FVScrollbar.Width
+    FHScrollbar.Width := ActualWidth - 4 - FVScrollbar.Width
   else
-    FHScrollbar.Width := ActualWidth - 2;
+    FHScrollbar.Width := ActualWidth - 4;
 
   // Now call UpdateScrollBars which can read the correct ActualWidth/ActualHeight
   UpdateScrollBars;
@@ -1448,7 +1474,7 @@ begin
       col := FColumnHeight
     else
       col := 0;
-    y := y - col - 1 + FYOffset;
+    y := y - col - 2 + FYOffset;
     i := 0;
     x := x + FXOffset;
     cancel := False;
@@ -1542,8 +1568,18 @@ begin
 end;
 
 procedure TfpgTreeView.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  node: TfpgTreeNode;
 begin
   inherited HandleRMouseUp(x, y, shiftstate);
+  { Select the node under the mouse — standard behaviour in GTK, Qt, Win32 }
+  node := GetNodeAt(x, y);
+  if (node <> nil) and (node <> Selection) then
+  begin
+    Selection := node;
+    RePaint;
+    DoChange;
+  end;
   if Assigned(PopupMenu) then
     PopupMenu.ShowAt(self, x, y);
 end;
@@ -1592,6 +1628,34 @@ var
   y: integer;
   AImageItem: TfpgImageItem;
   AVisibleHeight: integer;
+
+  // Draw the expand/collapse [+]/[-] box for a node, centred on boxCenterY.
+  // Fills the box interior first so any tree lines already drawn behind it
+  // are covered before the outline and symbol are rendered on top.
+  procedure DrawExpandBox(boxCenterY: integer; aNode: TfpgTreeNode);
+  var
+    bx: integer;
+  begin
+    bx := w - FXOffset - GetColumnWidth(i1) div 2 - 3;
+    // Fill interior with widget background to erase any lines drawn behind
+    Canvas.Color := BackgroundColor;
+    Canvas.FillRectangle(bx + 1, boxCenterY - 3, 7, 7);
+    // Draw the box outline (always solid)
+    Canvas.SetColor(FTreeLineColor);
+    Canvas.SetLineStyle(1, lsSolid);
+    Canvas.DrawRectangle(bx, boxCenterY - 4, 9, 9);
+    // Draw + or -, centred inside the box
+    Canvas.SetColor(clText1);
+    if aNode.Collapsed then
+    begin
+      Canvas.DrawLine(bx + 1, boxCenterY, bx + 7, boxCenterY);          // horizontal bar
+      Canvas.DrawLine(bx + 4, boxCenterY - 2, bx + 4, boxCenterY + 2);  // vertical bar
+    end
+    else
+      Canvas.DrawLine(bx + 1, boxCenterY, bx + 7, boxCenterY);           // horizontal bar only
+    Canvas.SetLineStyle(1, FTreeLineStyle);
+  end;
+
 begin
   if csUpdating in ComponentState then
     Exit;
@@ -1613,12 +1677,7 @@ begin
     Exit;
   end;
 
-  if FFocused then
-    Canvas.SetColor(clWidgetFrame)
-  else
-    Canvas.SetColor(clInactiveWgFrame);
-  r.SetRect(0, 0, ActualWidth, ActualHeight);
-  Canvas.DrawRectangle(r); // border
+  fpgStyle.DrawControlFrame(Canvas, 0, 0, ActualWidth, ActualHeight);
 
   i1 := 0;
   PreCalcColumnLeft;
@@ -1653,12 +1712,12 @@ begin
   // Calculate the client area used for nodes and lines
   if ShowColumns then
   begin
-    r.SetRect(1, 1 + FColumnHeight, VisibleWidth, VisibleHeight);
+    r.SetRect(2, 2 + FColumnHeight, VisibleWidth, VisibleHeight);
     col := FColumnHeight;
   end
   else
   begin
-    r.SetRect(1, 1, VisibleWidth, VisibleHeight);
+    r.SetRect(2, 2, VisibleWidth, VisibleHeight);
     col := 0;
   end;
   Canvas.ClearClipRect;
@@ -1731,7 +1790,7 @@ begin
         Canvas.FillRectangle(w + imgx - FXOffset, ACenterPos - (GetNodeHeight div 2), GetNodeWidth(h) - imgx, GetNodeHeight);
       end;
 
-      Canvas.DrawString(w + imgx - FXOffset + 2 { small spacing }, ACenterPos - (GetNodeHeight div 2), h.text);
+      Canvas.DrawString(w + imgx - FXOffset + 2 { small spacing }, ACenterPos - ((FFont.GetAscent + FFont.GetDescent) div 2), h.text);
 
       Canvas.SetTextColor(h.ParentTextColor);
       Canvas.SetLineStyle(1, FTreeLineStyle);
@@ -1749,31 +1808,13 @@ begin
         end;
 
         // subnode rectangle around the "+" or "-"
-        Canvas.SetColor(FTreeLineColor);
-        Canvas.SetLineStyle(1, lsSolid);  // rectangle is always solid line style
-        Canvas.DrawRectangle(w - FXOffset - GetColumnWidth(i1) div 2 - 3, ACenterPos - 3, 9, 9);
-
-        Canvas.SetColor(clText1);
-
-        if h.Collapsed {or h.HasChildren} then
-        begin
-          // draw a "+"
-          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 - 1, ACenterPos + 1, w - FXOffset - GetColumnWidth(i1) div 2 + 4, ACenterPos + 1);
-          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 1, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos + 4);
-        end
-        else
-        begin
-          // draw a "-"
-          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 - 1, ACenterPos + 1, w - FXOffset - GetColumnWidth(i1) div 2 + 4, ACenterPos + 1);
-        end;
-
-        Canvas.SetLineStyle(1, FTreeLineStyle);
+        DrawExpandBox(ACenterPos, h);
       end
       else
       begin
         // short horizontal line for each node
         Canvas.SetColor(FTreeLineColor);
-        Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1,  ACenterPos + 1, w - FXOffset - 1,  ACenterPos + 1);
+        Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1,  ACenterPos, w - FXOffset - 1,  ACenterPos);
       end;
 
       Canvas.SetColor(FTreeLineColor);
@@ -1788,6 +1829,8 @@ begin
             Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 4, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - (SpaceToVisibleNext(h.prev) * GetNodeHeight) + 5)
           else
             Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - (SpaceToVisibleNext(h.prev) * GetNodeHeight) + 5);
+          // connector line passed through h.prev's box — redraw it on top
+          DrawExpandBox(ACenterPos - (SpaceToVisibleNext(h.prev) * GetNodeHeight), h.prev);
         end
         else
         begin

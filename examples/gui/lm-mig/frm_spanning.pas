@@ -42,7 +42,7 @@ begin
 
   // Create MigLayout with 3 columns
   mig := TfpgMigLayoutManager.Create;
-  mig.LC.SetWrapAfter(3);  // 3 columns
+  mig.LC.WrapAfter(3);  // 3 columns
   if FDebug then
     mig.LC.Debug;
   LayoutManager := mig;

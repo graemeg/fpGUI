@@ -24,6 +24,7 @@
 // 18.02.2006-Milano: Complete unit port
 // 17.02.2006-Milano: Unit port establishment
 //
+{$IFDEF WINDOWS }
 { agg_font_win32_tt.pas }
 unit
  agg_font_win32_tt ;
@@ -1293,7 +1294,7 @@ begin
           result:=true;
 
           exit;
-         
+
          end;
 
        end
@@ -1769,6 +1770,13 @@ INITIALIZATION
  GetGlyphOutlineX:=@GetGlyphOutlineW;
 
 {$ENDIF }
+
+{$ELSE}
+// dummy, so we don't need separate paths in FPC command line
+unit agg_font_win32_tt;
+interface
+implementation
+{$ENDIF WINDOWS }
 
 END.
 

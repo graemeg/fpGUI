@@ -42,6 +42,8 @@ type
     function    ReadDateTime(const ASection, AName: string; ADefault: TDateTime): TDateTime; override;
     function    ReadFloat(const ASection, AName: string; ADefault: double): double; override;
     function    ReadTime(const ASection, AName: string; ADefault: TDateTime): TDateTime; override;
+    function    ReadColor(const ASection, AIdent: string; ADefault: TfpgColor): TfpgColor;
+    procedure   WriteColor(const ASection, AIdent: string; AValue: TfpgColor);
     procedure   ReadFormState(AForm: TfpgForm; AHeight: integer = -1; AWidth: integer = -1; const ASkipDimensions: Boolean = False);
     procedure   WriteFormState(AForm: TfpgForm);
   end;
@@ -154,6 +156,22 @@ begin
     (not FReadOnly) then
     WriteTime(ASection, AName, ADefault);
   Result := inherited ReadTime(ASection, AName, ADefault);
+end;
+
+function TfpgINIFile.ReadColor(const ASection, AIdent: string; ADefault: TfpgColor): TfpgColor;
+var
+  lDefault: string;
+begin
+  lDefault := '$' + IntToHex(LongWord(ADefault), 8);
+  if (not ValueExists(ASection, AIdent)) and (not FReadOnly) then
+    WriteString(ASection, AIdent, lDefault);
+  Result := TfpgColor(StrToInt64Def(ReadString(ASection, AIdent, lDefault), LongWord(ADefault)));
+end;
+
+procedure TfpgINIFile.WriteColor(const ASection, AIdent: string; AValue: TfpgColor);
+begin
+  if not FReadOnly then
+    WriteString(ASection, AIdent, '$' + IntToHex(LongWord(AValue), 8));
 end;
 
 // Do NOT localize

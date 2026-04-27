@@ -77,14 +77,14 @@ type
     procedure   DoEndDraw; override;
     function    GetPixel(X, Y: integer): TfpgColor; override;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
-    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
-    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
+    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
     procedure   DoDrawPolygon(const Points: array of TPoint); override;
     function    GetBufferAllocated: Boolean; override;
     procedure   DoAllocateBuffer; override;
-  end;
-  
-  
+  end deprecated 'Native Cocoa canvas superseded by THybridCanvas (AggCanvas). Will be removed in a future release.';
+
+
   { Window delegate for handling window events }
   TfpgCocoaWindowDelegate = objcclass(NSObject)
   public
@@ -145,9 +145,9 @@ type
     procedure   DoSetWindowTitle(const ATitle: string); override;
     procedure   DoSetMouseCursor; override;
     procedure   DoDNDEnabled(const AValue: boolean); override;
+  public
     property    WinHandle: NSWindow read FWinHandle;
     property    View: TfpgCocoaView read FView;
-  public
     procedure   ActivateWindow; override;
     procedure   CaptureMouse(AForWidget: TfpgWidgetBase); override;
     procedure   ReleaseMouse; override;
@@ -159,18 +159,22 @@ type
   private
     function    ConvertShiftState(modifierFlags: NSUInteger): TShiftState;
     function    ConvertKeyCode(keyCode: cushort): Word;
+    procedure   DoWakeMainThread(Sender: TObject);
   protected
     function    DoGetFontFaceList: TStringList; override;
     procedure   DoWaitWindowMessage(atimeoutms: integer); override;
     function    MessagesPending: boolean; override;
     procedure   DoFlush; override;
+    function    GetMonitorCount: Integer; override;
+    function    GetMonitorInfo(AIndex: Integer): TfpgScreenInfo; override;
   public
     constructor Create(const AParams: string); override;
+    destructor  Destroy; override;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
     function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
-    function    Screen_dpi_x: integer; override;
-    function    Screen_dpi_y: integer; override;
+    function    Screen_dpi_x: integer; override; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
+    function    Screen_dpi_y: integer; override; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
     function    Screen_dpi: integer; override;
   end;
   
@@ -184,6 +188,8 @@ type
   
   
   TfpgCocoaFileList = class(TfpgFileListBase)
+  protected
+    procedure   PopulateSpecialDirs(const aDirectory: TfpgString); override;
   end;
   
   
@@ -224,6 +230,11 @@ implementation
 uses
   baseunix,
   unix,
+  CGImage,
+  CGColorSpace,
+  CGDataProvider,
+  CGGeometry,
+  CGContext,
   fpg_main,
   fpg_widget,
   fpg_popupwindow,
@@ -232,7 +243,18 @@ uses
   fpg_utils,
   fpg_form,         // for modal event support
   fpg_cmdlineparams,
-  fpg_constants;
+  fpg_constants,
+  fpg_wakeChannel,
+  fpg_cocoa_wakechannel;
+
+{ FPC's CocoaAll window level constants are all broken (return -1).
+  Define the correct values from Apple's CGWindowLevel.h. }
+const
+  fpgkCGNormalWindowLevel    = 0;
+  fpgkCGFloatingWindowLevel  = 3;
+  fpgkCGModalPanelWindowLevel = 8;
+  fpgkCGPopUpMenuWindowLevel = 101;
+  fpgkCGScreenSaverWindowLevel = 1000;
 
 { Helper function to convert NSString to String }
 function NSStringToString(ns: NSString): String;
@@ -336,7 +358,14 @@ begin
   if msgp.rect.Width < 0 then msgp.rect.Width := 0;
   if msgp.rect.Height < 0 then msgp.rect.Height := 0;
 
-  fpgPostMessage(nil, FWindow, FPGM_RESIZE, msgp);
+  if (FWindow.FSize.W <> msgp.rect.Width) or (FWindow.FSize.H <> msgp.rect.Height) then
+  begin
+    fpgPostMessage(nil, FWindow, FPGM_RESIZE, msgp);
+    // Update cached size so the next windowDidResize can detect changes.
+    // Without this, restore-from-maximize goes undetected because
+    // FSize still holds the pre-maximize dimensions.
+    FWindow.FSize := fpgSize(msgp.rect.Width, msgp.rect.Height);
+  end;
 end;
 
 procedure TfpgCocoaWindowDelegate.windowDidMove(notification: NSNotification);
@@ -353,7 +382,11 @@ begin
   msgp.rect.Left := Round(frame.origin.x);
   msgp.rect.Top := Round(NSScreen.mainScreen.frame.size.height - frame.origin.y - frame.size.height);
 
-  fpgPostMessage(nil, FWindow, FPGM_MOVE, msgp);
+  if (FWindow.FPosition.X <> msgp.rect.Left) or (FWindow.FPosition.Y <> msgp.rect.Top) then
+  begin
+    fpgPostMessage(nil, FWindow, FPGM_MOVE, msgp);
+    FWindow.FPosition := fpgPoint(msgp.rect.Left, msgp.rect.Top);
+  end;
 end;
 
 procedure TfpgCocoaWindowDelegate.windowDidBecomeKey(notification: NSNotification);
@@ -406,55 +439,67 @@ end;
 
 procedure TfpgCocoaView.drawRect(dirtyRect: NSRect);
 var
-  srcPixel: PLongWord;
-  i, j: Integer;
-  x, y, w, h: Integer;
-  r, g, b, a: Byte;
-  color: NSColor;
+  colorSpace: CGColorSpaceRef;
+  provider: CGDataProviderRef;
+  image: CGImageRef;
+  ctx: CGContextRef;
+  stride: Integer;
+  fullRect: CGRect;
+  nsCtx: NSGraphicsContext;
 begin
-  // This will be called by Cocoa when the view needs to be redrawn
-  // Just draw the buffer - do NOT trigger FPGM_PAINT from here (causes infinite loop)
+  { Called by Cocoa when the view needs to be redrawn.
+    Do NOT trigger FPGM_PAINT from here — that causes an infinite loop.
+    Just blit the pixel buffer that the hybrid canvas has already rendered. }
+  if not Assigned(FImageData) or (FImageWidth < 1) or (FImageHeight < 1) then
+    Exit;
 
-  // Draw the image buffer if we have one
-  if Assigned(FImageData) and (FImageWidth > 0) and (FImageHeight > 0) then
+  nsCtx := NSGraphicsContext.currentContext;
+  if nsCtx = nil then
+    Exit;
+
+  stride := FImageWidth * 4;
+
+  { Create a CGImage from the BGRA pixel buffer.
+    kCGBitmapByteOrder32Little + kCGImageAlphaNoneSkipFirst = BGRA layout
+    which matches the AggPas buffer byte order exactly. }
+  colorSpace := CGColorSpaceCreateDeviceRGB;
+  provider := CGDataProviderCreateWithData(nil, FImageData,
+    stride * FImageHeight, nil);
+  image := CGImageCreate(
+    FImageWidth, FImageHeight,
+    8,               { bits per component }
+    32,              { bits per pixel }
+    stride,          { bytes per row }
+    colorSpace,
+    kCGBitmapByteOrder32Little or kCGImageAlphaNoneSkipFirst,
+    provider,
+    nil,             { no decode array }
+    0,               { shouldInterpolate = false }
+    kCGRenderingIntentDefault
+  );
+
+  if image <> nil then
   begin
-    x := Round(dirtyRect.origin.x);
-    y := Round(dirtyRect.origin.y);
-    w := Round(dirtyRect.size.width);
-    h := Round(dirtyRect.size.height);
-
-    // Clamp to image bounds
-    if x < 0 then x := 0;
-    if y < 0 then y := 0;
-    if x + w > FImageWidth then w := FImageWidth - x;
-    if y + h > FImageHeight then h := FImageHeight - y;
-
-    if (w > 0) and (h > 0) then
+    ctx := CGContext.CGContextRef(nsCtx.CGContext);
+    if ctx <> nil then
     begin
-      srcPixel := PLongWord(FImageData);
-      Inc(srcPixel, x + (y * FImageWidth));
-
-      for j := 0 to h - 1 do
-      begin
-        for i := 0 to w - 1 do
-        begin
-          // Extract RGBA components (assuming BGRA byte order)
-          b := PByte(srcPixel)^;
-          g := PByte(PtrUInt(srcPixel) + 1)^;
-          r := PByte(PtrUInt(srcPixel) + 2)^;
-          a := PByte(PtrUInt(srcPixel) + 3)^;
-
-          color := NSColor.colorWithDeviceRed_green_blue_alpha(
-            r / 255.0, g / 255.0, b / 255.0, a / 255.0);
-          color.set_;
-          NSRectFill(NSMakeRect(x + i, y + j, 1, 1));
-
-          Inc(srcPixel);
-        end;
-        Inc(srcPixel, FImageWidth - w);
-      end;
+      { CGContextDrawImage always draws the image's first row at the
+        bottom of the destination rect. In our isFlipped=True view the
+        y-axis points downward, so without correction the image appears
+        upside-down. Fix by flipping the CG context vertically. }
+      CGContextSaveGState(ctx);
+      CGContextTranslateCTM(ctx, 0, FImageHeight);
+      CGContextScaleCTM(ctx, 1, -1);
+      fullRect := CGRectMake(0, 0, FImageWidth, FImageHeight);
+      CGContextDrawImage(ctx, fullRect, image);
+      CGContextRestoreGState(ctx);
     end;
   end;
+
+  { Release Core Graphics objects }
+  CGImageRelease(image);
+  CGDataProviderRelease(provider);
+  CGColorSpaceRelease(colorSpace);
 end;
 
 function TfpgCocoaView.acceptsFirstResponder: Boolean;
@@ -772,7 +817,7 @@ begin
   if (WindowType = wtPopup) or (WindowType = wtChild) then
   begin
     // Borderless windows need special configuration to be visible on macOS
-    FWinHandle.setLevel(NSPopUpMenuWindowLevel);  // Appear above other windows
+    FWinHandle.setLevel(fpgkCGPopUpMenuWindowLevel);  // Appear above other windows
     FWinHandle.setOpaque(True);  // Make window opaque
     FWinHandle.setHasShadow(True);  // Add shadow for visibility
     FWinHandle.setBackgroundColor(NSColor.windowBackgroundColor);  // Set background
@@ -789,6 +834,15 @@ begin
 
   FWinHandle.setContentView(FView);
   FWinHandle.setAcceptsMouseMovedEvents(True);
+
+  // Apply min/max size constraints for sizeable windows
+  if (WindowType <> wtChild) and (waSizeable in FWindowAttributes) and Assigned(PrimaryWidget) then
+  begin
+    if (PrimaryWidget.MinWidth > 0) or (PrimaryWidget.MinHeight > 0) then
+      FWinHandle.setContentMinSize(NSMakeSize(PrimaryWidget.MinWidth, PrimaryWidget.MinHeight));
+    if (PrimaryWidget.MaxWidth > 0) or (PrimaryWidget.MaxHeight > 0) then
+      FWinHandle.setContentMaxSize(NSMakeSize(PrimaryWidget.MaxWidth, PrimaryWidget.MaxHeight));
+  end;
 
   // Set window title if we have a primary widget with a title
   if Assigned(PrimaryWidget) and (PrimaryWidget is TfpgWindow) then
@@ -856,12 +910,25 @@ begin
     FWinHandle.setStyleMask(styleMask);
   end;
 
+  // Apply min/max size constraints for sizeable windows
+  if (FWindowType <> wtChild) and (waSizeable in ANewAttributes) and Assigned(PrimaryWidget) then
+  begin
+    if (PrimaryWidget.MinWidth > 0) or (PrimaryWidget.MinHeight > 0) then
+      FWinHandle.setContentMinSize(NSMakeSize(PrimaryWidget.MinWidth, PrimaryWidget.MinHeight));
+    if (PrimaryWidget.MaxWidth > 0) or (PrimaryWidget.MaxHeight > 0) then
+      FWinHandle.setContentMaxSize(NSMakeSize(PrimaryWidget.MaxWidth, PrimaryWidget.MaxHeight));
+  end;
+
   // Handle other attributes as needed
   if waFullScreen in ANewAttributes then
   begin
     if not (waFullScreen in AOldAtributes) then
       FWinHandle.toggleFullScreen(nil);
   end;
+
+  { Window positioning (wpScreenCenter, wpOneThirdDown, etc.) is now handled
+    centrally in TfpgBaseForm.DoAllocateWindowHandle before the native window
+    is created. Only waAutoPos remains as a backend concern. }
 end;
 
 procedure TfpgCocoaWindow.DoSetWindowVisible(const AValue: Boolean);
@@ -885,13 +952,12 @@ begin
     end;
     FWinHandle.orderFrontRegardless;
 
-    // Trigger initial paint when window becomes visible
+
+    // Trigger initial paint when window becomes visible.
+    // The paint handler populates the buffer, then the buffer manager
+    // calls setNeedsDisplayInRect + displayIfNeeded to blit it.
     if Assigned(FView) then
     begin
-      // Mark entire view as needing display
-      FView.setNeedsDisplay_(True);
-
-      // Also send a paint message to fpGUI to populate the buffer
       fillchar(msgp, sizeof(msgp), 0);
       msgp.rect.Width := FSize.W;
       msgp.rect.Height := FSize.H;
@@ -994,6 +1060,29 @@ begin
   NSApp.finishLaunching;
 
   FIsInitialized := True;
+
+  { Create and open the wake channel. On Cocoa this posts a dummy
+    NSApplicationDefined event to wake nextEventMatchingMask. }
+  WakeChannel := TfpgCocoaWakeChannel.Create;
+  WakeChannel.Open;
+
+  { Hook the RTL's WakeMainThread so TThread.Queue/Synchronize wake
+    the event loop via our channel }
+  Classes.WakeMainThread := @DoWakeMainThread;
+end;
+
+procedure TfpgCocoaApplication.DoWakeMainThread(Sender: TObject);
+begin
+  Self.WakeMainThread;
+end;
+
+destructor TfpgCocoaApplication.Destroy;
+begin
+  Classes.WakeMainThread := nil;
+  if WakeChannel <> nil then
+    WakeChannel.Close;
+  WakeChannel := nil;
+  inherited Destroy;
 end;
 
 function TfpgCocoaApplication.DoGetFontFaceList: TStringList;
@@ -1118,6 +1207,28 @@ end;
 function TfpgCocoaApplication.Screen_dpi: integer;
 begin
   Result := Screen_dpi_x;
+end;
+
+function TfpgCocoaApplication.GetMonitorCount: Integer;
+begin
+  { TODO: Use NSScreen.screens.count for proper multi-monitor support }
+  Result := 1;
+end;
+
+function TfpgCocoaApplication.GetMonitorInfo(AIndex: Integer): TfpgScreenInfo;
+var
+  screenRect: NSRect;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  { TODO: Enumerate NSScreen.screens for per-monitor info }
+  if AIndex = 0 then
+  begin
+    screenRect := NSScreen.mainScreen.frame;
+    Result.Bounds.SetRect(0, 0, Round(screenRect.size.width), Round(screenRect.size.height));
+    Result.WorkArea := Result.Bounds;
+    Result.Primary  := True;
+    { DPI: macOS uses 72 pt/inch as base. DpiX/DpiY left as 0 → falls back to Screen_dpi }
+  end;
 end;
 
 function TfpgCocoaApplication.ConvertShiftState(modifierFlags: NSUInteger): TShiftState;
@@ -1261,6 +1372,21 @@ begin
   // NSPasteboard is accessed on demand
 end;
 
+{ TfpgCocoaFileList }
+
+procedure TfpgCocoaFileList.PopulateSpecialDirs(const aDirectory: TfpgString);
+var
+  ds: string;
+begin
+  FSpecialDirs.Clear;
+  FSpecialDirs.Add(DirectorySeparator); // add root /
+  ds := aDirectory;
+  if Copy(ds, 1, 1) <> DirectorySeparator then
+    ds := DirectorySeparator + ds;
+  inherited PopulateSpecialDirs(ds);
+end;
+
+
 { TfpgCocoaDrag }
 
 function TfpgCocoaDrag.Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction=daCopy): TfpgDropAction;
@@ -1395,12 +1521,12 @@ begin
   // Stub - not used with AggCanvas
 end;
 
-procedure TfpgCocoaCanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgCocoaCanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
 begin
   // Stub - not used with AggCanvas
 end;
 
-procedure TfpgCocoaCanvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgCocoaCanvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double);
 begin
   // Stub - not used with AggCanvas
 end;

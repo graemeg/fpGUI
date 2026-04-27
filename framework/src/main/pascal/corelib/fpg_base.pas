@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (c) 2006 See the file AUTHORS.txt, included in this
+    Copyright (c) 2006-2026 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -29,13 +29,18 @@ uses
   variants,
   fgl,
   contnrs,
-  fpg_cmdlineparams;
+  fpg_cmdlineparams,
+  fpg_wakeChannel;
 
 type
   TfpgCoord       = integer;     // we might use floating point coordinates in the future...
   TfpgColor       = type longword;    // Always in AARRGGBB (Alpha, Red, Green, Blue) format!!
   TfpgString      = type AnsiString;
-  TfpgChar        = type String[4];
+
+  // 1. Define the specific string length first
+  ShortString4 = String[4];
+  // 2. Now use that named type for your alias
+  TfpgChar        = type ShortString4;
 
   PPoint = ^TPoint;
 
@@ -48,9 +53,9 @@ type
 
   TWindowType = (wtChild, wtWindow, wtModalForm, wtPopup);
 
-  TWindowAttribute = (waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop,
+  TWindowAttribute = (waSizeable, waAutoPos, waStayOnTop,
       waFullScreen, waBorderless, waUnblockableMessages, waX11SkipWMHints,
-      waOneThirdDownPos, waSystemStayOnTop);
+      waSystemStayOnTop);
   TWindowAttributes = set of TWindowAttribute;
 
   TfpgWindowAttributeChanged = procedure(Sender: TObject; ChangedAttributes: TWindowAttributes) of object;
@@ -329,7 +334,30 @@ type
     function    GetCanvasRef: TObject; virtual;
     // IFontEngine end
     function    HandleIsValid: boolean; virtual; abstract;
+    { Render AText into an BGRA pixel buffer — used by the hybrid canvas
+      (AggCanvas). AX, AY define the baseline position (caller has already
+      added GetAscent to the top-of-line Y). Clip rect is in buffer pixels.
+      Non-hybrid-canvas font resources inherit the default no-op. }
+    procedure   DrawTextToBuffer(ABuf: PByte; AStride, ABufW, ABufH,
+                  AX, AY: Integer; const AText: string; AColor: TfpgColor;
+                  AClipX1, AClipY1, AClipX2, AClipY2: Integer); virtual;
     property    FontDesc: string read FFontDesc;
+  end;
+
+
+  { Buffer management abstraction for hybrid canvas architecture.
+    Handles platform-specific pixel buffer allocation, screen flushing
+    (XPutImage on X11, BitBlt on Windows), and cleanup. }
+  IBufferManager = interface
+    ['{D7E8F9A0-1B2C-3D4E-5F6A-7B8C9D0E1F2A}']
+    procedure AttachWindow(AWindow: TfpgWindowBase);
+    procedure DetachWindow;
+    procedure AllocateBuffer(AWidth, AHeight: Integer;
+      out AData: Pointer; out AStride: Integer);
+    function BufferAllocated: Boolean;
+    procedure FreeBuffer;
+    procedure PutBufferToScreen(x, y, w, h: TfpgCoord);
+    procedure RestoreFromBuffer(const ARect: TfpgRect);
   end;
 
 
@@ -437,11 +465,15 @@ type
     procedure   DoEndDraw; virtual; abstract;
     function    GetPixel(X, Y: integer): TfpgColor; virtual; abstract;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); virtual; abstract;
-    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); virtual; abstract;
-    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); virtual; abstract;
+    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); virtual; abstract;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); virtual; abstract;
     procedure   DoDrawPolygon(const Points: array of TPoint); virtual; abstract;
     function    GetBufferAllocated: Boolean; virtual; abstract;
     procedure   DoAllocateBuffer; virtual; abstract;
+    { Blit the off-screen buffer directly to the OS window for the given rect,
+      bypassing the paint message queue. Called by RestoreFromBuffer.
+      The default implementation is a no-op; backends override as needed. }
+    procedure   DoRestoreFromBuffer(const ARect: TfpgRect); virtual;
   public
     constructor Create(awidget: TfpgWidgetBase); virtual;
     destructor  Destroy; override;
@@ -486,6 +518,12 @@ type
     procedure   EndDraw(ARect: TfpgRect); overload;
     procedure   EndDraw; overload;
     procedure   FreeResources;
+    { Blit ARect from the off-screen buffer directly to the OS window without
+      going through the paint message queue. Returns True if the buffer was
+      available and the blit was performed; False if no buffer exists yet (e.g.
+      before the first paint), in which case the caller should fall back to
+      InvalidateRect to trigger a full repaint. }
+    function    RestoreFromBuffer(const ARect: TfpgRect): Boolean;
     property    Color: TfpgColor read FColor write SetColor;
     property    TextColor: TfpgColor read FTextColor write SetTextColor;
     property    Font: TfpgFontResourceBase read FFont;
@@ -587,6 +625,7 @@ type
   public
     // The standard constructor.
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   AfterConstruction; override;
     // general properties and functions
     function    Right: TfpgCoord;
@@ -742,11 +781,22 @@ type
   end;
 
 
+  { Per-screen geometry, work area and DPI information }
+  TfpgScreenInfo = record
+    Bounds   : TfpgRect;   // full monitor bounds (absolute screen coordinates, pixels)
+    WorkArea : TfpgRect;   // usable area minus taskbar/panels
+    Primary  : Boolean;
+    DpiX     : Integer;    // horizontal DPI  (0 = unknown, use application default)
+    DpiY     : Integer;    // vertical DPI
+  end;
+
+
   TfpgApplicationBase = class(TfpgComponent, ICmdLineParams)
   private
     FMainForm: TfpgWidgetBase;
     FTerminated: boolean;
     FCritSect: TCriticalSection;
+    FWakeChannel: IWakeChannel;
     FHelpKey: word;
     FHelpFile: TfpgString;
     FCmdLineParams: ICmdLineParams;
@@ -767,6 +817,8 @@ type
     function    MessagesPending: boolean; virtual; abstract;
     function    GetHelpViewer: TfpgString; virtual;
     procedure   DoFlush; virtual; abstract;
+    function    GetMonitorCount: Integer; virtual; abstract;
+    function    GetMonitorInfo(AIndex: Integer): TfpgScreenInfo; virtual; abstract;
   public { METADATA }
     AppTitle: TfpgString;
     AppVersion: TfpgString;
@@ -789,12 +841,18 @@ type
     function    GetScreenWidth: TfpgCoord; virtual; abstract;
     function    GetScreenHeight: TfpgCoord; virtual; abstract;
     function    GetScreenPixelColor(APos: TPoint): TfpgColor; virtual; abstract;
-    function    Screen_dpi_x: integer; virtual; abstract;
-    function    Screen_dpi_y: integer; virtual; abstract;
+    function    Screen_dpi_x: integer; virtual; abstract; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
+    function    Screen_dpi_y: integer; virtual; abstract; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
     function    Screen_dpi: integer; virtual; abstract;
     procedure   Terminate;
     procedure   Lock;
     procedure   Unlock;
+    { Thread-safe: wakes the main thread's event loop from any thread.
+      Worker threads should call this after enqueuing work for the main
+      thread (via fpgPostMessage, TThread.Queue, etc.) to ensure the
+      event loop processes the work promptly instead of waiting for
+      the next platform event or timer. }
+    procedure   WakeMainThread;
     procedure   InvokeHelp;
     function    ContextHelp(const AHelpContext: THelpContext): Boolean;
     function    KeywordHelp(const AHelpKeyword: string): Boolean;
@@ -810,6 +868,7 @@ type
     property    Terminated: boolean read FTerminated write FTerminated;
     property    OnIdle: TNotifyEvent read FOnIdle write FOnIdle;
     property    selection: TfpgClipboardBase read FSelection;
+    property    WakeChannel: IWakeChannel read FWakeChannel write FWakeChannel;
   end;
 
 
@@ -1067,7 +1126,7 @@ uses
   process,
   dateutils,
   math,
-  synregexpr;
+  regexpr;
 
 
 const
@@ -1552,9 +1611,6 @@ begin
   // convert window cordinates to widget coordinates
   w.WindowToWidget(AX, AY);
 
-  {$IFDEF DNDDEBUG}
-  DebugLn('dragging over widget: ', TargetWidget.ClassName, ' ',AX,':',AY);
-  {$ENDIF}
   msgp.drop.Drop := Self;
   msgp.drop.x:=AX;
   msgp.drop.y:=AY;
@@ -1853,6 +1909,12 @@ begin
   FMinHeight := 2;
   FPreferredSize.SetSize(0, 0);  // 0 = not explicitly set, calculate from content
   FFont := fpgApplication.FontManager.GetFont(FPG_DEFAULT_FONT_DESC);  // Default font for all widgets
+end;
+
+destructor TfpgWidgetBase.Destroy;
+begin
+  FFont := nil;
+  inherited Destroy;
 end;
 
 procedure TfpgWidgetBase.AfterConstruction;
@@ -2978,6 +3040,7 @@ begin
   DoFillTriangle(x1, y1, x2, y2, x3, y3);
 end;
 
+{ aka A Pie shape, not a Chord }
 procedure TfpgCanvasBase.FillArc(x, y, w, h: TfpgCoord; a1, a2: double);
 begin
   DoFillArc(x, y, w, h, a1, a2);
@@ -3223,15 +3286,7 @@ end;
 
 
 procedure TfpgCanvasBase.EndDraw(x, y, w, h: TfpgCoord);
-{$IFDEF CStackDebug}
-var
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgCanvasBase.EndDraw(x,y,w,h) - ' + ClassName);
-  DebugLnFmt('x:%d  y:%d  w:%d  h:%d', [x,y,w,h]);
-  {$ENDIF}
   if FBeginDrawCount > 0 then
   begin
     Dec(FBeginDrawCount);
@@ -3251,27 +3306,25 @@ begin
 end;
 
 procedure TfpgCanvasBase.EndDraw(ARect: TfpgRect);
-{$IFDEF CStackDebug}
-var
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgCanvasBase.EndDraw(rect) - ' + ClassName);
-  {$ENDIF}
   EndDraw(ARect.Left, ARect.Top, ARect.Width, ARect.Height);
 end;
 
 procedure TfpgCanvasBase.EndDraw;
-{$IFDEF CStackDebug}
-var
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgCanvasBase.EndDraw - ' + ClassName);
-  {$ENDIF}
   EndDraw(0, 0, FWidget.ActualWidth, FWidget.ActualHeight);
+end;
+
+procedure TfpgCanvasBase.DoRestoreFromBuffer(const ARect: TfpgRect);
+begin
+  { Default no-op. Backends that support direct buffer blitting override this. }
+end;
+
+function TfpgCanvasBase.RestoreFromBuffer(const ARect: TfpgRect): Boolean;
+begin
+  Result := GetBufferAllocated;
+  if Result then
+    DoRestoreFromBuffer(ARect);
 end;
 
 procedure TfpgCanvasBase.FreeResources;
@@ -3298,6 +3351,14 @@ begin
   // Font manager owns font resources and handles cleanup
   // No need to notify - cache will free fonts when destroyed
   inherited Destroy;
+end;
+
+procedure TfpgFontResourceBase.DrawTextToBuffer(ABuf: PByte;
+  AStride, ABufW, ABufH, AX, AY: Integer; const AText: string;
+  AColor: TfpgColor; AClipX1, AClipY1, AClipX2, AClipY2: Integer);
+begin
+  { Default no-op: native font resources (X11, GDI) do not render to
+    pixel buffers. Override in AggCanvas font resources. }
 end;
 
 
@@ -4128,6 +4189,12 @@ end;
 procedure TfpgApplicationBase.Unlock;
 begin
   FCritSect.Leave;
+end;
+
+procedure TfpgApplicationBase.WakeMainThread;
+begin
+  if FWakeChannel <> nil then
+    FWakeChannel.Signal;
 end;
 
 procedure TfpgApplicationBase.InvokeHelp;

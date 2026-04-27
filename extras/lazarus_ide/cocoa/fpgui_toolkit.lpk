@@ -27,8 +27,8 @@
     </CompilerOptions>
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
-    <Version Major="2" Minor="0" Release="3"/>
-    <Files Count="134">
+    <Version Major="2" Minor="1" Release="0"/>
+    <Files Count="135">
       <Item1>
         <Filename Value="../../../framework/src/main/pascal/corelib/stdimages.inc"/>
         <Type Value="Include"/>
@@ -361,18 +361,6 @@
         <Filename Value="../../../framework/src/main/pascal/gui/fpg_style_motif.pas"/>
         <UnitName Value="fpg_style_motif"/>
       </Item87>
-      <Item88>
-        <Filename Value="../../../framework/src/main/pascal/gui/fpg_style_clearlooks.pas"/>
-        <UnitName Value="fpg_style_clearlooks"/>
-      </Item88>
-      <Item89>
-        <Filename Value="../../../framework/src/main/pascal/gui/fpg_style_bluecurve.pas"/>
-        <UnitName Value="fpg_style_bluecurve"/>
-      </Item89>
-      <Item90>
-        <Filename Value="../../../framework/src/main/pascal/gui/fpg_style_bitmap.pas"/>
-        <UnitName Value="fpg_style_bitmap"/>
-      </Item90>
       <Item91>
         <Filename Value="../../../framework/src/main/pascal/gui/fpg_readonly.pas"/>
         <UnitName Value="fpg_readonly"/>
@@ -435,125 +423,125 @@
         <UnitName Value="fpg_style_plastic"/>
       </Item105>
       <Item106>
-        <Filename Value="../../../framework/src/main/pascal/gui/fpg_style_win8.pas"/>
-        <UnitName Value="fpg_style_win8"/>
+        <Filename Value="../../../framework/src/main/pascal/gui/fpg_style_fusion.pas"/>
+        <UnitName Value="fpg_style_fusion"/>
       </Item106>
       <Item107>
-        <Filename Value="../../../framework/src/main/pascal/gui/fpg_scrollframe.pas"/>
-        <UnitName Value="fpg_scrollframe"/>
+        <Filename Value="../../../framework/src/main/pascal/gui/fpg_style_win8.pas"/>
+        <UnitName Value="fpg_style_win8"/>
       </Item107>
       <Item108>
-        <Filename Value="../../../framework/src/main/pascal/gui/inputintegerdialog.inc"/>
-        <Type Value="Include"/>
+        <Filename Value="../../../framework/src/main/pascal/gui/fpg_scrollframe.pas"/>
+        <UnitName Value="fpg_scrollframe"/>
       </Item108>
       <Item109>
-        <Filename Value="../../../framework/src/main/pascal/gui/fpg_toggle.pas"/>
-        <UnitName Value="fpg_toggle"/>
+        <Filename Value="../../../framework/src/main/pascal/gui/inputintegerdialog.inc"/>
+        <Type Value="Include"/>
       </Item109>
       <Item110>
-        <Filename Value="../../../framework/src/main/pascal/gui/fpg_stringgridbuilder.pas"/>
-        <UnitName Value="fpg_StringGridBuilder"/>
+        <Filename Value="../../../framework/src/main/pascal/gui/fpg_toggle.pas"/>
+        <UnitName Value="fpg_toggle"/>
       </Item110>
       <Item111>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_csvparser.pas"/>
-        <UnitName Value="fpg_CSVParser"/>
+        <Filename Value="../../../framework/src/main/pascal/gui/fpg_stringgridbuilder.pas"/>
+        <UnitName Value="fpg_StringGridBuilder"/>
       </Item111>
       <Item112>
-        <Filename Value="../../../framework/src/main/pascal/gui/fpg_ledmatrix.pas"/>
-        <UnitName Value="fpg_ledmatrix"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_csvparser.pas"/>
+        <UnitName Value="fpg_CSVParser"/>
       </Item112>
       <Item113>
-        <Filename Value="../../../framework/src/main/pascal/gui/fpg_dnd_window.pas"/>
-        <UnitName Value="fpg_dnd_window"/>
+        <Filename Value="../../../framework/src/main/pascal/gui/fpg_ledmatrix.pas"/>
+        <UnitName Value="fpg_ledmatrix"/>
       </Item113>
       <Item114>
-        <Filename Value="../../../framework/src/main/pascal/gui/fpg_hexview.pas"/>
-        <UnitName Value="fpg_hexview"/>
+        <Filename Value="../../../framework/src/main/pascal/gui/fpg_dnd_window.pas"/>
+        <UnitName Value="fpg_dnd_window"/>
       </Item114>
       <Item115>
-        <Filename Value="../../../framework/src/main/pascal/3rdparty/regex/synregexpr.pas"/>
-        <UnitName Value="SynRegExpr"/>
+        <Filename Value="../../../framework/src/main/pascal/gui/fpg_hexview.pas"/>
+        <UnitName Value="fpg_hexview"/>
       </Item115>
-      <Item116>
+      <Item117>
         <Filename Value="../../../framework/src/main/pascal/corelib/fpg_flowlayout.pas"/>
         <UnitName Value="fpg_flowlayout"/>
-      </Item116>
-      <Item117>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_layoutmanager.pas"/>
-        <UnitName Value="fpg_layoutmanager"/>
       </Item117>
       <Item118>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_layouttypes.pas"/>
-        <UnitName Value="fpg_layouttypes"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_layoutmanager.pas"/>
+        <UnitName Value="fpg_layoutmanager"/>
       </Item118>
       <Item119>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_borderlayout.pas"/>
-        <UnitName Value="fpg_borderlayout"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_layouttypes.pas"/>
+        <UnitName Value="fpg_layouttypes"/>
       </Item119>
       <Item120>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_miglayout.pas"/>
-        <UnitName Value="fpg_miglayout"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_borderlayout.pas"/>
+        <UnitName Value="fpg_borderlayout"/>
       </Item120>
       <Item121>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_migconstraint.pas"/>
-        <UnitName Value="fpg_migconstraint"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_miglayout.pas"/>
+        <UnitName Value="fpg_miglayout"/>
       </Item121>
       <Item122>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_hidemode.pas"/>
-        <UnitName Value="fpg_mig_hidemode"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_migconstraint.pas"/>
+        <UnitName Value="fpg_migconstraint"/>
       </Item122>
       <Item123>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_unitvalue.pas"/>
-        <UnitName Value="fpg_mig_unitvalue"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_hidemode.pas"/>
+        <UnitName Value="fpg_mig_hidemode"/>
       </Item123>
       <Item124>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_boundsize.pas"/>
-        <UnitName Value="fpg_mig_boundsize"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_unitvalue.pas"/>
+        <UnitName Value="fpg_mig_unitvalue"/>
       </Item124>
       <Item125>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_platformdefaults.pas"/>
-        <UnitName Value="fpg_mig_platformdefaults"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_boundsize.pas"/>
+        <UnitName Value="fpg_mig_boundsize"/>
       </Item125>
       <Item126>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_dimconstraint.pas"/>
-        <UnitName Value="fpg_mig_dimconstraint"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_platformdefaults.pas"/>
+        <UnitName Value="fpg_mig_platformdefaults"/>
       </Item126>
       <Item127>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_ac.pas"/>
-        <UnitName Value="fpg_mig_ac"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_dimconstraint.pas"/>
+        <UnitName Value="fpg_mig_dimconstraint"/>
       </Item127>
       <Item128>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_lc.pas"/>
-        <UnitName Value="fpg_mig_lc"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_ac.pas"/>
+        <UnitName Value="fpg_mig_ac"/>
       </Item128>
       <Item129>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_cc.pas"/>
-        <UnitName Value="fpg_mig_cc"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_lc.pas"/>
+        <UnitName Value="fpg_mig_lc"/>
       </Item129>
       <Item130>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_constraintparser.pas"/>
-        <UnitName Value="fpg_mig_constraintparser"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_cc.pas"/>
+        <UnitName Value="fpg_mig_cc"/>
       </Item130>
       <Item131>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_resizeconstraint.pas"/>
-        <UnitName Value="fpg_mig_resizeconstraint"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_constraintparser.pas"/>
+        <UnitName Value="fpg_mig_constraintparser"/>
       </Item131>
       <Item132>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_layoutcallback.pas"/>
-        <UnitName Value="fpg_mig_layoutcallback"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_resizeconstraint.pas"/>
+        <UnitName Value="fpg_mig_resizeconstraint"/>
       </Item132>
       <Item133>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_gapprovider.pas"/>
-        <UnitName Value="fpg_mig_gapprovider"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_layoutcallback.pas"/>
+        <UnitName Value="fpg_mig_layoutcallback"/>
       </Item133>
       <Item134>
-        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_linkhandler.pas"/>
-        <UnitName Value="fpg_mig_linkhandler"/>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_gapprovider.pas"/>
+        <UnitName Value="fpg_mig_gapprovider"/>
       </Item134>
       <Item135>
+        <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_linkhandler.pas"/>
+        <UnitName Value="fpg_mig_linkhandler"/>
+      </Item135>
+      <Item136>
         <Filename Value="../../../framework/src/main/pascal/corelib/fpg_mig_layoututil.pas"/>
         <UnitName Value="fpg_mig_layoututil"/>
-      </Item135>
+      </Item136>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib;../../../docs/xml/corelib/x11;../../../docs/xml/corelib/gdi;../../../docs/xml/corelib/cocoa;../../../docs/xml/gui"/>
     <RequiredPkgs Count="2">

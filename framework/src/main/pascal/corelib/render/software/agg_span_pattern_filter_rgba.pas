@@ -35,7 +35,7 @@
 // 23.06.2006-Milano: ptrcomp adjustments
 // 06.03.2006-Milano: Unit port establishment
 //
-{ agg_span_pattern_filter_rgba.pas {untested}
+{ CAUTION: untested }
 unit
  agg_span_pattern_filter_rgba ;
 

@@ -257,6 +257,14 @@ begin
           bit := bit xor 1;
         until pixelcnt >= img.Width;
 
+        // If odd width, we stopped mid-byte (high nibble only).
+        // Advance past that partially consumed byte before padding.
+        if bit = 1 then
+        begin
+          Inc(p);
+          Inc(bcnt);
+        end;
+
         while (bcnt mod 4) <> 0 do
         begin
           Inc(bcnt);
@@ -473,6 +481,14 @@ begin
           Inc(pixelcnt);
           bit := bit xor 1;
         until pixelcnt >= img.Width;
+
+        // If odd width, we stopped mid-byte (high nibble only).
+        // Advance past that partially consumed byte before padding.
+        if bit = 1 then
+        begin
+          Inc(p);
+          Inc(bcnt);
+        end;
 
         while (bcnt mod 4) <> 0 do
         begin

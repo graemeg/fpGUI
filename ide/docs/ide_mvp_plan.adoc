@@ -1,0 +1,941 @@
+= fpGUI IDE — MVP Implementation Plan
+:author: Graeme Geldenhuys
+:date: 2026-03-13
+:toc: left
+:toclevels: 3
+:sectnums:
+
+== Vision
+
+Build an fpGUI-native IDE optimised for Object Pascal development, delivering an IntelliJ-calibre developer experience. The IDE integrates three mature subsystems — fpGUI (UI toolkit + visual designer + documentation viewer), PasBuild (Maven-inspired build tool), and PDR/OPDF (native Object Pascal debugger) — into a cohesive development environment.
+
+The existing Maximus IDE demo (`examples/apps/ide/`) serves as the starting point, providing approximately 40% of the MVP functionality out of the box.
+
+== Guiding Principles
+
+Convention over configuration:: PasBuild already enforces standard directory layouts. The IDE should leverage this — opening a `project.xml` should immediately resolve all source paths, dependencies, and build configurations without manual setup.
+
+Progressive disclosure:: Present essential information (editor, project tree, build output) by default. Advanced panels (debugger, watches, call stack) appear only when a debug session starts.
+
+Keyboard-first workflow:: Every action reachable by mouse must also have a keyboard shortcut. Provide a command palette (Ctrl+Shift+A) for discoverability.
+
+No external dependencies:: The IDE must be self-contained. No requirement for GDB, Make, or external editors. PDR replaces GDB. PasBuild replaces Make/shell scripts.
+
+== What Maximus Already Provides
+
+The current Maximus IDE demo is not a blank slate. It provides:
+
+[cols="1,2",options="header"]
+|===
+| Feature | Implementation State
+
+| Multi-tab editor
+| TfpgPageControl with TfpgTextEdit instances, tab management
+
+| Project management
+| Custom `.project` INI format, project tree view, unit tracking
+
+| Threaded compilation
+| TBuilderThread with real-time output capture to messages grid
+
+| Syntax highlighting
+| Regex-based `OnDrawLine` callback for Object Pascal and patch/diff files
+
+| Code navigation
+| Procedure/method list dialog (TmwPasLex tokeniser)
+
+| Find/Replace
+| Dialog with case-sensitive, whole-word, scope, and direction options
+
+| IDE configuration
+| Compiler paths, editor font, keyboard shortcuts, external tools
+
+| Macro system
+| `${COMPILER}`, `${FPGUIDIR}`, `${TARGET}`, per-project custom macros
+
+| Project templates
+| New project from template (default, fpGUI, fptest, aggpas)
+
+| File change monitoring
+| Background detection of external file modifications
+|===
+
+Notable: Maximus already bundles `mPasLex.pas`, a 35,000-line Pascal tokeniser used for the procedure list but not for syntax highlighting. However, as discussed in <<tokeniser-decision>>, this will be replaced by FPC's `fcl-passrc` package.
+
+[[tokeniser-decision]]
+== Tokeniser Decision: mPasLex vs fcl-passrc
+
+A comparison of the bundled `mPasLex` tokeniser against FPC's `fcl-passrc` package (`/data/devel/fpc-3.3.1/src/packages/fcl-passrc/src/`) was conducted to determine the best foundation for syntax highlighting, code navigation, and long-term maintenance.
+
+=== Feature Comparison
+
+[cols="2,1,1",options="header"]
+|===
+| Capability | mPasLex | fcl-passrc
+
+| Token types
+| ~60
+| 80+
+
+| Modern generics
+| No
+| Full support
+
+| Anonymous functions/closures
+| No
+| Full support
+
+| Management operators
+| No
+| Full support
+
+| Multi-line strings (backtick syntax)
+| No
+| Full support
+
+| Full AST production
+| No
+| Complete (`pastree.pp`, 6,366 lines)
+
+| Symbol resolver / name resolution
+| No
+| Full (`pasresolver.pp`, 30,670 lines)
+
+| In-memory source parsing
+| No
+| Yes — `TStreamResolver` for unsaved editor buffers
+
+| Maintained by
+| Unmaintained (stale)
+| FPC core team (actively updated)
+
+| Total codebase
+| ~35,000 lines
+| ~56,000 lines (scanner + parser + AST + resolver)
+|===
+
+=== Decision
+
+**Use fcl-passrc for all parsing and tokenisation. Remove mPasLex.**
+
+Rationale::
+
+1. **Language coverage** — `mPasLex` has not been kept current with FPC language features. Generics, anonymous functions, management operators, and multi-line strings are all unsupported. `fcl-passrc` tracks the compiler itself and supports all modern Object Pascal features.
+
+2. **Long-term maintenance** — Maintaining a private tokeniser that must be updated for every language change is an ongoing burden with no end. `fcl-passrc` is maintained by the FPC team as part of the compiler infrastructure. Language feature updates arrive automatically with FPC upgrades.
+
+3. **Deeper analysis** — `fcl-passrc` provides not just tokenisation but a full parser, AST, and symbol resolver. This enables proper go-to-definition, find usages with resolved references (no false positives), parameter hints, and semantic highlighting — capabilities that are impossible with a token-only lexer.
+
+4. **In-memory parsing** — `TStreamResolver` allows parsing unsaved editor buffers directly, which is essential for real-time code analysis without requiring the user to save first.
+
+=== Performance Consideration
+
+`fcl-passrc`'s scanner (`TPascalScanner`) is designed for full-file scanning rather than per-line incremental tokenisation. There is no public save/restore state API for resuming from a specific line. However, this is not a practical limitation:
+
+* The scanner is compiler-grade. A 5,000-line file tokenises in single-digit milliseconds.
+* For syntax highlighting, re-tokenising the entire file on each edit is acceptable at this speed.
+* For code navigation, the full parser and resolver run on file save (not per-keystroke), which is well within interactive latency.
+
+== MVP Feature Set
+
+=== Tier 1 — Core Editor Enhancement [✔ completed]
+
+These changes transform the text editor from a capable editor into a viable code editor.
+
+==== 1.1 Undo/Redo System
+
+The single most critical gap. No undo/redo exists in the current editor.
+
+Implementation approach::
+Command pattern with `TUndoManager` maintaining undo and redo stacks. Each text mutation goes through an action object that records the inverse operation. Consecutive character insertions within 1 second are merged into compound actions (typing a word = one undo step).
+
+Action classes required::
+
+* `TInsertTextAction` — covers single characters, paste, and auto-indent insertion
+* `TDeleteTextAction` — covers Backspace, Delete, and selection deletion
+* `TSplitLineAction` — Enter key
+* `TJoinLinesAction` — Backspace at line start, Delete at line end
+* `TIndentBlockAction` — Tab on selection (see 1.2)
+* `TCompoundAction` — groups multiple actions into one undo step
+
+Integration points::
+All text mutation paths in `HandleKeyPress`, `HandleKeyChar`, paste handler, and drag-and-drop handler must route through the undo manager.
+
+Key bindings::
+* Ctrl+Z — Undo
+* Ctrl+Shift+Z — Redo
+* Ctrl+Y — Redo (alternative)
+
+==== 1.2 Block Indent/Unindent
+
+Tab and Shift+Tab with an active selection indent/unindent all selected lines. Configurable indent size (default: 2 spaces, matching current hardcoded tab behaviour).
+
+==== 1.3 Current Line Highlighting
+
+Subtle background colour change on the line containing the caret. Small feature, high usability impact. Configurable colour, defaults to a slightly lighter/darker shade of the editor background.
+
+==== 1.4 Go-to-Line
+
+Ctrl+G opens a small input dialog. Enter a line number to navigate there. The dialog should show "Line N of M" to provide context.
+
+==== 1.5 Bracket Matching
+
+When the caret is on `(`, `)`, `[`, `]`, `{`, `}`, highlight the matching counterpart. Also matches `begin`/`end` pairs (and `case`, `try`, `record`, `class`, `object` as block openers). Uses the `fcl-passrc` token stream to find matches correctly, respecting strings and comments.
+
+NOTE: The original plan proposed using the full AST from `fcl-passrc` (via `TPasImplBeginBlock` nodes) for scope-aware `begin`/`end` matching. This was deferred for three reasons: (1) `TPasParser` requires syntactically valid source and fails on incomplete code being actively edited; (2) `TPasElement.SourceLinenumber` provides line numbers but no column positions, making it impossible to pinpoint keywords on a line; (3) a full parse on every keystroke is too expensive. The token-stream approach handles nesting correctly for the vast majority of cases.
+
+==== 1.6 Editor Tab Improvements
+
+* Close button on each tab (fpGUI's TfpgPageControl already supports this)
+* Middle-click to close tab
+* Tab context menu: Close, Close Others, Close All, Copy Path
+* Modified indicator (asterisk or dot) in tab title
+* Ctrl+Tab / Ctrl+Shift+Tab to cycle tabs
+
+=== Tier 2 — Token-Based Syntax Highlighting [✔ completed]
+
+Replace the regex-based `OnDrawLine` highlighting with a token-based system built on FPC's `fcl-passrc` scanner (`TPascalScanner`). See <<tokeniser-decision>> for the rationale behind this choice over the bundled `mPasLex`.
+
+==== 2.1 Scanner Integration Layer
+
+Create a `TEditorHighlighter` adapter that wraps `TPascalScanner` from `pscanner.pp` and produces an array of styled tokens per line.
+
+Token record::
+
+* `TokenType` — maps from `TPascalScanner.CurToken` (TToken enum with 80+ types) to a simplified category: keyword, identifier, string, number, comment, directive, symbol, whitespace
+* `StartCol`, `EndCol` — column offsets within the line, derived from `CurTokenPos`
+* `StyleIndex` — maps to a colour/font-style entry in the theme
+
+The adapter feeds the editor's current text content to the scanner via `TStreamResolver` (supporting unsaved buffers). On each full scan, it builds a flat array of tokens indexed by line number for O(1) lookup during rendering.
+
+==== 2.2 Full-File Tokenisation
+
+On each text edit, re-tokenise the entire file. `TPascalScanner` is compiler-grade and handles 5,000-line files in single-digit milliseconds, so full re-scanning is practical. The token array is rebuilt in a single pass and replaces the previous cache atomically.
+
+This approach is simpler than incremental tokenisation and avoids the complexity of state save/restore across line boundaries. If profiling reveals performance issues with very large files (10,000+ lines), incremental scanning from the edit point can be added as an optimisation.
+
+==== 2.3 Theme System
+
+Define a `TEditorTheme` record containing colour and style mappings for each token type. Ship with two built-in themes:
+
+* Default (light background, IntelliJ-inspired colours)
+* Dark (dark background, Darcula-inspired colours)
+* Solarized (dark). https://ethanschoonover.com/solarized/
+* Solarized (light)
+
+Theme is a data structure, not a class hierarchy. Themes are loadable from a simple INI or JSON file. I need to decide what file format is best.
+Files will be stored in ide/src/main/resources/editor-themes/ - that way PasBuil
+can pick them up and process them for source or binary archives too. Maximus (ide) will find them relative to the binary in "editor-themes/" directory.
+
+==== 2.4 Semantic Highlighting Extensions
+
+Because `fcl-passrc` provides a full parser and symbol resolver (`TPasResolver`), semantic highlighting becomes achievable rather than aspirational. Beyond lexical tokens, the highlighter can distinguish:
+
+* Local variables vs parameters vs fields — `TPasResolver` resolves every identifier to its declaration, which carries its `TPasMemberVisibility` and element kind
+* Deprecated identifiers (strikethrough style) — `TPasMemberHint` includes `hDeprecated`
+* TODO/FIXME in comments (bold or distinct colour) — via the scanner's `OnComment` callback
+* Type names vs variable names vs procedure names — resolved from the AST node kind
+
+Semantic highlighting runs on file save (not per-keystroke) using the resolver. The lexical highlighter provides instant feedback; the semantic pass overlays richer styling when analysis completes.
+
+=== Tier 3 — PasBuild Integration [✔ completed]
+
+Replace the custom `.project` format with native PasBuild `project.xml` support. This is the single most impactful change for project management workflow.
+
+==== 3.1 Project Loading
+
+Parse `project.xml` on project open. Extract:
+
+* Project name, version, author
+* Build configuration (main source, output directory, defines, compiler options)
+* Unit search paths (for code navigation)
+* Include paths
+* Profiles (debug, release, custom)
+* Module list (for multi-module projects)
+* Dependencies (external and inter-module)
+* Test configuration (framework, test runner path)
+
+Use PasBuild's `TConfigLoader` directly by adding `pasbuild` units to the IDE's compiler search path, or invoke `pasbuild` as an external process if decoupling is preferred.
+
+==== 3.2 Project Tree
+
+Redesign the project tree to reflect PasBuild structure:
+
+----
+MyProject (1.0.0)
+├── Sources (node hint: src/main/pascal/)
+│   ├── Main.lpr
+│   ├── core/
+│   │   ├── CoreUnit.pas
+│   │   └── Types.pas
+│   └── gui/
+│       └── MainForm.pas
+├── Tests (node hint: src/test/pascal/)
+│   └── TestRunner.pas
+├── Dependencies
+│   ├── math-core (1.2.0)
+│   └── utils-lib (2.0.1)
+└── Build Profiles
+    ├── debug
+    └── release
+----
+
+For multi-module (aggregator) projects, show each module as a top-level node with its own subtree.
+
+==== 3.3 Build Integration
+
+Replace the current `TBuilderThread` direct-FPC-invocation with PasBuild goal execution:
+
+* Build (Ctrl+F9) → `pasbuild compile -p <active-profile>`
+* Rebuild → `pasbuild clean compile -p <active-profile>`
+* Run (F9) → `pasbuild compile -p <active-profile>` then launch executable
+* Test (Ctrl+Shift+F10) → `pasbuild test -p <active-profile>`
+* Clean → `pasbuild clean`
+
+Profile selection dropdown in the toolbar allows switching between debug/release/custom profiles.
+
+Capture PasBuild output in the messages panel. Parse compiler error/warning messages into structured entries (file, line, column, message). Double-click an error to navigate to the source location.
+
+==== 3.4 Multi-Module Support
+
+For aggregator projects:
+
+* Discover all modules via `TModuleDiscoverer`
+* Display module build order in dependency tree view
+* Allow building individual modules (right-click → Build Module)
+* Show per-module build status in reactor-style output
+
+==== 3.5 Dependency Visualisation
+
+`pasbuild dependency-tree` output displayed in a dedicated panel or dialog, showing the module dependency graph. For multi-module projects this is essential for understanding build order.
+
+=== Tier 4 — Code Navigation [Mostly Done]
+
+This is where the IDE moves beyond "editor with build integration" into genuine IDE territory.
+
+*UPDATE*: originally I planned to use fcl-passrc, but after many attempts it did
+      not work out well with partial code. So I implemented our own pascal
+      tokeniser. So the remaining points might need to be adjusted slightly.
+
+NOTE: There are still some improvements coming, that will integrate
+ better with PasBuild module and external dependencies. Hence the
+ "Mostly Done" status. It kind-of works, but occationally gets stuck
+ with nowhere to go.
+
+==== 4.1 Enhanced Procedure/Method List [won't do]
+
+NOTE: I decided not to change anything. I like the existing Procedure List
+      dialog as-is.
+
+Replace the existing modal procedure list dialog with a persistent structure panel, and related nodes with full source positions.
+
+* Show in a persistent side panel (not just a modal dialog)
+* Group by class/unit — natural from AST structure (`TPasClassType` → members)
+* Filter by typing (incremental search)
+* Show parameter signatures — extracted from `TPasArgument` nodes on each procedure
+* Navigate on single-click (not just double-click)
+* Ctrl+F12 shortcut (IntelliJ convention)
+
+==== 4.2 Go to Declaration [done]
+
+Ctrl+Click or Ctrl+B on an identifier navigates to its declaration. Implementation approach:
+
+1. Parse the current unit with `TPasParser` to produce an AST
+2. Run `TPasResolver` to resolve all identifier references to their declarations
+3. Each resolved reference carries the target `TPasElement` with its `SourceFilename` and `SourceLinenumber`
+4. For identifiers declared in other units, use PasBuild's resolved unit paths to locate the source file on disk
+5. Navigate to the declaration's source position
+
+The AST and resolved references are cached per file and rebuilt on save. `TStreamResolver` allows parsing unsaved buffers so the current editor content is always used.
+
+This provides **correct** go-to-declaration — not a lexical guess. The resolver handles overloaded procedures, inherited members, property accessors, and generic specialisations.
+
+NOTE: When resolving identifiers declared in RTL/FCL units, consider pre-filtering known standard library identifiers before attempting full resolution. CodeGraph (https://github.com/colbymchenry/codegraph) uses this approach for Delphi — maintaining a list of ~60 known standard library identifiers that are recognised early in the resolution pipeline, avoiding unnecessary lookups. For FPC, a similar list of RTL/FCL unit names (e.g. `System`, `SysUtils`, `Classes`, `Math`, etc.) could short-circuit resolution and display a "standard library" indicator instead of attempting to locate source files. This keeps the resolver focused on project code and avoids failure when RTL source paths are not configured.
+
+==== 4.3 Find Usages [done]
+
+Ctrl+Alt+F7 on an identifier finds all references. Implementation:
+
+UPDATE: originally I planned to use fcl-passrc, but after many attempts it did
+      not work out well with partial code. So I implemented our own pascal
+      tokeniser. So the remaining points might need to be adjusted slightly.
+
+* Parse all project source files (using PasBuild's source directory) with `TPasParser`
+* Run `TPasResolver` on each file to build resolved references
+* Collect all references that resolve to the same declaration `TPasElement`
+* Display results in a tool window with file, line, and context preview
+* Group by file
+
+Because references are resolved through the AST, this produces **no false positives** — unlike a text-based search, it correctly distinguishes identically named symbols in different scopes. For large projects, parsing can be done incrementally (only re-parse changed files) with results cached.
+
+==== 4.4 File Navigation [done]
+
+* Ctrl+Shift+N — Navigate to file by name (fuzzy matching)
+* Ctrl+N — Navigate to symbol by name (procedure, class, type)
+* Alt+Left / Alt+Right — Navigate back/forward through cursor history
+
+The cursor history stack records (file, line, column) on every navigation jump (go-to-declaration, go-to-line, find-next, etc.).
+
+==== 4.5 Quick Documentation [done]
+
+Ctrl+Q on an identifier shows a tooltip with:
+
+* Declaration signature — extracted from the `TPasElement` AST node
+* Source file and line — from `SourceFilename` and `SourceLinenumber`
+* Doc comment (if present above the declaration) — captured via the scanner's `OnComment` callback during parsing
+
+Uses the same resolved AST as Go to Declaration.
+
+=== Tier 5 — Debugger Integration (PDR/OPDF) - [In Progress]
+
+Integrate the PDR debugger engine directly into the IDE process. The hexagonal architecture of PDR makes this straightforward — the IDE implements the same adapter pattern as the CLI.
+
+==== 5.1 Debugger Adapter
+
+Define `TIDEDebugAdapter` implementing PDR's port interfaces:
+
+* Wire `TDebuggerEngine` from `pdr-core`
+* Wire `TLinuxPtraceAdapter` from `pdr-adapters`
+* Wire `TOPDFReaderAdapter` from `pdr-adapters`
+* Wire appropriate `TArchAdapter` for host platform
+
+The IDE owns the adapter lifecycle. One adapter instance per debug session.
+
+===== Threading Architecture
+
+PDR's `Continue`, `StepLine`, and `StepInto` methods block in `FpWaitPid` until the tracee stops. In the CLI, this is acceptable because the REPL is inherently blocking (with Ctrl+C as an escape hatch). In the IDE, blocking the main thread would freeze the entire UI.
+
+The solution is a dedicated **debugger worker thread** that calls PDR engine methods and posts events back to the main thread:
+
+[source,pascal]
+----
+TDebugWorkerThread = class(TThread)
+private
+  FEngine: TDebuggerEngine;
+  FOnStopped: TThreadMethod;   // Synchronize back to main thread
+protected
+  procedure Execute; override;
+end;
+----
+
+Execution flow::
+
+1. User clicks Continue (F9) → main thread posts a `Continue` request to the worker thread
+2. Worker thread calls `FEngine.Continue` (blocks in `FpWaitPid`)
+3. Tracee hits breakpoint → `FpWaitPid` returns → worker thread calls `Synchronize(FOnStopped)`
+4. Main thread receives event → updates editor highlight, variables panel, call stack
+
+The PDR engine itself requires no changes. `TDebuggerEngine`, `TLinuxPtraceAdapter`, and all port interfaces remain synchronous. The threading boundary lives entirely within `TIDEDebugAdapter`.
+
+Pause/interrupt::
+
+To implement the Pause button (or Ctrl+C equivalent), `TIDEDebugAdapter` calls `FpKill(TracePID, SIGSTOP)` from the main thread. The tracee stops, `FpWaitPid` returns in the worker thread with `SIGSTOP`, and the worker posts the stopped event back. `TLinuxPtraceAdapter` already handles `SIGSTOP` as a user-interrupt signal (returns to caller without re-injecting it).
+
+Process group isolation::
+
+`TLinuxPtraceAdapter.Launch` already places the child process in its own process group via `setpgid(0, 0)`. This prevents any terminal signals from reaching the tracee directly, ensuring all process control flows through the debugger engine.
+
+Signal handling::
+
+PDR's ptrace adapter classifies signals into three categories:
+
+* **SIGTRAP** — breakpoint or single-step completion (always stop)
+* **Stop-worthy** (SIGSEGV, SIGFPE, SIGILL, SIGBUS, SIGABRT) — stop and report to user, deliver on next continue
+* **Benign** (SIGWINCH, SIGCHLD, SIGURG, etc.) — automatically re-injected and not reported to the IDE
+* **SIGSTOP** — treated as user-interrupt, returns control without re-injection
+
+This means the IDE only receives stop events for breakpoints, watchpoints, step completions, exceptions, and serious signals. Benign signals from the OS (e.g. SIGWINCH during window resize) are handled transparently by the adapter and never propagate to the IDE layer.
+
+==== 5.2 Debug Session Lifecycle
+
+* F9 (Debug Run) — Build with debug profile (`-gO` for OPDF emission, `-g -gl` for line info), then launch under debugger
+* Shift+F9 — Run without debugger
+* Ctrl+F2 — Stop debugging (kill process)
+* Debug session state machine: Idle → Building → Starting → Running → Paused → Terminated
+
+==== 5.3 Execution Line Highlight
+
+Navigate to source and highlight the current execution position on each debugger stop event.
+
+* Open the source file in the editor and bring the tab to the front
+* Mark the stopped line with a distinct background colour (yellow/amber — distinct from the caret line highlight)
+* Scroll the editor to centre the execution line in view
+* Highlight is visible even when the editor does not have keyboard focus
+* Clear the highlight on continue, step, or session termination
+
+The highlight colour is part of the editor theme (`ExecutionLine` chrome colour) and overrides the caret line highlight when both fall on the same line.
+
+==== 5.4 Breakpoint Management
+
+* Click gutter to toggle breakpoint (visual indicator: red circle)
+* F5 or Ctrl+F8 — Toggle breakpoint at current line
+* Breakpoint list panel showing all breakpoints with file, line, condition, hit count
+* Conditional breakpoints via right-click on gutter marker (hit count conditions supported by PDR)
+* Breakpoints persist across sessions (saved in project-local `.ide/breakpoints.xml`)
+
+==== 5.5 Execution Control
+
+Toolbar buttons and keyboard shortcuts:
+
+* F7 — Step Into (`StepInto`)
+* F8 — Step Over (`StepOver`)
+* Shift+F8 — Step Out (run until current function returns)
+* F9 — Continue (`Continue`)
+* Pause — Interrupt running process (sends SIGSTOP via `FpKill`)
+* Ctrl+F2 — Stop
+
+All execution commands (Continue, Step Into, Step Over) are dispatched to the debugger worker thread (see 5.1 Threading Architecture). The IDE main thread remains responsive while the tracee is running. The Pause button is the only execution control that acts directly from the main thread — it calls `FpKill(TracePID, SIGSTOP)`, which causes the blocked worker thread to return from `FpWaitPid` and post a stopped event.
+
+==== 5.6 Variables Panel
+
+Display local variables and parameters for the current stack frame. Auto-refreshes on each pause.
+
+* Tree-based display for structured types (records, classes)
+* Expandable nodes for fields, properties, array elements
+* Uses PDR's `GetLocalVariables()` and `EvaluateExpression()` APIs
+* Type and value columns
+* Scope-aware: shows variables from enclosing procedures for nested functions
+
+==== 5.7 Call Stack Panel
+
+Display the call stack when paused. Each frame shows:
+
+* Function/procedure name
+* Source file and line number
+* Address (for frames without debug info)
+
+Double-click a frame to navigate to that source location and switch the Variables panel to show that frame's locals.
+
+==== 5.8 Watches Panel
+
+User-defined expressions evaluated on each pause.
+
+* Add watch via right-click in editor or Watches panel
+* Expression syntax: variable names, field access (`obj.field`), array indexing (`arr[5]`)
+* Out-of-scope watches display `<not in scope>` rather than an error
+* The IDE owns the watch list and calls `EvaluateExpression()` per watch on each pause. Do _not_ use PDR's internal `FDisplayList` mechanism — that is a CLI convenience feature and gives the IDE no control over the watch list lifecycle or persistence.
+* Watch list persisted in `.ide/session.json`
+
+==== 5.9 Evaluate Expression Dialog
+
+Ctrl+Alt+F8: evaluate an arbitrary expression in the current scope. Uses PDR's `EvaluateExpression()`.
+
+* Simple modal dialog: expression input field, result display, Close button
+* Only active when the debugger is in the Paused state
+* Result re-evaluated on each invocation (not live-updated)
+* Implement this before 5.8 — it exercises the full `EvaluateExpression()` pipeline in a controlled, minimal context and validates the adapter wiring before building the Watches panel on top of it
+
+Hover tooltip evaluation (deferred)::
+All major IDEs support evaluating the symbol under the mouse cursor during a paused debug session. This is deferred because it requires non-trivial additional work: mouse-tracking with debounce, extracting the symbol or dot-notation path at the caret position from the token stream, and a floating tooltip widget. Once the dialog form of 5.9 is proven, hover evaluation can be added as a follow-on step reusing the same `EvaluateExpression()` call.
+
+==== 5.10 Exception Handling
+
+Requires changes in *both* the `opdebugger` repo and the IDE.
+
+PDR engine side (`/data/devel/opdebugger/`):
+
+* `HandleExceptionBreakpoint` currently reads the exception class name, message, and raise address from process memory but only writes them to stdout via `WriteLn`. These must instead be returned as structured data so the IDE can consume them.
+* Add a `TExceptionInfo` record (class name, message, raise address, source file, line number) to `pdr_ports.pas`.
+* Expose the last exception info via a new `ICommandHandler` method or via `TDebugStopInfo` — whichever fits the existing stop-reporting model.
+
+IDE side (`ide/`):
+
+* `TDebugWorkerResult` needs a new stop-reason variant (e.g. `dsrException`) and an `ExceptionInfo` field.
+* `DebugStopped` in `ide.form.main.pas` must check for the exception stop reason and display the notification bar with class name and message.
+* Highlight the raise site in the editor (navigate to source file + line).
+* Notification bar offers Continue and Stop actions.
+
+=== Tier 6 — Git Integration
+
+Provide essential Git operations without requiring an external terminal.
+
+==== 6.1 Status Indicators
+
+* Modified files marked in project tree (colour change or icon overlay)
+* Editor gutter markers for changed/added/deleted lines (green, blue, red)
+* Status bar shows current branch name
+
+==== 6.2 Core Operations
+
+Accessible via menu and keyboard shortcuts:
+
+* Ctrl+K — Commit dialog (staged changes, diff preview, commit message)
+* Ctrl+Shift+K — Push
+* Pull / Fetch
+* Branch switching (dropdown in toolbar)
+* View file history (log for current file)
+* Annotate/Blame (gutter display)
+* Diff viewer (side-by-side or unified, leveraging the existing patch syntax highlighter)
+
+Implementation: Shell out to `git` CLI. Parse output. No need for a libgit2 binding — the `git` CLI is stable, well-documented, and universally available.
+
+==== 6.3 Merge Conflict Resolution
+
+When a pull/merge produces conflicts:
+
+* List conflicting files in a panel
+* Open conflict markers in editor with syntax highlighting
+* Three-way merge view is desirable but complex — defer to post-MVP if needed
+* At minimum: navigate between conflict markers with next/previous shortcuts
+
+=== Tier 7 — Test Integration
+
+==== 7.1 Test Discovery
+
+Use PasBuild's `TTestConfig` to locate the test runner and framework type. Scan test source directory for test classes and methods using `fcl-passrc`'s parser — `TPasClassType` nodes inheriting from `TTestCase` identify test classes, and their `TPasProcedure` members starting with `Test` identify individual test methods.
+
+==== 7.2 Test Runner Panel
+
+* Tree view of test suites and individual tests
+* Run all tests (Ctrl+Shift+F10)
+* Run single test (right-click → Run)
+* Green/red indicators for pass/fail
+* Double-click failure to navigate to source
+* Test output in messages panel
+
+==== 7.3 Test-Driven Workflow
+
+* Run tests on build (configurable)
+* Re-run failed tests only
+* Continuous test mode (run tests on save — optional, post-MVP)
+
+== Architecture
+
+=== Application Structure
+
+----
+maximus (IDE executable)
+├── Core
+│   ├── IDE Application (TIDEApplication)
+│   ├── Project Model (TIDEProject wrapping PasBuild config)
+│   ├── Editor Manager (TEditorManager)
+│   ├── Symbol Index (TSymbolIndex)
+│   └── Settings/Preferences (TIDESettings)
+├── Editor
+│   ├── TfpgBaseTextEdit (enhanced with undo, bracket matching)
+│   ├── TUndoManager
+│   ├── TEditorHighlighter (fcl-passrc TPascalScanner adapter)
+│   └── TEditorTheme
+├── Build
+│   ├── TBuildRunner (PasBuild process wrapper)
+│   ├── TCompilerOutputParser
+│   └── TBuildProfileSelector
+├── Debug
+│   ├── TIDEDebugAdapter (PDR integration)
+│   ├── TBreakpointManager
+│   └── TDebugSession
+├── Navigation
+│   ├── TProjectIndex (fcl-passrc AST + resolver cache per file)
+│   ├── TNavigationHistory
+│   ├── TFileNavigator (fuzzy file search)
+│   └── TUsageFinder (resolved reference search)
+├── VCS
+│   ├── TGitAdapter (git CLI wrapper)
+│   ├── TGitStatusTracker
+│   └── TDiffViewer
+├── Test
+│   ├── TTestDiscovery
+│   ├── TTestRunner
+│   └── TTestResultParser
+└── UI
+    ├── Main Form (TIDEMainForm)
+    ├── Panel Manager (dockable panels)
+    ├── Command Palette
+    └── Notification System
+----
+
+=== Key Design Decisions
+
+==== PasBuild Integration: In-Process vs External Process
+
+Two options:
+
+1. **In-process** — Link PasBuild units directly. Full access to `TProjectConfig`, `TModuleRegistry`, etc. Faster, richer integration. Risk: version coupling.
+
+2. **External process** — Invoke `pasbuild` CLI. Parse output. Decoupled. Slower for repeated queries.
+
+Recommendation: **Hybrid approach.** Use PasBuild units in-process for project configuration parsing (read-only). Invoke PasBuild CLI for build execution (compile, test, package). This gives fast project loading while keeping build execution isolated.
+
+==== PDR Integration: In-Process
+
+The debugger must be in-process. PDR's `TDebuggerEngine` uses ptrace, which requires parent-child process relationships. The IDE forks the debuggee via the engine. This is the same architecture as any native debugger IDE.
+
+==== Project Index Architecture (fcl-passrc)
+
+The project index is built on FPC's `fcl-passrc` package, providing a real AST and symbol resolver rather than a hand-rolled lexical symbol table.
+
+Per-file cache::
+
+* On file save (or first open), parse the file with `TPasParser` to produce a `TPasModule` AST
+* Run `TPasResolver` to resolve all identifier references to their declarations
+* Cache the AST and resolved references keyed by filename
+* Use `TStreamResolver` to parse unsaved editor buffers directly
+
+Cross-file resolution::
+
+* The resolver follows `uses` clause imports to locate dependent units
+* PasBuild's resolved unit paths provide the search directories
+* Dependent unit ASTs are parsed on demand and cached
+
+This gives the IDE correct name resolution, overload disambiguation, generic specialisation, and property accessor tracking — without building a custom semantic model. The FPC team maintains the resolver as part of the compiler infrastructure, so it stays current with language changes automatically.
+
+==== Panel Layout
+
+----
++——————————————————————————————————————————————————————+
+| Menu Bar                                             |
++——————————————————————————————————————————————————————+
+| Toolbar                                              |
++——————————————————————————————————————————————————————+
+| Breadcrumb navigator: module > path > unit.pas       |
++————————+————————————————————————————+————————————————+
+|        |                            |                |
+| Project|    Editor Tabs             | (Optional)     |
+| Tree   |    +——————————————+        | Inspector      |
+|        |    | source code  |        | Panel /        |
+| Files  |    |              |        | Unit Structure |
+|        |    |              |        |                |
+|        |    |              |        |                |
++————————+————————————————————————————+————————————————+
+| Messages | Build Output | Debug Console | Tests      |
++——————————————————————————————————————————————————————+
+| Status:     | Ln 42 Col 12 | profile | <branch-name> |
++——————————————————————————————————————————————————————+
+----
+
+Debug panels (Variables, Watches, Call Stack) appear as additional tabs in the bottom panel group or as split panels when a debug session starts.
+
+== Implementation Phases
+
+=== Phase 1: Editor Foundation [✔ completed]
+
+Scope:: Undo/redo, block indent, current line highlight, go-to-line, bracket matching, editor tab improvements.
+
+Rationale:: Every subsequent phase depends on a solid editor. Without undo/redo, the IDE is not usable for real work.
+
+Dependencies:: None — pure editor enhancements to `fpg_textedit.pas`.
+
+=== Phase 2: Token-Based Syntax Highlighting [✔ completed]
+
+Scope:: `fcl-passrc` scanner adapter, full-file tokenisation, theme system, `FormatLine` rewrite, `begin`/`end` matching via AST.
+
+Rationale:: The regex-based highlighter is the second-most-visible limitation. Adopting `fcl-passrc` here also lays the foundation for the full parser/resolver used in Phase 4 code navigation.
+
+Dependencies:: Phase 1 (editor must be stable before changing the rendering pipeline).
+
+=== Phase 3: PasBuild Integration [✔ completed]
+
+Scope:: `project.xml` loading, project tree redesign, build goal execution, profile switching, error navigation, multi-module support.
+
+Rationale:: Project management is a top priority. PasBuild integration replaces the ad-hoc `.project` format with a standardised, well-tested system and immediately enables profile-based builds and dependency management.
+
+Dependencies:: None for core integration. Phases 1-2 should be complete for a good experience.
+
+=== Phase 4: Code Navigation [✔ mostly completed]
+
+Scope:: `fcl-passrc` AST and resolver integration, go-to-declaration, find usages, file/symbol navigation, cursor history, procedure list enhancement, quick documentation.
+
+Rationale:: Code navigation is what separates an IDE from an editor. Using `fcl-passrc`'s full parser and resolver provides correct, scope-aware navigation rather than lexical guesswork.
+
+Dependencies:: Phase 2 (`fcl-passrc` scanner infrastructure) and Phase 3 (PasBuild unit path resolution).
+
+=== Phase 5: Debugger Integration [in progress]
+
+Scope:: PDR adapter, debug session lifecycle, breakpoints, stepping, variables, watches, call stack, evaluate expression, exception handling.
+
+Rationale:: Debugging is a top priority but requires a stable editor and build system first. The user must be able to build with `-gO` (OPDF emission) before debugging is useful.
+
+Dependencies:: Phase 1 (editor for breakpoint gutter), Phase 3 (PasBuild for debug profile builds).
+
+=== Phase 6: Git Integration
+
+Scope:: Status indicators, commit, push/pull, branch switching, file history, gutter change markers.
+
+Rationale:: Git integration removes the need to context-switch to a terminal for routine version control operations.
+
+Dependencies:: Phase 1 (editor for gutter markers).
+
+=== Phase 7: Test Integration
+
+Scope:: Test discovery, test runner panel, pass/fail display, navigation to failures.
+
+Rationale:: Completes the development lifecycle within the IDE.
+
+Dependencies:: Phase 3 (PasBuild test configuration).
+
+=== Phase 8: Spit and Polish
+
+Scope:: Bookmarks (numbered and anonymous), unit breadcrumbs, command palette, and other UX refinements.
+
+Rationale:: These features improve daily workflow quality but are not blocking for any other phase. They can be implemented incrementally once the core IDE is functional.
+
+Dependencies:: Phase 1 (editor gutter for bookmark indicators), Phase 3 (session storage for bookmark persistence).
+
+==== Bookmark Model
+
+The IDE supports two types of bookmarks, matching IntelliJ IDEA and Delphi/Lazarus IDE behaviour:
+
+===== Numbered Bookmarks (0–9)
+
+* **Set**: Ctrl+Shift+0 through Ctrl+Shift+9
+* **Jump**: Ctrl+0 through Ctrl+9
+* **Scope**: Global across the entire project — each number maps to exactly one location (file + line + column). Setting bookmark 3 in file B automatically clears any previous bookmark 3 in file A.
+* **Visual indicator**: The bookmark number is displayed in the editor gutter (e.g. a small `3` badge)
+
+===== Anonymous Bookmarks
+
+* **Toggle**: F11 (or click gutter icon)
+* **Navigate**: F2 / Shift+F2 to cycle through all anonymous bookmarks
+* **Scope**: Unlimited count, spanning all files
+* **Visual indicator**: A generic bookmark icon in the gutter (distinct from numbered bookmarks)
+
+===== Session Storage
+
+Numbered bookmarks are stored as a keyed object where each key is the bookmark number (0–9). Only set bookmarks appear — absent keys mean unset. Each entry records file path, line, and column:
+
+[source,json]
+----
+"numberedBookmarks": {
+  "0": { "path": "src/main/pascal/myapp.main.pas", "line": 10, "col": 1 },
+  "3": { "path": "src/main/pascal/myapp.form.main.pas", "line": 33, "col": 5 }
+}
+----
+
+Anonymous bookmarks are stored as a flat array of locations:
+
+[source,json]
+----
+"anonymousBookmarks": [
+  { "path": "src/main/pascal/myapp.main.pas", "line": 55 },
+  { "path": "src/main/pascal/myapp.form.main.pas", "line": 88 }
+]
+----
+
+Both types use relative paths (relative to the project directory) so bookmarks survive project relocation.
+
+===== Bookmarks Panel
+
+A dedicated Bookmarks panel (in the bottom panel group) lists all bookmarks:
+
+----
+┌─ Bookmarks ─────────────────────────────────────────────────┐
+│ [0] myapp.main.pas:10        — procedure Initialize;        │
+│ [3] myapp.form.main.pas:33   — FButton := TfpgButton.Cre... │
+│ [7] myapp.utils.pas:200      — function ExpandPath(...      │
+│ ────────────────────────────────────────────────────────────│
+│  ○  myapp.main.pas:55        — if Assigned(FProject) then   │
+│  ○  myapp.form.main.pas:88   — grdMessages.RowCount := 0;   │
+└─────────────────────────────────────────────────────────────┘
+----
+
+Numbered bookmarks appear first (sorted by number), followed by anonymous bookmarks (sorted by file then line). Each row shows the file, line number, and a preview of the line content. Double-click or Enter navigates to the location.
+
+==== Breadcrumbs Bar
+
+A horizontal breadcrumbs bar sits below the toolbar (inspired by IntelliJ IDEA's Classic UI). It provides at-a-glance context for the active editor tab and doubles as the active module indicator for multi-module projects.
+
+===== Layout
+
+For a multi-module aggregator project:
+
+----
+fpgui-framework > src/main/pascal > gui > fpg_style_fusion.pas
+----
+
+For a single-module project:
+
+----
+fpgui-ide > src/main/pascal > ide.form.main.pas
+----
+
+The first segment is the project or module name. Subsequent segments reflect the relative path from the module's source directory to the currently open file.
+
+===== Behaviour
+
+* **Updates on tab switch** — the breadcrumbs bar reflects whichever editor tab is active. This implicitly shows the active module without requiring a separate selector.
+* **Clickable segments** — clicking a segment opens a dropdown listing siblings at that level (other directories or files in the same parent). This provides quick lateral navigation without the project tree.
+* **Current method/class** — when the caret is inside a class or method, an additional segment can show the enclosing scope (e.g. `TMainForm > PopulatePasBuildTree`). This requires `fcl-passrc` AST position lookup, so it may be added incrementally.
+* **No editor tab open** — when no file is open, the breadcrumbs bar shows only the project name.
+
+===== Implementation Notes
+
+The breadcrumbs bar is a lightweight `TfpgPanel` containing `TfpgLabel` segments with separator characters. It does not require changes to the editor widget — it reads the active tab's file path and the project backend's module information. For multi-module projects, `FindModuleForFile` determines which module name to display as the first segment.
+
+== Technical Risks and Mitigations
+
+[cols="1,2,2",options="header"]
+|===
+| Risk | Impact | Mitigation
+
+| Undo/redo complexity
+| Every text mutation path must be intercepted. Missing a path means data loss.
+| Comprehensive test suite covering all mutation paths. Run existing editor tests after integration.
+
+| fcl-passrc full-file re-scan cost
+| Re-tokenising the entire file on every edit may become noticeable for very large files (10,000+ lines).
+| Profile with realistic files. If needed, add incremental scanning from the edit point. Most Pascal source files are well under 5,000 lines.
+
+| PasBuild version coupling
+| IDE breaks when PasBuild's `TProjectConfig` changes.
+| Use PasBuild units as a read-only dependency. Pin to a specific PasBuild version. Only update deliberately.
+
+| PDR ptrace limitations
+| ptrace requires parent-child relationship. Cannot attach to arbitrary processes easily.
+| Primary workflow is launch-under-debugger. Attach-to-process is a secondary workflow documented as requiring `ptrace_scope=0` or `CAP_SYS_PTRACE`.
+
+| fcl-passrc resolver performance on large projects
+| Running `TPasResolver` across many files may add latency to go-to-definition and find-usages.
+| Parse and resolve on file save, not per-keystroke. Cache results aggressively. Parse dependent units lazily on first access. Profile with realistic multi-module projects.
+
+| Large file performance
+| Files over 10,000 lines may cause noticeable delay in tokenisation and symbol indexing.
+| Incremental tokenisation limits work per edit. Symbol index is built asynchronously on a background thread. Most Pascal source files are under 5,000 lines.
+|===
+
+== Deferred Features (Post-MVP)
+
+These features are explicitly out of scope for the MVP but should be designed-for where possible (i.e., do not make architectural decisions that preclude them).
+
+* Code folding — Requires token-based lexer (Phase 2), but fold point detection is additional work
+* BiDi text support — Not needed for Object Pascal source editing
+* IME input method support — Not needed for primary user base
+* Multiple cursors / multi-caret editing
+* Column (block) selection mode
+* Code completion / IntelliSense — `fcl-passrc`'s resolver provides the foundation, but completion requires incremental parsing of incomplete/invalid code, which adds significant complexity
+* Refactoring tools (rename, extract method) — `fcl-passrc` provides the AST, but safe refactoring requires whole-project resolution and source rewriting
+* Integrated terminal emulator widget
+* Remote development / SSH
+* Plugin/extension system
+* Visual form designer integration (uidesigner embedded in IDE)
+* DocView integration (help viewer embedded in IDE)
+* Minimap / document overview
+* Three-way merge conflict resolution
+
+== Open Questions
+
+1. **Project file migration**: Should the IDE support both `.project` (legacy) and `project.xml` (PasBuild) formats during a transition period, or cut over immediately to PasBuild only?
+
+2. **PasBuild compilation flags**: PasBuild currently does not emit `-gO` (OPDF debug info) by default. Should the IDE's debug profile automatically add this flag, or should it be configured in `project.xml`?
+
+Answer: I'm leaning towards it being controlled by profiles in the
+project.xml file. Even if you don't use FPC 3.3.1 (with OPDF) support
+ - thus no debugging - it is still useful for editing, navigation and
+ building program. If I forced the -gO option, I basically force
+ everyone to use FPC 3.3.1, which is a unreleased and in-development
+ moving version of FPC. Not a good idea!
+
+3. **IDE settings storage**: Where should IDE-specific settings (window layout, breakpoints, open files, cursor positions) be stored? Options: `~/.config/maximus/`, project-local `.ide/` directory, or both.
+
+Answer: I decided on a hybrid approach. Global IDE settings
+and user preferences are stored in ~/.config/maximus/ and project
+session related information is stored in a .ide/ directory where the
+project.xml file was located.
+
+4. **Project naming**: Should the IDE retain the "Maximus" name, or adopt a new identity for the production release?
+
+5. **Backwards compatibility with Maximus `.project` files**: How many existing `.project` files exist in the wild that would need migration tooling?
+
+Answer: I doubt there are any. I believe I'm probably the only person
+that tried out the ide in the early days. It simply wasn't usable
+for development purposes back then.
+

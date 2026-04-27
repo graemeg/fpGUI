@@ -3,16 +3,19 @@ unit bin2pas;
 interface
 uses SysUtils, classes;
 
-function ConvertImage(const AFileName: string): string;
+{ Converts AFileName to a Pascal const byte-array declaration string.
+  The const name is derived from the filename base, prefixed with APrefix.
+  Defaults to the legacy 'newimg_' prefix when APrefix is empty. }
+function ConvertImage(const AFileName: string; const APrefix: string = 'newimg_'): string;
 
 
 
 implementation
 uses fpg_utils;
 
-function ConvertImage(const AFileName: string): string;
+function ConvertImage(const AFileName: string; const APrefix: string = 'newimg_'): string;
 const
-  Prefix = '     ';
+  Indent = '     ';
   MaxLineLength = 72;
 var
   InStream: TFileStream;
@@ -20,6 +23,7 @@ var
   b: byte;
   Line, ToAdd: String;
   ConstName: string;
+  EffectivePrefix: string;
 
   procedure WriteStr(const St: string);
   begin
@@ -44,16 +48,20 @@ var
 begin
   b := Byte(0);
   result:='';
+  if APrefix = '' then
+    EffectivePrefix := 'newimg_'
+  else
+    EffectivePrefix := APrefix;
   InStream := TFileStream.Create(AFileName, fmOpenRead);
   try
-    ConstName := 'newimg_' + sanitize(ChangeFileExt(fpgExtractFileName(AFileName), ''));
+    ConstName := EffectivePrefix + sanitize(ChangeFileExt(fpgExtractFileName(AFileName), ''));
     WriteStrLn('');
     WriteStrLn('const');
 
     InStream.Seek(0, soFromBeginning);
     Count := InStream.Size;
     WriteStrLn(Format('  %s: array[0..%d] of byte = (',[ConstName, Count-1]));
-    Line := Prefix;
+    Line := Indent;
     for I := 1 to Count do
     begin
       InStream.Read(B, 1);
@@ -64,7 +72,7 @@ begin
       if Length(Line) >= MaxLineLength then
       begin
         WriteStrLn(Line);
-        Line := PreFix;
+        Line := Indent;
       end;
     end; { for }
     WriteStrln(Line+');');

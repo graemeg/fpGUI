@@ -27,7 +27,7 @@
 // 23.06.2006-Milano: ptrcomp adjustments
 // 06.03.2006-Milano: Unit port establishment
 //
-{ agg_span_pattern_filter_gray.pas {untested}
+{ CAUTION: untested }
 unit
  agg_span_pattern_filter_gray ;
 
@@ -88,7 +88,7 @@ type
 
   end;
 
- span_pattern_filter_gray_2x2_ptr = ^span_pattern_filter_gray_2x2; 
+ span_pattern_filter_gray_2x2_ptr = ^span_pattern_filter_gray_2x2;
  span_pattern_filter_gray_2x2 = object(span_image_filter )
    m_wrap_mode_x ,
    m_wrap_mode_y : wrap_mode_ptr;
@@ -107,7 +107,7 @@ type
 
   end;
 
- span_pattern_filter_gray_ptr = ^span_pattern_filter_gray; 
+ span_pattern_filter_gray_ptr = ^span_pattern_filter_gray;
  span_pattern_filter_gray = object(span_image_filter )
    m_wrap_mode_x ,
    m_wrap_mode_y : wrap_mode_ptr;

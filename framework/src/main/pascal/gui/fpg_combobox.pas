@@ -756,8 +756,8 @@ begin
 
   fpgStyle.DrawStaticComboBox(Canvas, r, Enabled, Focused, ReadOnly, FBackgroundColor, FInternalBtnRect, FBtnPressed);
 
-//  Dec(r.Width, FInternalBtnRect.Width);
-//  Canvas.SetClipRect(r);
+  Dec(r.Width, FInternalBtnRect.Width);
+  Canvas.SetClipRect(r);
   Canvas.SetFont(Font);
   if Focused then
     Canvas.SetTextColor(clSelectionText)

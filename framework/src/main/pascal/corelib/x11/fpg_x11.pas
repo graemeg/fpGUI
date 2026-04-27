@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2025 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2026 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -147,9 +147,8 @@ type
     FFontData: PXftFont;
     function    DoGetTextWidthClassic(const txt: string): integer;
     function    DoGetTextWidthWorkaround(const txt: string): integer;
-  protected
-    property    Handle: PXftFont read FFontData;
   public
+    property    Handle: PXftFont read FFontData;
     constructor Create(const afontdesc: string); override;
     destructor  Destroy; override;
     function    HandleIsValid: boolean; override;
@@ -215,17 +214,18 @@ type
     procedure   DoEndDraw; override;
     function    GetPixel(X, Y: integer): TfpgColor; override;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
-    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
-    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
+    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
     procedure   DoDrawPolygon(const Points: array of TPoint); override;
     function    GetBufferAllocated: Boolean; override;
     procedure   DoAllocateBuffer; override;
+    procedure   DoRestoreFromBuffer(const ARect: TfpgRect); override;
     property    DCHandle: TfpgDCHandle read DrawHandle;
   public
     constructor Create(awidget: TfpgWidgetBase); override;
     destructor  Destroy; override;
     procedure   CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase; var ASrcRect: TfpgRect); override;
-  end;
+  end deprecated 'Native X11 canvas superseded by THybridCanvas (AggCanvas). Will be removed in a future release.';
 
 
   TfpgX11Window = class(TfpgWindowBase)
@@ -258,9 +258,9 @@ type
     function    GetWindowState: TfpgWindowState; override;
     procedure   SetWindowState(const AValue: TfpgWindowState); override;
     procedure   SetWindowOpacity(AValue: Single); override;
+  public
     procedure   TriggerSyncCounter;
     property    WinHandle: TfpgWinHandle read FWinHandle;
-  public
     constructor Create(AOwner: TComponent); override;
     procedure   ActivateWindow; override;
     procedure   CaptureMouse(AForWidget: TfpgWidgetBase); override;
@@ -317,6 +317,9 @@ type
     { X11 window grouping }
     FLeaderWindow: TfpgWinHandle;
     FClientLeaderAtom: TAtom;
+    { Cached effective DPI resolved at startup }
+    FEffectiveDPI: integer;
+    function    GetPhysicalDPI: integer;
     procedure   SetDrag(const AValue: TfpgX11Drag);
     function    ConvertShiftState(AState: Cardinal): TShiftState;
     function    KeySymToKeycode(KeySym: TKeySym): Word;
@@ -329,6 +332,7 @@ type
     procedure   HandleDNDposition(ATopLevelWindow: TfpgX11Window; const ASource: TWindow; const x_root: integer; const y_root: integer; const AAction: TAtom; const ATimestamp: x.TTime);
     procedure   HandleDNDdrop(ATopLevelWindow: TfpgX11Window; const ASource: TWindow; const ATimestamp: x.TTime);
     procedure   HandleDNDSelection(const ev: TXEvent);
+    procedure   DoWakeMainThread(Sender: TObject);
     property    Drag: TfpgX11Drag read FDrag write SetDrag;
   protected
     FDisplay: PXDisplay;
@@ -356,14 +360,16 @@ type
     function    MessagesPending: boolean; override;
     function    GetHelpViewer: TfpgString; override;
     procedure   DoFlush; override;
+    function    GetMonitorCount: Integer; override;
+    function    GetMonitorInfo(AIndex: Integer): TfpgScreenInfo; override;
   public
     constructor Create(const AParams: string); override;
     destructor  Destroy; override;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
     function    GetScreenPixelColor(APos: TPoint): TfpgColor; override;
-    function    Screen_dpi_x: integer; override;
-    function    Screen_dpi_y: integer; override;
+    function    Screen_dpi_x: integer; override; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
+    function    Screen_dpi_y: integer; override; deprecated 'Use fpgApplication.Desktop instead [2026-03-03]';
     function    Screen_dpi: integer; override;
     property    Display: PXDisplay read FDisplay; platform;
     property    RootWindow: TfpgWinHandle read FRootWindow; platform;
@@ -486,6 +492,11 @@ type
 
 function fpgColorToX(col: TfpgColor): longword;
 
+{ Accessors for X11 application state — avoids exposing xapplication global }
+function fpgX11Display: PXDisplay;
+function fpgX11Screen: integer;
+function fpgX11DisplayDepth: integer;
+
 
 implementation
 
@@ -504,13 +515,48 @@ uses
   fpg_form,         // for modal event support
   fpg_cmdlineparams,
   fpg_constants,
+  fpg_wakeChannel,
+  fpg_x11_wakechannel,
   cursorfont,
   xatom,            // used for XA_WM_NAME
+  xresource,
   keysym,
-  math;
+  math,
+  dynlibs;
 
 var
   xapplication: TfpgApplication;
+
+{ XRandR 1.5 structs — not in FPC's xrandr.pp which only covers v1.1 }
+type
+  TRROutput15 = culong;
+  PRROutput15 = ^TRROutput15;
+
+  TXRRMonitorInfo = record
+    name      : TAtom;
+    primary   : TBool;
+    automatic : TBool;
+    noutput   : cint;
+    x, y      : cint;
+    width     : cint;      // pixels
+    height    : cint;      // pixels
+    mwidth    : cint;      // physical mm
+    mheight   : cint;      // physical mm
+    outputs   : PRROutput15;
+  end;
+  PXRRMonitorInfo = ^TXRRMonitorInfo;
+
+  TXRRQueryVersionFunc = function(dpy: PXDisplay; major, minor: Pcint): TStatus; cdecl;
+  TXRRGetMonitorsFunc  = function(dpy: PXDisplay; window: TWindow;
+                           get_active: TBool; nmonitors: Pcint): PXRRMonitorInfo; cdecl;
+  TXRRFreeMonitorsProc = procedure(monitors: PXRRMonitorInfo); cdecl;
+
+var
+  xrandrLib       : TLibHandle = 0;
+  xrrQueryVersion : TXRRQueryVersionFunc = nil;
+  xrrGetMonitors  : TXRRGetMonitorsFunc  = nil;
+  xrrFreeMonitors : TXRRFreeMonitorsProc = nil;
+  xrandrAvailable : Boolean = False;
 
 const
   FPG_XDND_VERSION: TAtom = 5; // our supported XDND version
@@ -582,6 +628,21 @@ begin
     XAllocColor(xapplication.display, xapplication.DefaultColorMap, @xc);
     Result := xc.pixel;
   end;
+end;
+
+function fpgX11Display: PXDisplay;
+begin
+  Result := xapplication.Display;
+end;
+
+function fpgX11Screen: integer;
+begin
+  Result := xapplication.DefaultScreen;
+end;
+
+function fpgX11DisplayDepth: integer;
+begin
+  Result := xapplication.DisplayDepth;
 end;
 
 procedure SetXftColor(col: TfpgColor; var colxft: TXftColor);
@@ -804,7 +865,7 @@ end;
 
 procedure HandleAtom(var e: TXSelectionEvent; const Atom: TAtom; Prop: TAtom);
 var
-	clip: TfpgX11Selection;
+  clip: TfpgX11Selection;
 begin
   if Atom = None then
   begin
@@ -1265,6 +1326,28 @@ begin
 end;
 {$ENDIF}
 
+procedure InitXRandR(ADisplay: PXDisplay);
+var
+  major, minor: cint;
+begin
+  xrandrLib := LoadLibrary('libXrandr.so.2');
+  if xrandrLib = 0 then
+    xrandrLib := LoadLibrary('libXrandr.so');
+  if xrandrLib = 0 then
+    Exit;
+  Pointer(xrrQueryVersion) := GetProcAddress(xrandrLib, 'XRRQueryVersion');
+  Pointer(xrrGetMonitors)  := GetProcAddress(xrandrLib, 'XRRGetMonitors');
+  Pointer(xrrFreeMonitors) := GetProcAddress(xrandrLib, 'XRRFreeMonitors');
+  if not (Assigned(xrrQueryVersion) and Assigned(xrrGetMonitors)
+      and Assigned(xrrFreeMonitors)) then
+    Exit;
+  major := 0;
+  minor := 0;
+  xrrQueryVersion(ADisplay, @major, @minor);
+  xrandrAvailable := (major > 1) or ((major = 1) and (minor >= 5));
+end;
+
+
 { TfpgX11Application }
 
 procedure TfpgX11Application.SetDrag(const AValue: TfpgX11Drag);
@@ -1553,6 +1636,88 @@ begin
   FreeMem(pc);
 end;
 
+{  DetectEffectiveDPI
+   Determines the logical DPI using a priority chain inspired by Qt/GTK:
+     1. FPGUI_SCALE_FACTOR env var  - fpGUI-specific override (fractional, e.g. 1.5)
+     2. Xft.dpi X resource          - set by KDE/Gnome desktop scaling settings
+     3. QT_SCALE_FACTOR env var     - fractional scale factor used by Qt apps
+     4. GDK_SCALE env var           - integer scale factor used by GTK apps
+     5. Physical monitor dimensions - fallback (unreliable on some 4K displays)
+   Returns the effective DPI as an integer (e.g. 96, 120, 144, 192). }
+function DetectEffectiveDPI(ADisplay: PDisplay; APhysicalDPI: integer): integer;
+
+  { Parse a floating-point scale factor from a string.
+    Uses Val to avoid locale issues (env vars always use '.' as decimal separator). }
+  function ParseScaleFactor(const S: string; out AValue: Double): Boolean;
+  var
+    Code: Integer;
+  begin
+    Val(S, AValue, Code);
+    Result := (Code = 0) and (AValue > 0);
+  end;
+
+var
+  EnvVal: string;
+  ScaleFactor: Double;
+  RMS: PChar;
+  DB: TXrmDatabase;
+  Value: TXrmValue;
+  StrType: PChar;
+  DPI: Integer;
+begin
+  // 1. FPGUI_SCALE_FACTOR - explicit fpGUI override (fractional, e.g. "1.5")
+  EnvVal := GetEnvironmentVariable('FPGUI_SCALE_FACTOR');
+  if (EnvVal <> '') and ParseScaleFactor(EnvVal, ScaleFactor) then
+  begin
+    Result := Round(96 * ScaleFactor);
+    Exit;
+  end;
+
+  // 2. Xft.dpi from X resource manager (KDE/Gnome desktop scaling)
+  XrmInitialize;
+  RMS := XResourceManagerString(ADisplay);
+  if RMS <> nil then
+  begin
+    DB := XrmGetStringDatabase(RMS);
+    try
+      if XrmGetResource(DB, 'Xft.dpi', 'Xft.Dpi', @StrType, @Value) <> 0 then
+      begin
+        DPI := StrToIntDef(Value.addr, 0);
+        if DPI > 0 then
+        begin
+          Result := DPI;
+          Exit;
+        end;
+      end;
+    finally
+      XrmDestroyDatabase(DB);
+    end;
+  end;
+
+  // 3. QT_SCALE_FACTOR - fractional scale factor (e.g. "1.25")
+  EnvVal := GetEnvironmentVariable('QT_SCALE_FACTOR');
+  if (EnvVal <> '') and ParseScaleFactor(EnvVal, ScaleFactor) then
+  begin
+    Result := Round(96 * ScaleFactor);
+    Exit;
+  end;
+
+  // 4. GDK_SCALE - integer scale factor only (e.g. "2")
+  EnvVal := GetEnvironmentVariable('GDK_SCALE');
+  if EnvVal <> '' then
+  begin
+    DPI := StrToIntDef(EnvVal, 0);
+    if DPI > 0 then
+    begin
+      Result := 96 * DPI;
+      Exit;
+    end;
+  end;
+
+  // 5. Fallback to physical monitor dimensions
+  Result := APhysicalDPI;
+end;
+
 constructor TfpgX11Application.Create(const AParams: string);
 var
   s: string;
@@ -1583,6 +1748,9 @@ begin
   //Writeln('display depth: ',DisplayDepth);
   DefaultColorMap := XDefaultColorMap(FDisplay, DefaultScreen);
 
+  // Detect effective DPI from desktop environment, env vars, or physical display
+  FEffectiveDPI := DetectEffectiveDPI(FDisplay, GetPhysicalDPI);
+
   // Initialize atoms
   xia_clipboard         := XInternAtom(FDisplay, 'CLIPBOARD', TBool(False));
   xia_selection         := XInternAtom(FDisplay, 'PRIMARY', TBool(False));
@@ -1610,12 +1778,33 @@ begin
   FIsInitialized := True;
   xapplication := TfpgApplication(self);
 
+  // Create and open the wake channel (self-pipe) so worker threads
+  // can wake the event loop via WakeMainThread
+  WakeChannel := TfpgX11WakeChannel.Create;
+  WakeChannel.Open;
+
+  // Hook the RTL's WakeMainThread so TThread.Queue/Synchronize wake
+  // the event loop via the self-pipe
+  Classes.WakeMainThread := @DoWakeMainThread;
+
+  // Initialize XRandR for multi-monitor support (dynamic loading, graceful fallback)
+  InitXRandR(FDisplay);
+
   // this needs to happen after the above global registration
   FSelection := TfpgX11Selection.Create;
 end;
 
+procedure TfpgX11Application.DoWakeMainThread(Sender: TObject);
+begin
+  Self.WakeMainThread;
+end;
+
 destructor TfpgX11Application.Destroy;
 begin
+  Classes.WakeMainThread := nil;
+  if WakeChannel <> nil then
+    WakeChannel.Close;
+  WakeChannel := nil;
   FSelection.free;
   netlayer.Free;
   XCloseDisplay(FDisplay);
@@ -1717,6 +1906,8 @@ var
   msgp: TfpgMessageParams;
   rfds: baseunix.TFDSet;
   xfd: integer;
+  wakefd: integer;
+  maxfd: integer;
   KeySym: TKeySym;
   Popup: TfpgWidget;
   needToWait: boolean;
@@ -1799,11 +1990,38 @@ begin
       OnIdle(self);
     fpFD_ZERO(rfds);
     fpFD_SET(xfd, rfds);
-    r := fpSelect(xfd + 1, @rfds, nil, nil, atimeoutms);
-    if r <> 0 then  // We got a X event or the timeout happened
+
+    { Include the wake channel pipe fd in the select set so that
+      worker threads calling WakeMainThread instantly unblock us. }
+    wakefd := -1;
+    maxfd := xfd;
+    if WakeChannel <> nil then
+    begin
+      wakefd := WakeChannel.GetPollFd;
+      if wakefd >= 0 then
+      begin
+        fpFD_SET(wakefd, rfds);
+        if wakefd > maxfd then
+          maxfd := wakefd;
+      end;
+    end;
+
+    r := fpSelect(maxfd + 1, @rfds, nil, nil, atimeoutms);
+
+    { Drain the wake pipe if it was signalled, regardless of whether
+      X events are also pending }
+    if (wakefd >= 0) and (r > 0) and (fpFD_ISSET(wakefd, rfds) <> 0) then
+    begin
+      if WakeChannel <> nil then
+        WakeChannel.Drain;
+    end;
+
+    if (r > 0) and (fpFD_ISSET(xfd, rfds) <> 0) then
       XNextEvent(display, @ev)
+    else if r <= 0 then
+      Exit  // timeout or error — nothing further to do
     else
-      Exit; // nothing further to do here!
+      Exit; // only the wake pipe was signalled, no X event
   end;
 
   // if the event filter returns true then it ate the message
@@ -2015,8 +2233,12 @@ begin
 
     X.Expose:
         begin
+          { Save the window handle before the loop may update ev. }
+          w := FindWindowByHandle(ev.xexpose.window);
           with ev.xexpose do
             msgp.rect.SetRect(x, y, width, height);
+          { Drain all pending Expose events for this window in one pass,
+            merging their rectangles into a single repaint region. }
           while XCheckTypedWindowEvent(display, ev.xexpose.window, X.Expose, @ev) do
           begin
             with ev.xexpose do
@@ -2025,11 +2247,14 @@ begin
               msgp.rect.UnionRect(msgp.rect, rect);
             end;
           end;
-          if ev.xexpose.count = 0 then
+          if Assigned(w) then
           begin
-            w := FindWindowByHandle(ev.xexpose.window);
-            // use invalidate if a FPGM_PAINT message is already queued
-            if Assigned(w) then
+            { Fast path: blit the exposed region from the off-screen buffer
+              directly to the window.  This is correct for the alien-windows
+              model where a single buffer backs the entire top-level window.
+              Fall back to a full repaint only when no buffer exists yet
+              (e.g. before the very first paint). }
+            if not TfpgWidget(w.Owner).Canvas.RestoreFromBuffer(msgp.rect) then
               TfpgWidget(w.Owner).InvalidateRect(msgp.rect);
           end;
         end;
@@ -2237,10 +2462,19 @@ begin
             end;
 
             if (w.FSize.W <> msgp.rect.Width) or (w.FSize.H <> msgp.rect.Height) then
+            begin
               fpgPostMessage(nil, w, FPGM_RESIZE, msgp);
+              // Update cached size so the next ConfigureNotify can detect changes.
+              // Without this, restore-from-maximize goes undetected because
+              // FSize still holds the pre-maximize dimensions.
+              w.FSize := fpgSize(msgp.rect.Width, msgp.rect.Height);
+            end;
 
             if (w.FPosition.X <> msgp.rect.Left) or (w.FPosition.Y <> msgp.rect.Top) then
+            begin
               fpgPostMessage(nil, w, FPGM_MOVE, msgp);
+              w.FPosition := fpgPoint(msgp.rect.Left, msgp.rect.Top);
+            end;
           end;
         end;
 
@@ -2422,40 +2656,91 @@ begin
   end;
 end;
 
-function TfpgX11Application.Screen_dpi_x: integer;
+function TfpgX11Application.GetPhysicalDPI: integer;
 var
   mm: integer;
 begin
-  // 25.4 is millimeters per inch
-  mm := 0;
-  mm := DisplayWidthMM(Display, DefaultScreen);
-  if mm > 0 then
-    Result := Round((GetScreenWidth * 25.4) / mm)
-  else
-    Result := 96; // seems to be a well known default. :-(
-end;
-
-function TfpgX11Application.Screen_dpi_y: integer;
-var
-  mm: integer;
-begin
-  // 25.4 is millimeters per inch
-  mm := 0;
+  // Calculate DPI from physical display dimensions (25.4 mm per inch)
   mm := DisplayHeightMM(Display, DefaultScreen);
   if mm > 0 then
     Result := Round((GetScreenHeight * 25.4) / mm)
   else
-    Result := Screen_dpi_x; // same as width
+    Result := 96;
+end;
+
+function TfpgX11Application.Screen_dpi_x: integer;
+begin
+  Result := FEffectiveDPI;
+end;
+
+function TfpgX11Application.Screen_dpi_y: integer;
+begin
+  Result := FEffectiveDPI;
 end;
 
 function TfpgX11Application.Screen_dpi: integer;
 begin
-  Result := Screen_dpi_y;
+  Result := FEffectiveDPI;
   {$IFDEF GDEBUG}
   writeln('Display width in mm: ', DisplayWidthMM(Display, DefaultScreen));
   writeln('Display height in mm: ', DisplayHeightMM(Display, DefaultScreen));
-  writeln('Display dpi: ', Result);
+  writeln('Effective DPI: ', Result);
   {$ENDIF}
+end;
+
+function TfpgX11Application.GetMonitorCount: Integer;
+var
+  monitors: PXRRMonitorInfo;
+  count: cint;
+begin
+  if xrandrAvailable then
+  begin
+    count := 0;
+    monitors := xrrGetMonitors(FDisplay, FRootWindow, TBool(True), @count);
+    xrrFreeMonitors(monitors);
+    Result := count;
+  end
+  else
+    Result := 1;
+end;
+
+function TfpgX11Application.GetMonitorInfo(AIndex: Integer): TfpgScreenInfo;
+var
+  monitors: PXRRMonitorInfo;
+  count: cint;
+  m: PXRRMonitorInfo;
+  wa: TXWindowAttributes;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  if xrandrAvailable then
+  begin
+    count := 0;
+    monitors := xrrGetMonitors(FDisplay, FRootWindow, TBool(True), @count);
+    try
+      m := monitors;
+      Inc(m, AIndex);
+      Result.Bounds.SetRect(m^.x, m^.y, m^.width, m^.height);
+      Result.WorkArea := Result.Bounds;  // X11/EWMH has no per-monitor work area; full bounds is correct baseline
+      Result.Primary := (m^.primary <> 0);
+      { Physical mm dimensions → DPI. Guard against displays reporting 0mm. }
+      if (m^.mwidth > 0) and (m^.mheight > 0) then
+      begin
+        Result.DpiX := Round(m^.width  / (m^.mwidth  / 25.4));
+        Result.DpiY := Round(m^.height / (m^.mheight / 25.4));
+      end;
+      // DpiX/DpiY = 0 means unknown; TfpgDesktop falls back to Screen_dpi
+    finally
+      xrrFreeMonitors(monitors);
+    end;
+  end
+  else
+  begin
+    { No XRandR: report single monitor from root window attributes }
+    XGetWindowAttributes(FDisplay, FRootWindow, @wa);
+    Result.Bounds.SetRect(0, 0, wa.Width, wa.Height);
+    Result.WorkArea := Result.Bounds;
+    Result.Primary  := True;
+  end;
 end;
 
 { TfpgX11Window }
@@ -2772,6 +3057,17 @@ begin
       hints.flags      := hints.flags or PMinSize;
       hints.min_width  := widget.MinWidth;
       hints.min_height := widget.MinHeight;
+      { Only set max size hints if widget has explicit size constraints }
+      if (widget.MaxWidth > 0) and (widget.MaxWidth < xapplication.ScreenWidth) then
+      begin
+        hints.flags      := hints.flags or PMaxSize;
+        hints.max_width  := widget.MaxWidth;
+      end;
+      if (widget.MaxHeight > 0) and (widget.MaxHeight < xapplication.ScreenHeight) then
+      begin
+        hints.flags      := hints.flags or PMaxSize;
+        hints.max_height := widget.MaxHeight;
+      end;
     end
     else
     begin
@@ -2972,26 +3268,9 @@ begin
   // if the window is mapped then this stuff is irrelevant
   if not (xwsfMapped in FWinFlags) or AForceAll then
   begin
-    // waAutoPos
+    // waAutoPos — let the window manager choose position
     if not (waAutoPos in ANewAttributes) then
       hints.flags := hints.flags or PPosition;
-
-    // waScreenCenterPos;
-    if (waScreenCenterPos in ANewAttributes) then
-    begin
-      hints.flags := hints.flags or PPosition;
-      FPosition.X := (xapplication.ScreenWidth - FSize.W) div 2;
-      FPosition.Y  := (xapplication.ScreenHeight - FSize.H) div 2;
-      DoMoveWindow(FPosition.X, FPosition.Y);
-    end
-    // waOneThirdDownPos
-    else if waOneThirdDownPos in ANewAttributes then
-    begin
-      hints.flags := hints.flags or PPosition;
-      FPosition.X := (xapplication.ScreenWidth - FSize.W) div 2;
-      FPosition.Y  := (xapplication.ScreenHeight - FSize.H) div 3;
-      DoMoveWindow(FPosition.X, FPosition.Y);
-    end;
   end;
 
   // waSizeable;
@@ -3081,9 +3360,9 @@ var
   ChangedAttrs: TWindowAttributes = [];
   Attr: TWindowAttribute;
 begin
-  {waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop,
+  {waSizeable, waAutoPos, waStayOnTop,
       waFullScreen, waBorderless, waUnblockableMessages, waX11SkipWMHints,
-      waOneThirdDownPos, waSystemStayOnTop}
+      waSystemStayOnTop}
 
   {nwsModal, nwsSticky, nwsMaxVert, nwsMaxHorz, nwsShaded, nwsSkipTaskBar,
                      nwsSkipPager, nwsHidden, nwsFullScreen, nwsAbove, nwsBelow, nwsDemandsAttn}
@@ -3361,8 +3640,7 @@ begin
       DoEndDraw;
   end;
 
-  if not FDrawing then
-    AllocateDC;
+  AllocateDC;
 
   FDrawing := True;
 end;
@@ -3371,14 +3649,7 @@ procedure TfpgX11Canvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var
   cgc: TfpgGContext;
   GcValues: TXGcValues;
-{$IFDEF CStackDebug}
-  itf: IInterface;
-{$ENDIF}
 begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TAgg2D.DoPutBufferToScreen - ' + ClassName);
-  DebugLn(Format('x:%d  y:%d  w:%d  h:%d', [x, y, w, h]));
-  {$ENDIF}
   if (DrawHandle = FBufferPixmap) then
   begin
     if (w < 1) or (h < 1) then
@@ -3388,6 +3659,24 @@ begin
     XFreeGc(xapplication.display, cgc);
     TfpgX11Window(FWidget.Window).TriggerSyncCounter;
   end;
+end;
+
+procedure TfpgX11Canvas.DoRestoreFromBuffer(const ARect: TfpgRect);
+var
+  cgc: TfpgGContext;
+  GcValues: TXGcValues;
+begin
+  { Blit directly from the off-screen pixmap to the X window for the exposed
+    rect.  We create a temporary GC so this is safe to call outside of a
+    BeginDraw/EndDraw pair, i.e. from the Expose event handler. }
+  if (ARect.Width < 1) or (ARect.Height < 1) then
+    Exit;
+  cgc := XCreateGc(xapplication.display, FBufferPixmap, 0, @GcValues);
+  XCopyArea(xapplication.Display, FBufferPixmap,
+      TfpgX11Window(FWidget.Window).WinHandle, cgc,
+      ARect.Left, ARect.Top, ARect.Width, ARect.Height,
+      ARect.Left, ARect.Top);
+  XFreeGc(xapplication.display, cgc);
 end;
 
 procedure TfpgX11Canvas.DoEndDraw;
@@ -3431,7 +3720,7 @@ begin
   SetColor(oldColor);
 end;
 
-procedure TfpgX11Canvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgX11Canvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
 begin
   if (w < 1) or (h < 1) then
     Exit;  // nothing to draw
@@ -3439,7 +3728,7 @@ begin
       Trunc(64 * a1), Trunc(64 * a2));
 end;
 
-procedure TfpgX11Canvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgX11Canvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double);
 begin
   XFillArc(xapplication.display, DrawHandle, Fgc, x+FDeltaX, y+FDeltaY, Max(w,0), Max(h,0),
       Trunc(64 * a1), Trunc(64 * a2));
@@ -3472,7 +3761,7 @@ var
   hp: longword;
   bw: longword;
 begin
-  if FCanvasTarget <> Self then
+  if (FCanvasTarget <> nil) and (FCanvasTarget <> Self) then
     Result := TfpgX11Canvas(FCanvasTarget).GetBufferAllocated
   else
   begin
@@ -4565,8 +4854,13 @@ initialization
   xapplication := nil;
 {$IFDEF GDEBUG}
   OldXErrorHandler:=XSetErrorHandler(@fpgXErrorHandler);
+{$ENDIF}
+
 finalization
+{$IFDEF GDEBUG}
   XSetErrorHandler(OldXErrorHandler);
 {$ENDIF}
+  if xrandrLib <> 0 then
+    UnloadLibrary(xrandrLib);
 
 end.

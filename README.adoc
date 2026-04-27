@@ -1,0 +1,224 @@
+= fpGUI - Free Pascal GUI Toolkit
+:toc:
+:toc-placement!:
+:sectnums:
+:source-highlighter: rouge
+:icons: font
+:url-repo: https://github.com/graemeg/fpgui
+:url-fpc: https://www.freepascal.org
+
+fpGUI is a cross-platform GUI toolkit written entirely in Object Pascal using the
+https://www.freepascal.org[Free Pascal Compiler]. It provides a custom-drawn widget
+set that renders consistently across all supported platforms, with no external widget
+toolkit dependencies. All rendering is done through the built-in AggPas hybrid canvas,
+which uses platform APIs (X11, GDI, Cocoa) for window management and input while
+delivering fully platform-independent, pixel-perfect output via software rasterisation.
+
+image:https://img.shields.io/badge/FPC-3.2.2+-blue.svg[FPC Version]
+image:https://img.shields.io/badge/license-LGPL--2.1%20with%20linking%20exception-green.svg[License]
+
+toc::[]
+
+== Features
+
+* **Cross-platform**: Linux (X11), Windows (GDI), macOS (Cocoa), FreeBSD, OpenSolaris
+* **AggPas hybrid canvas**: Platform-independent rendering via 100% Object Pascal software rasteriser
+* **No external dependencies**: No GTK, Qt, or other widget toolkit required
+* **Custom-drawn widgets**: Consistent look and feel across all platforms
+* **Themeable**: Multiple built-in styles including plastic and dark themes
+* **Layout managers**: MigLayout (ported from Java), FlowLayout, and BorderLayout
+* **Fluent constraint API**: LC, AC, and CC classes for concise layout definitions
+* **Rich widget set**: Buttons, edits, grids, treeviews, listviews, menus, tabs, scrollbars, and more
+* **Visual form designer**: UI Designer for rapid form creation
+* **PDF reporting engine**: Built-in report generation with print preview
+* **Drag and drop**: OS-independent DND support between applications and widgets
+* **Unicode support**: Full Unicode text input and rendering
+* **Documentation viewer**: DocView application for viewing INF/IPF help files
+
+
+== Project Structure
+
+[cols="1,3"]
+|===
+| Directory | Description
+
+| `framework/src/main/pascal/` | Core fpGUI framework source
+| `framework/src/test/pascal/` | Unit tests
+| `uidesigner/` | Visual UI Designer application
+| `docview/` | Documentation viewer (INF/IPF file viewer)
+| `examples/` | Example applications and widget demos
+| `extras/` | Third-party contributed components
+|===
+
+
+== Building
+
+=== Prerequisites
+
+* https://www.freepascal.org[Free Pascal Compiler] 3.2.2 or later
+* https://github.com/nickelsworth/pasbuild[PasBuild] build tool (optional but recommended)
+
+==== Linux / FreeBSD
+
+Install the X11 development libraries:
+
+[source,bash]
+----
+sudo apt-get install libx11-dev libxft-dev
+----
+
+==== AggPas Canvas
+
+fpGUI uses the AggPas hybrid canvas on all platforms. Ensure the Liberation Sans font
+is installed on Linux/FreeBSD. On Windows, the canvas uses Arial (included with the OS)
+via the native Win32 TrueType font engine — no external DLL required.
+
+=== Compiling the Framework
+
+Using PasBuild from the project root:
+
+[source,bash]
+----
+# Linux / FreeBSD
+pasbuild compile -m fpgui-framework -p unix
+pasbuild compile -m fpgui-framework -p unix,debug   # with debug symbols
+
+# Windows
+pasbuild compile -m fpgui-framework -p windows
+pasbuild compile -m fpgui-framework -p windows,debug  # with debug symbols
+----
+
+=== Running Tests
+
+[source,bash]
+----
+pasbuild test
+----
+
+=== Compiling Applications
+
+Most applications use `@extrafpc.cfg` files and should be built from their respective
+`src/` directories:
+
+[source,bash]
+----
+cd docview/src
+fpc @extrafpc.cfg docview.lpr
+----
+
+
+== Quick Start
+
+[source,pascal]
+----
+program ContactForm;
+
+{$mode objfpc}{$H+}
+
+uses
+  fpg_base, fpg_main, fpg_form, fpg_label, fpg_edit, fpg_button,
+  fpg_miglayout, fpg_mig_lc, fpg_mig_cc;
+
+type
+  TMainForm = class(TfpgForm)
+  public
+    procedure AfterCreate; override;
+  end;
+
+procedure TMainForm.AfterCreate;
+var
+  mig: TfpgMigLayoutManager;
+  lbl: TfpgLabel;
+  edt: TfpgEdit;
+  btn: TfpgButton;
+begin
+  inherited AfterCreate;
+  WindowTitle := 'Contact Form';
+  Width := 400;
+  Height := 200;
+
+  // Create a 2-column MigLayout grid
+  mig := TfpgMigLayoutManager.Create;
+  mig.LC.SetWrapAfter(2);
+  LayoutManager := mig;
+
+  // Row 1: Name
+  lbl := TfpgLabel.Create(Self);
+  lbl.Text := 'Name:';
+  mig.AddLayoutComponent(lbl, TfpgMigCC.Create());
+
+  edt := TfpgEdit.Create(Self);
+  edt.PreferredSize := fpgSize(200, 24);
+  mig.AddLayoutComponent(edt, TfpgMigCC.Create().GrowX());
+
+  // Row 2: Email
+  lbl := TfpgLabel.Create(Self);
+  lbl.Text := 'Email:';
+  mig.AddLayoutComponent(lbl, TfpgMigCC.Create());
+
+  edt := TfpgEdit.Create(Self);
+  edt.PreferredSize := fpgSize(200, 24);
+  mig.AddLayoutComponent(edt, TfpgMigCC.Create().GrowX());
+
+  // Row 3: Buttons spanning both columns
+  btn := TfpgButton.Create(Self);
+  btn.Text := 'OK';
+  btn.PreferredSize := fpgSize(80, 24);
+  mig.AddLayoutComponent(btn, TfpgMigCC.Create().SpanX.Split(2).Tag('ok'));
+
+  btn := TfpgButton.Create(Self);
+  btn.Text := 'Cancel';
+  btn.PreferredSize := fpgSize(80, 24);
+  mig.AddLayoutComponent(btn, TfpgMigCC.Create().Tag('cancel'));
+end;
+
+procedure MainProc;
+var
+  frm: TMainForm;
+begin
+  fpgApplication.Initialize;
+  frm := TMainForm.Create(nil);
+  try
+    frm.Show;
+    fpgApplication.Run;
+  finally
+    frm.Free;
+  end;
+end;
+
+begin
+  MainProc;
+end.
+----
+
+
+== Licensing
+
+The fpGUI framework is distributed under the **LGPL-2.1 with a static linking exception**
+(Modified LGPL), the same license model used by the Free Pascal RTL and Lazarus LCL.
+This permits use in both open-source and proprietary applications without requiring
+the application source to be published.
+
+See `license.ModifiedLGPL.txt` and `license.LGPL2.txt` for full details.
+
+[cols="1,2"]
+|===
+| Component | License
+
+| Framework (`framework/`) | Modified LGPL
+| UI Designer (`uidesigner/`) | Modified LGPL
+| DocView (`docview/`) | GPLv2
+| Examples (`examples/`) | GPLv2
+| Extras (`extras/`) | Various (see specific directories)
+|===
+
+
+== Contributing
+
+Contributions are welcome. Please submit pull requests against the `develop` branch.
+
+
+== Links
+
+* **Repository**: {url-repo}
+* **Free Pascal Compiler**: {url-fpc}

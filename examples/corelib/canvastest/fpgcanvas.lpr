@@ -17,12 +17,9 @@ type
 
   TMainForm = class(TfpgForm)
   private
-    {@VFD_HEAD_BEGIN: MainForm}
-    {@VFD_HEAD_END: MainForm}
     bmp: TfpgImage;
     dst: TfpgImage;
     procedure   FormPaint(Sender: TObject);
-    procedure   CustomPaintJob;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -32,13 +29,6 @@ type
 { TMainForm }
 
 procedure TMainForm.FormPaint(Sender: TObject);
-begin
-  CustomPaintJob;
-end;
-
-// We can now call all the paint methods from HandlePaint or
-// the OnPaint event.fpgcanvas
-procedure TMainForm.CustomPaintJob;
 var
   r: TfpgRect;
   fnt: TfpgFontResourceBase;
@@ -228,17 +218,14 @@ end;
 
 procedure TMainForm.AfterCreate;
 begin
-  {%region 'Auto-generated GUI code' -fold}
-  {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(357, 214, 500, 400);
+  Left := 357;
+  Top := 214;
+  Width := 500;
+  Height := 400;
   WindowTitle := 'fpGUI Canvas Test';
-  Hint := '';
   WindowPosition := wpOneThirdDown;
   OnPaint := @FormPaint;
-
-  {@VFD_BODY_END: MainForm}
-  {%endregion}
 end;
 
 

@@ -195,8 +195,7 @@ end;
 procedure TfpgRadioButton.HandlePaint;
 var
   r: TfpgRect;
-  img: TfpgImage;
-  ix: integer;
+  cbFlags: TfpgCheckBoxFlags;
   LFlags: TfpgTextFlags;
 begin
   inherited HandlePaint;
@@ -210,19 +209,18 @@ begin
   if r.top < 0 then
     r.top := 0;
 
-  // calculate which image to paint.
+  { Build radio button state flags }
+  cbFlags := [];
+  if FChecked then
+    Include(cbFlags, cbfChecked);
   if Enabled then
-  begin
-    ix := Ord(FChecked);
-    if FIsPressed then
-      Inc(ix, 2);
-  end
-  else
-    ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked);
+    Include(cbFlags, cbfEnabled);
+  if FIsPressed then
+    Include(cbFlags, cbfPressed);
+  if FFocused then
+    Include(cbFlags, cbfHasFocus);
 
-  // paint the radio button
-  img := fpgImages.GetImage('sys.radiobuttons');    // Do NOT localize
-  Canvas.DrawImagePart(r.Left, r.Top, img, ix*FBoxSize, 0, FBoxSize, FBoxSize);
+  fpgStyle.DrawRadioButton(Canvas, r, cbFlags);
 
   r := GetClientRect;
   { max focus rectangle and text boundry }
@@ -411,7 +409,7 @@ begin
   FTextColor  := Parent.TextColor;
   FBackgroundColor := Parent.BackgroundColor;
   FFocusable  := True;
-  FBoxSize    := 12;
+  FBoxSize    := fpgStyle.GetRadioButtonSize;
   FChecked    := False;
   FGroupIndex := 0;
   FIsPressed  := False;

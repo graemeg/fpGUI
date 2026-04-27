@@ -146,13 +146,16 @@ begin
     // Update container MinWidth/MinHeight so the window manager can enforce them.
     // This must happen after DoLayout because the grid needs to be built first
     // before minimum sizes can be calculated accurately.
+    // Only increase MinWidth/MinHeight - never reduce below the developer's explicit constraints.
     minSize := GetMinimumSize(AContainer);
     if (minSize.W > 0) and (minSize.H > 0) then
     begin
-      if (AContainer.MinWidth <> minSize.W) or (AContainer.MinHeight <> minSize.H) then
+      if (minSize.W > AContainer.MinWidth) or (minSize.H > AContainer.MinHeight) then
       begin
-        AContainer.MinWidth := minSize.W;
-        AContainer.MinHeight := minSize.H;
+        if minSize.W > AContainer.MinWidth then
+          AContainer.MinWidth := minSize.W;
+        if minSize.H > AContainer.MinHeight then
+          AContainer.MinHeight := minSize.H;
         AContainer.UpdatePosition;
       end;
     end;
@@ -201,15 +204,18 @@ begin
 
   // Update container's MinWidth/MinHeight when layout changes
   // This ensures the minimum size constraints are updated as components are added/removed
-  // Only do this if container has reasonable dimensions to avoid issues during extreme resizing
+  // Only do this if container has reasonable dimensions to avoid issues during extreme resizing.
+  // Only increase MinWidth/MinHeight - never reduce below the developer's explicit constraints.
   if Assigned(AContainer) and (AContainer.Width > 10) and (AContainer.Height > 10) then
   begin
     try
       minSize := GetMinimumSize(AContainer);
       if (minSize.W > 0) and (minSize.H > 0) then
       begin
-        AContainer.MinWidth := minSize.W;
-        AContainer.MinHeight := minSize.H;
+        if minSize.W > AContainer.MinWidth then
+          AContainer.MinWidth := minSize.W;
+        if minSize.H > AContainer.MinHeight then
+          AContainer.MinHeight := minSize.H;
       end;
     except
       // Silently ignore errors during minimum size calculation

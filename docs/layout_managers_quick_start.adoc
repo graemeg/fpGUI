@@ -305,7 +305,7 @@ begin
     TfpgMigCC.Create.SpanX(2).AlignX('right'));          // <2>
 end;
 ----
-<1> `.GrowX` tells the widget to expand horizontally when extra space is available.
+<1> `.GrowX` tells the widget to expand horizontally to fill the space allocated to its column.
 <2> `.SpanX(2)` spans both columns; `.AlignX('right')` right-aligns the button within the
 spanned area.
 
@@ -319,7 +319,13 @@ calls to be chained.
 |Method |Description
 
 |`.GrowX` / `.GrowY`
-|Allow the widget to grow horizontally / vertically to fill extra space.
+|Allow the widget to expand horizontally / vertically to fill the space within its cell.
+Does not affect how much space the column or row itself receives.
+
+|`.PushX` / `.PushY`
+|Make the column / row that contains this widget grow, taking any extra space in the
+container. Unlike `.GrowX`, this affects column/row sizing, not just the widget within
+its cell. Works without requiring `LC.FillX` / `LC.FillY`.
 
 |`.SpanX(n)` / `.SpanY(n)`
 |Span across _n_ columns / rows. Use `.SpanX` without arguments to span all remaining
@@ -380,25 +386,95 @@ Layout constraints configure the container as a whole. They are accessed via the
 
 === Growth and Fill
 
-Growth is one of the most useful MigLayout features. By default, widgets occupy their
-preferred size. When the container is larger than needed, extra space is distributed to
-widgets that have growth enabled.
+MigLayout distinguishes between two levels of growth, controlled by different CC methods:
+
+**`.GrowX` / `.GrowY` -- widget fills its cell**
+
+The widget expands to consume the space allocated to its column or row. This does not
+change how large the column or row itself becomes relative to others.
+
+**`.PushX` / `.PushY` -- column or row grows**
+
+The column (or row) that contains this widget takes any extra container space. This
+operates at the grid level, not the widget level. Combine with `.GrowX` if you also want
+the widget to fill the grown column.
 
 [source,pascal]
 ----
-// Widget grows horizontally
+// Widget fills its cell horizontally (cell size unchanged)
 mig.AddLayoutComponent(edt, TfpgMigCC.Create.GrowX);
 
 // Widget grows in both directions
 mig.AddLayoutComponent(memo, TfpgMigCC.Create.GrowX.GrowY);
 
-// Two widgets sharing growth (equal distribution)
-mig.AddLayoutComponent(edt1, TfpgMigCC.Create.GrowX);
-mig.AddLayoutComponent(edt2, TfpgMigCC.Create.GrowX);
+// Column 2 takes all extra horizontal space; widget fills that column
+mig.AddLayoutComponent(edt1, TfpgMigCC.Create);           // column 1: fixed width
+mig.AddLayoutComponent(edt2, TfpgMigCC.Create.PushX.GrowX); // column 2: grows
+
+// Two columns sharing growth equally (both have equal push weight)
+mig.AddLayoutComponent(edt1, TfpgMigCC.Create.PushX.GrowX);
+mig.AddLayoutComponent(edt2, TfpgMigCC.Create.PushX.GrowX);
 ----
 
-NOTE: For growth to take effect, the container-level LC must also enable fill.
-Use `mig.LC.FillX` (or `.Fill`) so that the grid expands to fill the container.
+NOTE: For `.GrowX` to have a visible effect, the column must have space to grow into.
+Use `mig.LC.FillX` (or `.Fill`) so that the grid expands to fill the container, then
+`.PushX` on the widget whose column should receive that extra space. Without `.PushX` (or
+without `FillX`), all columns share any extra space equally.
+
+==== Why is PushX/PushY on CC rather than AC?
+
+At first glance it may seem odd that `.PushX` and `.PushY` live on the component
+constraint (CC) when they act on the column or row, not the widget itself. The reason
+is that MigLayout is a *flow-based* layout manager: components are placed in order and
+rows or columns are created dynamically. When you add a component, you often do not know
+-- and should not need to know -- which row index it will ultimately occupy.
+
+If push were only available on AC, you would have to write something like:
+
+[source,pascal]
+----
+// Fragile: must know that the treeview lands in row index 1
+mig.RowConstraints := TfpgMigAC.Create.Index(1).Push;
+mig.AddLayoutComponent(tvContents, TfpgMigCC.Create.GrowY);
+----
+
+This couples the AC configuration to the component's position. Add a component earlier,
+change `WrapAfter`, or rearrange components, and the index silently points at the wrong
+row. By placing `.PushY` on the CC instead, you express the intent alongside the
+component itself:
+
+[source,pascal]
+----
+// Robust: row grows wherever this component ends up
+mig.AddLayoutComponent(tvContents, TfpgMigCC.Create.GrowY.PushY);
+----
+
+Think of `.PushX` / `.PushY` on CC as a shorthand that means: _"whichever column or row
+this component lands in, let that column or row absorb any extra space."_
+
+Use AC when you want to set constraints for rows or columns *by explicit index*, for
+example to fix a column to a specific minimum width regardless of what component occupies
+it. Use CC push when you want a specific component to drive growth, without caring about
+indices.
+
+==== Common Pattern: One Growing Row
+
+A very common requirement is a layout where the first row contains a toolbar or button
+bar at its natural height, and the remaining rows contain a scrollable widget that should
+fill all available space:
+
+[source,pascal]
+----
+// Single-column layout; second row fills all remaining vertical space
+mig.LC.WrapAfter(1).Fill;
+
+mig.AddLayoutComponent(btnGo, TfpgMigCC.Create.AlignX('right'));  // natural height
+mig.AddLayoutComponent(tvContents, TfpgMigCC.Create.GrowX.GrowY.PushY); // fills rest
+----
+
+* `.PushY` makes the treeview's row absorb all extra vertical space.
+* `.GrowY` makes the treeview widget fill that grown row.
+* Without `.PushY`, both rows would share the extra space equally.
 
 === Column Spanning
 

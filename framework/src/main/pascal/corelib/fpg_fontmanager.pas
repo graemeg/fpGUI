@@ -1,3 +1,14 @@
+{
+    This unit is part of the fpGUI Toolkit project.
+
+    Copyright (c) 2026 by Graeme Geldenhuys.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    Description:
+      Centralized font resource management with caching.
+}
 unit fpg_fontmanager;
 
 {$mode objfpc}{$H+}
@@ -110,15 +121,14 @@ begin
 
     if not Assigned(Result) then
     begin
-      // Cache miss - create new platform-specific font resource
-      {$IFDEF AGGCANVAS}
+      // Cache miss - create font resource.
+      // When AggPas is active, use AggFontResourceClass which provides
+      // FreeType-based metrics matching the rendered output. Otherwise
+      // use native font resources (Xft on X11, GDI on Windows).
       if Assigned(AggFontResourceClass) then
         Result := AggFontResourceClass.Create(fdesc)
       else
-        Result := TfpgFontResource.Create(fdesc); // Fallback if not registered
-      {$ELSE}
-      Result := TfpgFontResource.Create(fdesc);
-      {$ENDIF}
+        Result := TfpgFontResource.Create(fdesc);
 
       if Result.HandleIsValid then
       begin
@@ -145,11 +155,7 @@ begin
   if FDefaultFontDesc = '' then
   begin
     // Fallback to reasonable default
-    {$IFDEF UNIX}
-    FDefaultFontDesc := 'Liberation Sans-10';
-    {$ELSE}
-    FDefaultFontDesc := 'Arial-10';
-    {$ENDIF}
+    FDefaultFontDesc := FPG_DEFAULT_FONT_DESC;
   end;
 
   FLoadingDefaultFont := True;
@@ -169,11 +175,7 @@ begin
   if FFixedFontDesc = '' then
   begin
     // Fallback to reasonable default
-    {$IFDEF UNIX}
-    FFixedFontDesc := 'Liberation Mono-10';
-    {$ELSE}
-    FFixedFontDesc := 'Courier New-10';
-    {$ENDIF}
+    FFixedFontDesc := FPG_DEFAULT_FIXED_FONT_DESC;
   end;
 
   Result := GetFont(FFixedFontDesc);

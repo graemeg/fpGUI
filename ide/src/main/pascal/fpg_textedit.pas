@@ -1,0 +1,3583 @@
+{
+    This unit is part of the fpGUI Toolkit project.
+
+    Copyright (c) 2006 - 2026 by Graeme Geldenhuys.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      A text editor component with features like:
+      gutter, line numbers in gutter, right edge margin, syntax
+      highlighting, Undo/Redo and much more.
+}
+
+unit fpg_textedit;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, Contnrs, fpg_base, fpg_main, fpg_widget,
+  fpg_scrollbar, ide.editor.undo;
+
+type
+  // forward declaration
+  TfpgBaseTextEdit = class;
+
+  TfpgFindOptions = set of (foMatchCase, foWholeWords, foEntireScope);
+
+
+  TfpgGutter = class(TfpgWidget)
+  private
+    FAutoSize: Boolean;
+    FLineGranularity: Integer;
+    FOwner: TfpgBaseTextEdit; // convenience reference variable
+    FDigits: Integer;
+    FShowNum: Boolean;
+    FSpace: Integer;
+    FStartNum: Integer;
+    FZeroStart: Boolean;
+    procedure   SetDigits(const AValue: Integer);
+    procedure   SetLineGranularity(AValue: Integer);
+    procedure   SetShowNum(const AValue: Boolean);
+    procedure   SetSpace(const AValue: Integer);
+    procedure   SetStartNum(const AValue: Integer);
+    procedure   DrawLineNums;
+    procedure   DrawGutterIndicators;
+    procedure   SetZeroStart(const AValue: Boolean);
+    procedure   UpdateSize;
+  protected
+    procedure   HandlePaint; override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
+  public
+    constructor CreateGutter(AOwner: TfpgBaseTextEdit);
+    function    GetClientRect: TfpgRect; override;
+    property    AutoSize: Boolean read FAutoSize write FAutoSize default True;
+    property    LeadingDigits: Integer read FDigits write SetDigits default 0;
+    property    LineGranularity: Integer read FLineGranularity write SetLineGranularity default 1;
+    property    ShowNum: Boolean read FShowNum write SetShowNum default True;
+    property    Space: Integer read FSpace write SetSpace default 2;
+    property    StartNum: Integer read FStartNum write SetStartNum default 1;
+    property    Width default 35;
+    property    ZeroStart: Boolean read FZeroStart write SetZeroStart default False;
+  end;
+
+
+  TfpgGutterClickEvent = procedure(Sender: TObject; ALine: Integer) of object;
+
+  TfpgGutterLineEvent = procedure(Sender: TObject; ALine: Integer;
+      ACanvas: TfpgCanvas; const ARect: TfpgRect) of object;
+
+  TfpgDrawLineEvent = procedure(Sender: TObject; ALineText: TfpgString;
+      ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
+      var AllowSelfDraw: Boolean) of object;
+
+  TfpgCaretChangeEvent = procedure(Sender: TObject; ALine, ACol: Integer) of object;
+
+  TfpgFindText = procedure(Sender: TObject; FindPos: TPoint; var ScrollToWord: Boolean) of object;
+
+  TfpgReplaceText = procedure(Sender: TObject; FindPos: TPoint; var ScrollToWord, ReplaceText: Boolean) of object;
+
+  TfpgOnSearchEnd = procedure(Sender: TObject; FindIt, ReplaceMode: Boolean) of object;
+
+
+  TfpgBaseTextEdit = class(TfpgWidget)
+  private
+    type
+      TSelDrag = (sdNone, sdMightDrag, sdDragging ,sdDragged);
+
+      TSelection = object
+      private
+        FEdit: TfpgBaseTextEdit;
+        FOrigin: TfpgPoint;
+        FStartPos: TfpgPoint;
+        FEndPos: TfpgPoint;
+        procedure SetEndPos(AValue: TfpgPoint);
+        procedure SetStartPos(AValue: TfpgPoint);
+      public
+        function  HasContent: Boolean;
+        function  StartLine: Integer;
+        function  EndLine: Integer;
+        function  Contains(APoint: TfpgPoint): Boolean;
+        procedure AdjustLines(ADelta: Integer);
+        procedure AdjustStartX(ADelta: Integer);
+        // Returns True if no changes. False if Line length was adjusted.
+        function  ValidateEndOffset(const ALine: String): Boolean;
+        property  StartPos: TfpgPoint read FStartPos write SetStartPos;
+        property  EndPos: TfpgPoint read FEndPos write SetEndPos;
+        property  Origin: TfpgPoint read FOrigin;
+      end;
+    class procedure ValidateCaretPosition(var APoint: TfpgPoint; ALines: TStrings);
+  private
+    FAutoIndent: boolean;
+    FDefaultDropHandler: TfpgDropEventHandler;
+    FFullRedraw: Boolean;
+    FLines: TStrings;
+    CaretPos: TPoint;
+    FLastCaretPos: TPoint;
+    FOnCaretChange: TfpgCaretChangeEvent;
+    FOnChange: TNotifyEvent;
+    FOnDrawLine: TfpgDrawLineEvent;
+    FOnFindText: TfpgFindText;
+    FOnReplaceText: TfpgReplaceText;
+    FOnSearchEnd: TfpgOnSearchEnd;
+    FScrollBarStyle: TfpgScrollStyle;
+    MousePos: TPoint;
+    FChrW: Integer;
+    FChrH: Integer;
+    FTopLine: Integer;
+    FVisLines: Integer;
+    FVisCols: Integer;
+    StartNo, EndNo, StartOffs, EndOffs: Integer;
+    // Selection start and end object.
+    FSelection: TSelection;
+    FTabWidth: Integer;
+    HPos, VPos, XSize, YSize: Integer;
+    FMaxScrollH: Integer;
+    FVScrollBar: TfpgScrollBar;
+    FHScrollBar: TfpgScrollBar;
+    FTracking: Boolean;
+    FSelDrag: TSelDrag;
+    FSelected, FSelMouseDwn: Boolean;
+    FIsMultiClick: Boolean;
+    FGutterPan: TfpgGutter;
+    FRightEdge: Boolean;
+    FRightEdgeCol: Integer;
+    FLineChanged: Integer;    // force only one line to repaint if greater than -1
+    // Elastic Tabstops support
+    FElasticTabstops: TObject;  // Will be TTabstopsList (list of TIntegerList)
+    FTabPadding: Integer;
+    FUseElasticTabstops: Boolean;
+    FIndentSize: Integer;
+    FFontColor: TfpgColor;
+    FSelectionColor: TfpgColor;
+    FSelectionTextColor: TfpgColor;
+    FLineHighlightColor: TfpgColor;
+    FExecutionLine: Integer;        // 0-based; -1 = no highlight
+    FExecutionLineColor: TfpgColor;
+    FUndoManager: TUndoManager;
+    FOnCtrlClick: TNotifyEvent;
+    FOnGutterClick: TfpgGutterClickEvent;
+    FOnGutterLine: TfpgGutterLineEvent;
+
+    FLastScrollEventTime: TTime; // in milliseconds
+    FLastScrollEventTimeBefore: TTime; // in milliseconds
+    fmousewheelfrequmin: double;
+    fmousewheelfrequmax: double;
+    fmousewheeldeltamin: double;
+    fmousewheeldeltamax: double;
+    fmousewheelaccelerationmax: double;
+
+    fwheelsensitivity: double;
+    function    GetGutterShowLineNumbers: Boolean;
+    function    GetGutterVisible: Boolean;
+    function    GetGutterWidth: Integer;
+    function    GetHScrollPos: Integer;
+    function    GetVScrollPos: Integer;
+    function    GetCaretPosH: Integer;
+    function    GetCaretPosV: Integer;
+    function    GetLineText(AIndex: Integer): TfpgString;
+    function    GetLineFirstCharPos(ALine: Integer): Integer;
+    procedure   LinesChanged(Sender: TObject);
+    procedure   SetGutterShowLineNumbers(const AValue: Boolean);
+    procedure   SetGutterVisible(const AValue: Boolean);
+    procedure   SetHScrollPos(const AValue: Integer);
+    procedure   SetCaretPosH(const AValue: Integer);
+    procedure   SetCaretPosV(const AValue: Integer);
+    procedure   SetLines(const AValue: TStrings);
+    procedure   SetScrollBarStyle(const AValue: TfpgScrollStyle);
+    procedure   SetTabWidth(const AValue: Integer);
+    procedure   SetVScrollPos(const AValue: Integer);
+    procedure   UpdateCharBounds;
+    procedure   DragStartDetected(Sender: TObject);
+    procedure   DropDrop(Drop: TfpgDrop; AData: Variant);
+    procedure   DropEnter(Drop: TfpgDrop);
+    procedure   DropMove(Drop: TfpgDrop; X, Y: TfpgCoord);
+    procedure   GetSelBounds(var AStartNo, AEndNo, AStartOffs, AEndOffs: Integer);
+    procedure   VScrollBarMove(Sender: TObject; position: integer);
+    procedure   HScrollBarMove(Sender: TObject; position: integer);
+    procedure   SetVPos(p: Integer);
+    procedure   SetHPos(p: Integer);
+    procedure   UpdateScrollBarCoords;
+    procedure   UpdateGutterCoords;
+    procedure   KeyboardCaretNav(const ShiftState: TShiftState; const AKeyCode: Word);
+    procedure   InitMemoObjects;
+    procedure   SetRightEdge(const AValue: Boolean);
+    procedure   SetRightEdgeCol(const AValue: Integer);
+    function    calcmousewheeldelta(var info: TfpgMsgParmMouse; const fmin,fmax,deltamin,deltamax: double): double;
+    function    mousewheelacceleration(const avalue: double): double;
+    function    mousewheelacceleration(const avalue: integer): integer;
+    function    FindReplaceProc(TextToFind: TfpgString; FindOptions: TfpgFindOptions; Backward, ReplaceMode: Boolean; var ReplaceText: Boolean): Boolean;
+    procedure   CalculateElasticTabstops;
+    procedure   SetUseElasticTabstops(const AValue: Boolean);
+    procedure   CheckCaretChanged;
+  protected
+    procedure   SetFontDesc(const AValue: string); override;
+    { -- internal events -- }
+    procedure   HandleShow; override;
+    procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
+    procedure   HandlePaint; override;
+    procedure   HandleMouseEnter; override;
+    procedure   HandleMouseExit; override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
+    procedure   HandleMultiClick(count: Integer; x, y: integer; button: word; shiftstate: TShiftState); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
+    function    GetDefaultDropHandler: TfpgDropHandler; override;
+    { -- local widget functions -- }
+    procedure   DrawVisible; virtual;
+    procedure   DrawLine(const ALineIndex, Y: Integer); virtual;
+    procedure   FormatLine(const ALineIndex, X, Y: Integer); virtual;
+    procedure   DrawCaret(const X, Y: Integer); virtual;
+    { -- to be published --}
+    property    AutoIndent: boolean read FAutoIndent write FAutoIndent default True;
+    property    FullRedraw: Boolean read FFullRedraw write FFullRedraw default False;
+    property    GutterVisible: Boolean read GetGutterVisible write SetGutterVisible default False;
+    property    GutterShowLineNumbers: Boolean read GetGutterShowLineNumbers write SetGutterShowLineNumbers default True;
+    property    Lines: TStrings read FLines write SetLines;
+    property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle default ssAutoBoth;
+    property    IndentSize: Integer read FIndentSize write FIndentSize default 2;
+    property    FontColor: TfpgColor read FFontColor write FFontColor default clBlack;
+    property    SelectionColor: TfpgColor read FSelectionColor write FSelectionColor;
+    property    SelectionTextColor: TfpgColor read FSelectionTextColor write FSelectionTextColor;
+    property    LineHighlightColor: TfpgColor read FLineHighlightColor write FLineHighlightColor default clNone;
+    property    ExecutionLine: Integer read FExecutionLine write FExecutionLine;
+    property    ExecutionLineColor: TfpgColor read FExecutionLineColor write FExecutionLineColor;
+    property    TabWidth: Integer read FTabWidth write SetTabWidth default 8;
+    property    Tracking: Boolean read FTracking write FTracking default True;
+    property    OnCaretChange: TfpgCaretChangeEvent read FOnCaretChange write FOnCaretChange;
+    property    OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property    OnDrawLine: TfpgDrawLineEvent read FOnDrawLine write FOnDrawLine;
+    property    OnFindText: TfpgFindText read FOnFindText write FOnFindText;
+    property    OnSearchEnd: TfpgOnSearchEnd read FOnSearchEnd write FOnSearchEnd;
+    property    OnReplaceText: TfpgReplaceText read FOnReplaceText write FOnReplaceText;
+    property    OnCtrlClick: TNotifyEvent read FOnCtrlClick write FOnCtrlClick;
+    property    OnGutterClick: TfpgGutterClickEvent read FOnGutterClick write FOnGutterClick;
+    property    OnGutterLine: TfpgGutterLineEvent read FOnGutterLine write FOnGutterLine;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure   UpdateScrollBars;
+    function    GetClientRect: TfpgRect; override;
+    function    GetWordAtPos(const X, Y: Integer; out XBegin: Integer): TfpgString;
+    procedure   GetRowColAtPos(const X, Y: Integer; out Row, Col: Integer);
+    procedure   Clear;
+    procedure   InsertTextAtPos(S: TfpgString; Col, Row: Integer);
+    procedure   ScrollTo(X, Y: Integer);
+    procedure   GotoLine(ALine: integer);
+    procedure   CopyToClipboard;
+    procedure   CutToClipboard;
+    procedure   PasteFromClipboard;
+    procedure   DeleteSelection;
+    procedure   DuplicateLine;
+    procedure   DeleteLine;
+    procedure   BlockIndent;
+    procedure   BlockUnindent;
+    procedure   Undo;
+    procedure   Redo;
+    function    CanUndo: Boolean;
+    function    CanRedo: Boolean;
+    function    GetSelectedText: TfpgString;
+    procedure   SaveToFile(const AFileName: TfpgString);
+    procedure   LoadFromFile(const AFileName: TfpgString);
+    procedure   FindText(TextToFind: TfpgString; FindOptions: TfpgFindOptions; Backward: Boolean = False);
+    property    CaretPos_H: Integer read GetCaretPosH write SetCaretPosH;
+    property    CaretPos_V: Integer read GetCaretPosV write SetCaretPosV;
+    property    FontHeight: Integer read FChrH;
+    property    FontWidth: Integer read FChrW;
+    property    ScrollPos_H: Integer read GetHScrollPos write SetHScrollPos;
+    property    ScrollPos_V: Integer read GetVScrollPos write SetVScrollPos;
+    property    TopLine: Integer read FTopLine;
+    property    VisibleLines: Integer read FVisLines;
+    property    GutterWidth: Integer read GetGutterWidth;
+    property    RightEdge: Boolean read FRightEdge write SetRightEdge default False;
+    property    RightEdgeCol: Integer read FRightEdgeCol write SetRightEdgeCol default 80;
+    { Elastic Tabstops: Automatically aligns tab-separated columns across multiple lines.
+      When enabled, pressing Tab inserts an actual tab character (#9) instead of spaces,
+      and the renderer calculates optimal column positions based on content width.
+
+      KNOWN LIMITATIONS:
+      - Text rendering works correctly and columns align properly
+      - Cursor navigation treats tabs as single characters (correct from a string index
+        perspective), but this doesn't match the visual column positions
+      - Mouse click positioning doesn't account for elastic tab widths
+      - Text selection may not align perfectly with visual columns
+
+      Fixing cursor/selection behavior would require overriding KeyboardCaretNav(),
+      GetRowColAtPos(), DrawCaret(), and selection handling to map between character
+      indices and visual pixel positions - a significant undertaking.
+
+      Despite these limitations, elastic tabstops are useful for viewing and creating
+      tab-aligned data where visual alignment is more important than cursor precision. }
+    property    UseElasticTabstops: Boolean read FUseElasticTabstops write SetUseElasticTabstops default False;
+    property    TabPadding: Integer read FTabPadding write FTabPadding default 8;
+  end;
+
+
+  TfpgTextEdit = class(TfpgBaseTextEdit)
+  published
+    property    AutoIndent;
+    property    FontDesc;
+    property    FullRedraw;
+    property    GutterVisible;
+    property    GutterShowLineNumbers;
+    property    IndentSize;
+    property    FontColor;
+    property    SelectionColor;
+    property    SelectionTextColor;
+    property    LineHighlightColor;
+    property    ExecutionLine;
+    property    ExecutionLineColor;
+    property    Lines;
+    property    RightEdge;
+    property    ScrollBarStyle;
+    property    TabPadding;
+    property    TabWidth;
+    property    Tracking;
+    property    UseElasticTabstops;
+    property    OnCaretChange;
+    property    OnChange;
+    property    OnDrawLine;
+    property    OnFindText;
+    property    OnSearchEnd;
+    property    OnReplaceText;
+    property    OnCtrlClick;
+    property    OnGutterClick;
+    property    OnGutterLine;
+  end;
+
+
+implementation
+
+uses
+  fpg_dialogs,
+  fpg_constants,
+  fpg_stringutils,
+  fpg_utils,
+  math,
+  strutils,
+  dbugintf,
+  fgl;
+
+type
+  { Specialized generic lists for elastic tabstops }
+  TIntegerList = specialize TFPGList<Integer>;
+  TTabstopsList = specialize TFPGObjectList<TIntegerList>;
+
+
+function GetNextWord(SLine: TfpgString; var PosX: Integer): Boolean;
+const
+  ValidChars = ['a'..'z', 'A'..'Z', '0'..'9', '#'];
+var
+  I, RetX: Integer;
+  FindNext: Boolean;
+  c: TfpgChar;
+begin
+  Result := False;
+  if PosX > UTF8Length(SLine) then Exit;
+  FindNext := False;
+  RetX := 0;
+  for I := PosX to UTF8Length(SLine) do
+  begin
+    c := fpgCharAt(SLine, I);
+    { TODO -cUnicode Error : We need to fix c[i] usage. Also improve ValidChars definition. }
+    if not FindNext and not (c[1] in ValidChars) then
+    begin
+      FindNext := True;
+      Continue;
+    end;
+    if FindNext and (c[1] in ValidChars) then
+    begin
+      RetX := I;
+      Result := True;
+      Break;
+    end;
+  end;
+  if RetX < 1 then
+    Result := False;
+  PosX := RetX;
+end;
+
+{ TfpgBaseTextEdit.TSelection }
+
+procedure TfpgBaseTextEdit.TSelection.SetEndPos(AValue: TfpgPoint);
+begin
+  if FEndPos=AValue then Exit;
+
+  if (AValue.Y < FOrigin.Y) or ((AValue.Y = FOrigin.Y) and (AValue.X < FOrigin.X)) then
+  begin
+    FStartPos := AValue;
+    ValidateCaretPosition(FStartPos, FEdit.FLines);
+  end
+  else
+  begin
+    FEndPos:=AValue;
+    ValidateCaretPosition(FEndPos, FEdit.FLines);
+  end;
+end;
+
+procedure TfpgBaseTextEdit.TSelection.SetStartPos(AValue: TfpgPoint);
+begin
+  // Setting Start position begins selection
+  FStartPos := AValue;
+  FEndPos := AValue;
+  FOrigin := AValue;
+end;
+
+function TfpgBaseTextEdit.TSelection.HasContent: Boolean;
+begin
+  Result := (FStartPos.Y <> FEndPos.Y) or (FStartPos.X <> FEndPos.X);
+end;
+
+function TfpgBaseTextEdit.TSelection.StartLine: Integer;
+begin
+  Result := FStartPos.Y;
+end;
+
+function TfpgBaseTextEdit.TSelection.EndLine: Integer;
+begin
+  Result := FEndPos.Y;
+end;
+
+function TfpgBaseTextEdit.TSelection.Contains(APoint: TfpgPoint): Boolean;
+begin
+  Result := (((APoint.Y = FStartPos.Y) and (APoint.X >= FStartPos.X))
+      or (APoint.Y > FStartPos.Y))
+  and (((APoint.Y = FEndPos.Y) and (APoint.X <= FEndPos.X))
+      or (APoint.Y < FEndPos.Y));
+end;
+
+procedure TfpgBaseTextEdit.TSelection.AdjustLines(ADelta: Integer);
+begin
+  FStartPos.Y := FStartPos.Y + ADelta;
+  FEndPos.Y := FEndPos.Y + ADelta;
+end;
+
+procedure TfpgBaseTextEdit.TSelection.AdjustStartX(ADelta: Integer);
+begin
+  FStartPos.X := FStartPos.X + ADelta;
+  if FStartPos.Y = FEndPos.Y then
+    FEndPos.Y := FEndPos.Y + ADelta;
+end;
+
+function TfpgBaseTextEdit.TSelection.ValidateEndOffset(const ALine: String): Boolean;
+var
+  l: Integer;
+begin
+  Result := True;
+  l := UTF8Length(ALine);
+  if FEndPos.X > l then
+  begin
+    FEndPos.X := l - 1;
+    Result := False;
+  end;
+end;
+
+
+{ TfpgGutter }
+
+procedure TfpgGutter.SetDigits(const AValue: Integer);
+begin
+  if FDigits=AValue then exit;
+  FDigits:=AValue;
+end;
+
+procedure TfpgGutter.SetLineGranularity(AValue: Integer);
+begin
+  if AValue < 1 then
+    AValue:=1;
+  if FLineGranularity=AValue then Exit;
+  FLineGranularity:=AValue;
+  Invalidate;
+end;
+
+procedure TfpgGutter.SetShowNum(const AValue: Boolean);
+begin
+  if FShowNum=AValue then exit;
+  FShowNum:=AValue;
+  Invalidate;
+end;
+
+procedure TfpgGutter.SetSpace(const AValue: Integer);
+begin
+  if FSpace=AValue then exit;
+  FSpace:=AValue;
+end;
+
+procedure TfpgGutter.SetStartNum(const AValue: Integer);
+begin
+  if FStartNum=AValue then exit;
+  FStartNum:=AValue;
+end;
+
+procedure TfpgGutter.DrawLineNums;
+var
+  r: TfpgRect;
+  I, MaxI, W, H, ZeroL: Integer;
+  lNum: Integer;
+  s: TfpgString;
+  ltxtflags: TfpgTextFlags;
+begin
+  if not FShowNum then
+    Exit; //==>
+  w         := GetClientRect.Width - FSpace - 1;
+  H         := FOwner.FChrH;
+  MaxI      := FOwner.FVisLines;
+  ltxtflags := [txtRight, txtVCenter];
+  Canvas.SetFont(FOwner.Font);
+  r.SetRect(2, 0, W, H);
+
+  for i := 0 to MaxI do
+  begin
+//    writeln('i=', i);
+    lNum:=FStartNum+i;
+
+    if lNum > FOwner.Lines.Count then
+      break;
+
+    if (FLineGranularity = 1)
+    or (lNum = 1)
+    or (FOwner.CaretPos.Y = Pred(lNum))
+    or ((lNum) mod FLineGranularity = 0)
+    then
+    begin
+      S := IntToStr(lNum - (1 * ord(FZeroStart)));
+      for ZeroL := Length(S) to FDigits do
+        S := '0' + S;
+    end
+    else
+      S := '.';
+
+    r.Top := i * h;
+    if (FOwner.CaretPos.Y = Pred(lNum)) then
+      Canvas.TextColor := clRed
+    else
+      Canvas.TextColor := clBlack;
+    Canvas.DrawText(r, S, ltxtflags);
+  end;
+end;
+
+procedure TfpgGutter.DrawGutterIndicators;
+var
+  i, MaxI, H, GW: Integer;
+  lNum: Integer;
+  R: TfpgRect;
+begin
+  if not Assigned(FOwner.FOnGutterLine) then
+    Exit;
+  H    := FOwner.FChrH;
+  MaxI := FOwner.FVisLines;
+  GW   := GetClientRect.Width;
+  for i := 0 to MaxI do
+  begin
+    lNum := FStartNum + i;
+    if lNum > FOwner.Lines.Count then
+      Break;
+    R.SetRect(0, i * H, GW - FSpace - 1, H);
+    FOwner.FOnGutterLine(FOwner, lNum, Canvas, R);
+  end;
+end;
+
+procedure TfpgGutter.SetZeroStart(const AValue: Boolean);
+begin
+  if FZeroStart=AValue then exit;
+  FZeroStart:=AValue;
+end;
+
+procedure TfpgGutter.UpdateSize;
+var
+  NeededWidth: Integer;
+begin
+  if FAutoSize then
+  begin
+    NeededWidth := FOwner.Font.GetTextWidth(IntToStr(Max(35, FOwner.Lines.Count+1)))+ FSpace*2;
+    Width:=NeededWidth;
+  end;
+end;
+
+procedure TfpgGutter.HandlePaint;
+begin
+  inherited HandlePaint;
+  Canvas.Clear(clWindowBackground);
+  // Gutter right border
+  Canvas.SetColor(clHilite2);
+  Canvas.DrawLine(ActualWidth - 2, 0, ActualWidth - 2, ActualHeight - 1);
+  Canvas.SetColor(clShadow1);
+  Canvas.DrawLine(ActualWidth - 1, 0, ActualWidth - 1, ActualHeight - 1);
+  DrawLineNums;
+  DrawGutterIndicators;
+end;
+
+procedure TfpgGutter.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+var
+  LineIdx: Integer;
+begin
+  inherited HandleLMouseDown(x, y, shiftstate);
+  if Assigned(FOwner.FOnGutterClick) then
+  begin
+    LineIdx := FOwner.FTopLine + (y div FOwner.FChrH) + 1;  { 1-based }
+    if (LineIdx >= 1) and (LineIdx <= FOwner.Lines.Count) then
+      FOwner.FOnGutterClick(FOwner, LineIdx);
+  end;
+end;
+
+procedure TfpgGutter.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
+    delta: smallint);
+var
+  msg: TfpgMessageParams;
+begin
+  inherited HandleMouseScroll(x, y, shiftstate, delta);
+  FillMem(@msg, sizeof(msg), 0);  // zero out the record - initialize it
+  msg.mouse.x := x;
+  msg.mouse.y := y;
+  msg.mouse.shiftstate := shiftstate;
+  msg.mouse.delta := delta;
+  fpgPostMessage(self, FOwner.FVScrollBar, FPGM_SCROLL, msg);
+end;
+
+constructor TfpgGutter.CreateGutter(AOwner: TfpgBaseTextEdit);
+begin
+  inherited Create(AOwner);
+  FOwner := AOwner;
+  FAutoSize := True;
+  FDigits := 0;
+  FShowNum := True;
+  FSpace := 2;
+  FStartNum := 1;
+  FZeroStart := False;
+  FLineGranularity:=1;
+  Width := 35;
+end;
+
+function TfpgGutter.GetClientRect: TfpgRect;
+begin
+  Result := inherited GetClientRect;
+  Result.Width := Result.Width - 2; // border right line takes up two pixels
+end;
+
+{ TfpgBaseTextEdit }
+
+procedure TfpgBaseTextEdit.SetLines(const AValue: TStrings);
+begin
+  FLines.Assign(AValue);
+  FUndoManager.Clear;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.SetScrollBarStyle(const AValue: TfpgScrollStyle);
+begin
+  if FScrollBarStyle = AValue then
+    Exit; //==>
+  FScrollBarStyle := AValue;
+  UpdateScrollBarCoords;
+end;
+
+type
+  TDragHack = class(TfpgDrag);
+
+procedure TfpgBaseTextEdit.DragStartDetected(Sender: TObject);
+var
+  Drag: TDragHack;
+  Win: TfpgWidget;
+  Edit: TfpgTextEdit;
+  I: Integer;
+begin
+  if (FSelDrag = sdNone) or not FSelection.HasContent then
+    Exit; // ==>
+
+  FSelDrag := sdDragging;
+
+  Drag := TDragHack.Create(Self);
+  Drag.MimeData := TfpgMimeData.Create;
+  Drag.MimeData.Text := GetSelectedText;
+
+  // we are cheating and using a widget in the preview window instead of painting it ourselves.
+  Win := TfpgWidget(Drag.FPreviewWin);
+  Edit := TfpgTextEdit.Create(Win);
+  Edit.Lines.Text := GetSelectedText;
+
+  // Trim the preview text so more can be seen.
+  for I := Edit.Lines.Count-1 downto 0 do
+    if Trim(Edit.Lines[I]) = '' then
+      Edit.Lines.Delete(I)
+    else
+      Edit.Lines[I] := Trim(Edit.Lines[I]);
+
+  Edit.FontDesc := FontDesc;
+
+  Drag.PreviewSize := fpgSize(Edit.Width, Edit.Height);
+
+  // Set the Preview Win Relative to the cursor.
+  FDragStartPos := fpgPoint(-5,-5);
+
+  case Drag.Execute([daCopy, daMove]) of
+    daMove: DeleteSelection;
+  end;
+  FSelDrag := sdDragged;
+end;
+
+procedure TfpgBaseTextEdit.DropEnter(Drop: TfpgDrop);
+begin
+  Drop.CanDrop := Drop.AcceptMimeType([MIME_TEXT_PLAIN]);
+end;
+
+procedure TfpgBaseTextEdit.DropMove(Drop: TfpgDrop; X, Y: TfpgCoord);
+var
+  CursorCaret: TfpgPoint;
+begin
+  if Drop.SourceWidget = Self then
+    Drop.DropAction := daMove;
+
+  GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, CursorCaret.Y, CursorCaret.X);
+
+  ValidateCaretPosition(CursorCaret, FLines);
+
+  if CaretPos <> CursorCaret then
+    Invalidate;
+  CaretPos := CursorCaret;
+
+
+  Drop.CanDrop := not FSelection.Contains(CursorCaret);
+end;
+
+procedure TfpgBaseTextEdit.DropDrop(Drop: TfpgDrop; AData: Variant);
+var
+  S : String;
+  NewLines: TStringList;
+  PartBegin: String = '';
+  PartEnd: String = '';
+  i: Integer;
+begin
+  if (Drop.SourceWidget = self) and (FSelection.Contains(CaretPos)) then
+    Exit; // =>
+
+  S := AData;
+
+  NewLines := TStringList.Create;
+  NewLines.Text:=s;
+
+  if Drop.SourceWidget = Self then
+  begin
+    if CaretPos.Y < FSelection.StartLine then
+    begin
+      FSelection.AdjustLines(NewLines.Count-1);
+    end;
+    if (CaretPos.Y = FSelection.StartLine) and (CaretPos.X < FSelection.StartPos.X) then
+    begin
+      FSelection.AdjustLines(NewLines.Count-1);
+      FSelection.AdjustStartX(Length8(NewLines[0]));
+    end;
+  end;
+
+
+  // split the line we are dropping into
+  PartBegin:=Copy8(Lines.Strings[CaretPos.Y], 1, CaretPos.X);
+  PartEnd  :=Copy8(Lines.Strings[CaretPos.Y], CaretPos.X+1, Length8(Lines.Strings[CaretPos.Y]));
+
+  for i := 0 to NewLines.Count-1 do
+  begin
+    if i = 0 then
+      S := PartBegin + NewLines[0]
+    else
+      S := NewLines[i];
+
+    if i = NewLines.Count-1 then
+      S := S + PartEnd;
+
+    if i = 0 then
+      Lines.Delete(CaretPos.Y+i);
+    Lines.Insert(CaretPos.Y+i, S);
+
+  end;
+
+  //CaretPos := FSel;
+  Invalidate;
+
+  NewLines.Free;
+end;
+
+function TfpgBaseTextEdit.GetGutterShowLineNumbers: Boolean;
+begin
+ Result := FGutterPan.ShowNum;
+end;
+
+function TfpgBaseTextEdit.GetGutterVisible: Boolean;
+begin
+  Result := FGutterPan.Visible;
+end;
+
+function TfpgBaseTextEdit.GetGutterWidth: Integer;
+begin
+  if FGutterPan.Visible then
+    Result := FGutterPan.Width
+  else
+    Result := 0;
+end;
+
+function TfpgBaseTextEdit.GetHScrollPos: Integer;
+begin
+  Result := HPos;
+end;
+
+function TfpgBaseTextEdit.GetVScrollPos: Integer;
+begin
+  Result := VPos;
+end;
+
+function TfpgBaseTextEdit.GetCaretPosH: Integer;
+begin
+  Result := CaretPos.X;
+end;
+
+function TfpgBaseTextEdit.GetCaretPosV: Integer;
+begin
+  Result := CaretPos.Y;
+end;
+
+function TfpgBaseTextEdit.GetLineText(AIndex: Integer): TfpgString;
+begin
+  if (AIndex < 0) or (AIndex >= FLines.Count) then
+    Exit('');
+
+  Result := FLines[AIndex];
+end;
+
+function TfpgBaseTextEdit.GetLineFirstCharPos(ALine: Integer): Integer;
+var
+  L: String;
+  I: Integer;
+begin
+  Result := 0;
+  L := GetLineText(ALine);
+  // We dont need to worry about utf8. We are testing for ' ' from the start.
+  for I := 1 to Length(L) do
+  begin
+    if L[I] <> ' ' then
+      Exit(I-1);
+  end;
+end;
+
+procedure TfpgBaseTextEdit.LinesChanged(Sender: TObject);
+begin
+  FGutterPan.UpdateSize;
+  if FUseElasticTabstops then
+  begin
+    CalculateElasticTabstops;
+    Invalidate;
+  end;
+  if Assigned(FOnChange) then
+    FOnChange(Self);
+end;
+
+procedure TfpgBaseTextEdit.SetFontDesc(const AValue: string);
+begin
+  inherited SetFontDesc(AValue);
+  UpdateCharBounds;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.SetGutterShowLineNumbers(const AValue: Boolean);
+begin
+  FGutterPan.ShowNum := AValue;
+end;
+
+procedure TfpgBaseTextEdit.SetGutterVisible(const AValue: Boolean);
+begin
+  FGutterPan.Visible := AValue;
+  if FGutterPan.Visible then
+    UpdateGutterCoords;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.SetHScrollPos(const AValue: Integer);
+begin
+  SetHPos(AValue);
+end;
+
+procedure TfpgBaseTextEdit.SetTabWidth(const AValue: Integer);
+begin
+  if AValue < 1 then
+  begin
+    { todo: add these to resourcestring section }
+    if csDesigning in ComponentState then
+      TfpgMessageDialog.Information(ClassName + ' Tip', 'Value for TabWidth must be greater than 0.');
+    Exit; //==>
+  end;
+  FTabWidth := AValue;
+end;
+
+procedure TfpgBaseTextEdit.SetCaretPosH(const AValue: Integer);
+begin
+  CaretPos.X := Max(0, AValue);
+end;
+
+procedure TfpgBaseTextEdit.SetCaretPosV(const AValue: Integer);
+begin
+  CaretPos.Y := Max(0, Min(FLines.Count - 1, AValue));
+end;
+
+procedure TfpgBaseTextEdit.CheckCaretChanged;
+begin
+  if (CaretPos.X <> FLastCaretPos.X) or (CaretPos.Y <> FLastCaretPos.Y) then
+  begin
+    FLastCaretPos := CaretPos;
+    if Assigned(FOnCaretChange) then
+      FOnCaretChange(Self, CaretPos.Y, CaretPos.X);
+  end;
+end;
+
+procedure TfpgBaseTextEdit.SetVScrollPos(const AValue: Integer);
+begin
+  SetVPos(AValue);
+end;
+
+procedure TfpgBaseTextEdit.UpdateCharBounds;
+begin
+  if not Assigned(Font) or not Font.HandleIsValid then exit;
+
+  FChrW := Font.GetTextWidth('W');
+  FChrH := Font.GetHeight;
+
+  if FChrH > 0 then
+    FVisLines := (GetClientRect.Height div FChrH) + 1
+  else
+    FVisLines := 0;
+
+  if Assigned(FGutterPan) and (FChrW > 0) then
+  begin
+    if FGutterPan.Visible then
+      FVisCols := (GetClientRect.Width - FGutterPan.Width) div FChrW
+    else
+      FVisCols := GetClientRect.Width div FChrW;
+  end
+  else if FChrW > 0 then
+    FVisCols := GetClientRect.Width div FChrW
+  else
+    FVisCols := 0;
+end;
+
+{ Re-order StartXXX and EndXXX if user is selecting backwards }
+procedure TfpgBaseTextEdit.GetSelBounds(var AStartNo, AEndNo, AStartOffs,
+  AEndOffs: Integer);
+begin
+  AStartNo   := FSelection.StartPos.Y;
+  AEndNo     := FSelection.EndPos.Y;
+  AStartOffs := FSelection.StartPos.X;
+  AEndOffs   := FSelection.EndPos.X;
+end;
+
+procedure TfpgBaseTextEdit.UpdateScrollBars;
+begin
+  if not Assigned(FVScrollBar) or not Assigned(FHScrollBar) then
+    Exit;
+  FVScrollBar.Min := 0;
+  FVScrollBar.PageSize := FVisLines - 4;
+  FVScrollBar.Max := FLines.Count - FVisLines + 1;  // +1 is so the last line is completely visible
+  FVScrollBar.Position := VPos;
+  if FLines.Count > 0 then
+    FVScrollBar.SliderSize := FVisLines / FLines.Count;
+  FVScrollBar.Visible := FLines.Count > FVisLines;
+  if FVScrollBar.Visible then
+    FVScrollBar.RepaintSlider;
+
+  FHScrollBar.Min := 0;
+  FHScrollBar.PageSize := FVisCols div 2; //FMaxScrollH div 4;
+  FHScrollBar.Max := FMaxScrollH - FVisCols + 1;// div 2;
+  FHScrollBar.Position := HPos;
+  FHScrollBar.SliderSize := FVisCols / FMaxScrollH;
+  FHScrollBar.Visible := FMaxScrollH > FVisCols;
+  if FHScrollBar.Visible then
+    FHScrollBar.RepaintSlider;
+
+  UpdateScrollBarCoords;
+  UpdateCharBounds;
+end;
+
+procedure TfpgBaseTextEdit.VScrollBarMove(Sender: TObject; position: integer);
+begin
+  //if FDropList.Visible then
+    //FDropList.Visible := False;
+  //FDropTimeCount := 0;
+  //FLastDropPos.x := -1;
+  //FLastDropPos.y := -1;
+  if FTracking then
+    SetVPos(position);
+    //case ScrollCode of
+      //SB_LINEUP: SetVPos(VPos - 1);
+      //SB_LINEDOWN: SetVPos(VPos + 1);
+      //SB_PAGEUP: SetVPos(VPos - FVisLines);
+      //SB_PAGEDOWN: SetVPos(VPos + FVisLines);
+      //SB_THUMBPOSITION: SetVPos(Pos);
+      //SB_THUMBTRACK: if FTracking then SetVPos(Pos);
+      //SB_TOP: SetVPos(0);
+      //SB_BOTTOM: SetVPos(YSize);
+    //end;
+end;
+
+procedure TfpgBaseTextEdit.HScrollBarMove(Sender: TObject; position: integer);
+begin
+  //if FDropList.Visible then
+    //FDropList.Visible := False;
+  //FDropTimeCount := 0;
+  //FLastDropPos.x := -1;
+  //FLastDropPos.y := -1;
+
+  if FTracking then
+    SetHPos(position);
+
+    //case ScrollCode of
+      //SB_LINERIGHT: SetHPos(HPos + 1);
+      //SB_LINELEFT: SetHPos(HPos - 1);
+      //SB_PAGEUP: SetHPos(HPos - FVisLines);
+      //SB_PAGEDOWN: SetHPos(HPos + FVisLines);
+      //SB_THUMBPOSITION: SetHPos(Pos);
+      //SB_THUMBTRACK: if FTracking then SetHPos(Pos);
+      //SB_TOP: SetHPos(0);
+      //SB_BOTTOM: SetHPos(XSize);
+    //end;
+end;
+
+procedure TfpgBaseTextEdit.SetVPos(p: Integer);
+var
+  OldPos: Integer;
+//  R: TfpgRect;
+begin
+  OldPos := VPos;
+  VPos := p;
+
+  {$IFDEF gDEBUG}
+  writeln('OldPos:', OldPos, '  NewPos:', VPos, ' SB.Max:', FVScrollBar.Max);
+  {$ENDIF}
+
+//  FVScrollBar.Position := VPos;
+
+//  R := GetClientRect;
+  if OldPos - VPos <> 0 then
+  begin
+    { todo: implement scrolling children }
+//    ScrollChildren(0, (OldPos - VPos) * FChrH);
+    FTopLine := VPos;
+
+    if FFullRedraw then
+      Invalidate
+    else
+      if (FTopLine + (FVisLines-1)) <= FLines.Count then
+        Invalidate;
+    { TODO : Implement scrolling events }
+    //if Assigned(FOnScrolled_V) then
+      //FOnScrolled_V(Self);
+    //if Assigned(FOnTextScrolled) then
+        //FOnTextScrolled(Self, FTopLine, FTopLine + FVisLines + 1,HPos, FMaxScrollH);
+  end;
+end;
+
+procedure TfpgBaseTextEdit.SetHPos(p: Integer);
+var
+  OldPos: Integer;
+//  R: TfpgRect;
+begin
+  OldPos := HPos;
+  HPos := p;
+
+  {$IFDEF gDEBUG}
+  writeln('OldPos:', OldPos, '  NewPos:', HPos, ' SB.Max:', FHScrollBar.Max);
+  {$ENDIF}
+
+//  R := GetClientRect;
+  if OldPos - HPos <> 0 then
+  begin
+    { TODO : Implemente scrolling children }
+//    ScrollChildren((OldPos - HPos), 0);
+    //if FFullRedraw then
+      Invalidate;
+    //else
+      //DrawVisible;
+    { TODO : Implement scrolling events }
+    //if Assigned(FOnScrolled_H) then
+      //FOnScrolled_H(Self);
+    //if Assigned(FOnTextScrolled) then
+      //FOnTextScrolled(Self, FTopLine, FTopLine + FVisLines, HPos, FMaxScrollH);
+  end;
+end;
+
+procedure TfpgBaseTextEdit.UpdateScrollBarCoords;
+var
+  HWidth: integer;
+  VHeight: integer;
+  r: TfpgRect;
+begin
+  r := GetClientRect;
+  VHeight := r.Height;
+  HWidth  := r.Width;
+
+  FHScrollBar.Top     := ActualHeight - FHScrollBar.Height - r.Top;
+  FHScrollBar.Left    := r.Top;
+  FHScrollBar.Width   := HWidth;
+
+  FVScrollBar.Top     := r.Top;
+  FVScrollBar.Left    := ActualWidth - FVScrollBar.Width - r.Top;
+  FVScrollBar.Height  := VHeight;
+
+  FVScrollBar.UpdatePosition;
+  FHScrollBar.UpdatePosition;
+end;
+
+procedure TfpgBaseTextEdit.UpdateGutterCoords;
+var
+  r: TfpgRect;
+begin
+  r := GetClientRect;
+  if Assigned(FGutterPan) and FGutterPan.Visible then
+  begin
+    FGutterPan.UpdateSize;
+    FGutterPan.Left := r.Left;
+    FGutterPan.Top := r.Top;
+    FGutterPan.Width := FGutterPan.Width;
+    FGutterPan.Height := r.Height;
+  end;
+end;
+
+{ This procedure is used to set caret position on keyboard navigation and
+  to set selection if Shift key is pressed. }
+procedure TfpgBaseTextEdit.KeyboardCaretNav(const ShiftState: TShiftState; const AKeyCode: Word);
+var
+  SaveYCaretOffset: Integer;
+
+  procedure CtrlKeyLeftKey;
+  var
+    S: TfpgString;
+    XB: Integer;
+  begin
+    S := GetWordAtPos(CaretPos.X, CaretPos.Y, XB);
+    if (S <> '') and (XB > -1) then
+    begin
+      CaretPos.X := XB;
+    end
+    else
+    begin
+      CaretPos.X := 0;
+    end;
+    if FSelected then
+      FSelection.EndPos := CaretPos;
+
+  end;
+
+  procedure CtrlKeyRightKey;
+  var
+    S: TfpgString;
+    I: Integer;
+    NotFindIt: Boolean;
+  begin
+    if CaretPos.Y <= pred(FLines.Count) then
+    begin
+      NotFindIt := True;
+      while NotFindIt do
+      begin
+        S := GetLineText(CaretPos.Y);
+        I := CaretPos.X;
+        if GetNextWord(S, I) then
+        begin
+          CaretPos.X := I - 1;
+          NotFindIt := False;
+        end
+        else if CaretPos.Y < FLines.Count-1 then
+        begin
+          SetCaretPosV(CaretPos.Y + 1);
+          CaretPos.X := 0;
+          NotFindIt := False;
+        end
+        else
+          NotFindIt := False;
+        if CaretPos.Y > pred(FLines.Count) then
+        begin
+          NotFindIt := False;
+          CaretPos.X := 0;
+        end;
+      end;
+    end
+    else
+      CaretPos.X := 0;
+  end;
+
+begin
+  case AKeyCode of
+    keyLeft:
+        begin
+          if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) and FSelected  then
+          begin
+            FSelected := False;
+            CaretPos := FSelection.StartPos;
+            FSelection.StartPos := CaretPos;
+            Exit;
+          end;
+          CaretPos.X := CaretPos.X - 1;
+          if CaretPos.X < 0 then
+          begin
+            if CaretPos.Y > 0 then
+            begin
+              if CaretPos.Y <= (FLines.Count-1) then
+              begin
+                if (ssCtrl in ShiftState) then
+                begin
+                  SetCaretPosV(CaretPos.Y - 1);
+                  CaretPos.X := UTF8Length(GetLineText(CaretPos.Y));
+                  if FSelected then
+                  begin
+                    FSelection.EndPos := CaretPos;
+                  end;
+                  Exit;
+                end;
+              end;
+              SetCaretPosV(CaretPos.Y - 1);
+              CaretPos.X := UTF8Length(GetLineText(CaretPos.Y));
+            end
+            else
+            begin
+              CaretPos.X := 0;
+            end;
+          end;
+          if ssShift in ShiftState then
+          begin
+            if not FSelected then
+            begin
+              if CaretPos.Y <= (FLines.Count-1) then
+                if CaretPos.X > UTF8Length(GetLineText(CaretPos.Y)) then
+                  CaretPos.X := UTF8Length(GetLineText(CaretPos.Y)) - 1;
+              FSelected := True;
+              FSelection.StartPos := fpgPoint(CaretPos.X+1, CaretPos.Y);
+              if ssCtrl in ShiftState then
+                CtrlKeyLeftKey;
+              FSelection.EndPos := CaretPos;
+            end
+            else
+            begin
+              if ssCtrl in ShiftState then
+                CtrlKeyLeftKey;
+              FSelection.EndPos := CaretPos;
+              if FSelection.EndLine <= (FLines.Count-1) then
+              begin
+                if not FSelection.ValidateEndOffset(GetLineText(FSelection.EndLine)) then
+                begin
+                  CaretPos.X := FSelection.EndPos.X;
+                end;
+              end
+              else
+              begin
+                CaretPos.X := 0;
+                FSelection.EndPos := CaretPos;
+              end;
+            end;
+            FSelected := FSelection.HasContent;
+            Exit;
+          end;
+          if FSelected then
+          begin
+            FSelected := False;
+            CaretPos := FSelection.StartPos;
+          end;
+          if ssCtrl in ShiftState then
+          begin
+            CtrlKeyLeftKey;
+          end;
+          FSelection.StartPos := CaretPos;
+        end;
+
+    keyRight:
+        begin
+          if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) and FSelected  then
+          begin
+            FSelected := False;
+            CaretPos := FSelection.EndPos;
+            FSelection.StartPos := CaretPos;
+            Exit;
+          end;
+          CaretPos.X := CaretPos.X + 1;
+          if CaretPos.X > FMaxScrollH then
+          begin
+            FMaxScrollH := FMaxScrollH + 2;
+            UpdateScrollBars;
+          end;
+          if ssShift in ShiftState then
+          begin
+            if not FSelected then
+            begin
+              FSelected := True;
+              FSelection.StartPos := fpgPoint(CaretPos.X-1, CaretPos.Y);
+              if ssCtrl in ShiftState then
+                CtrlKeyRightKey;
+              FSelection.EndPos := CaretPos;
+            end
+            else
+            begin
+              if ssCtrl in ShiftState then
+                CtrlKeyRightKey;
+              FSelection.EndPos := CaretPos;
+            end;
+            FSelected := FSelection.HasContent;
+            Exit;
+          end;
+          if FSelected then
+          begin
+            FSelected := False;
+            CaretPos := FSelection.EndPos;
+          end;
+          if ssCtrl in ShiftState then
+          begin
+            CtrlKeyRightKey;
+          end;
+          FSelection.StartPos := CaretPos;
+        end;
+
+    keyUp:
+        begin
+          if CaretPos.Y = 0 then
+            Exit;
+          if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) then
+          begin
+            SetCaretPosV(CaretPos.Y - 1);
+            // scroll text
+            if FVScrollBar.Visible and (CaretPos.Y < FTopLine) then
+              FVScrollBar.LineUp;
+            if FSelected then
+            begin
+              FSelected := False;
+              Exit;
+            end;
+            FSelection.StartPos := CaretPos;
+            Exit;
+          end
+          else if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
+          begin
+            SetCaretPosV(CaretPos.Y - 1);
+            if FVScrollBar.Visible then
+              FVScrollBar.LineUp;    // VScrollBarMove(self, FVScrollBar.Position-1);
+            FSelection.StartPos := CaretPos;
+            Exit;
+          end
+          else if not (ssCtrl in ShiftState) and (ssShift in ShiftState) then
+          begin
+            SetCaretPosV(CaretPos.Y - 1);
+            if not FSelected then
+            begin
+              FSelection.StartPos := fpgPoint(CaretPos.X, CaretPos.Y +1);
+              FSelection.EndPos := CaretPos;
+              FSelected := True;
+            end
+            else
+            begin
+              FSelection.EndPos := CaretPos;
+              FSelected := FSelection.HasContent;
+            end;
+          end;
+        end;
+
+    keyDown:
+        begin
+          if Succ(CaretPos.Y) >= FLines.Count then
+            Exit;
+          if ShiftState = [] then
+          begin
+            SetCaretPosV(CaretPos.Y + 1);
+            // scroll text
+            if FVScrollBar.Visible and (CaretPos.Y > FTopLine+FVisLines-2) then
+              FVScrollBar.LineDown;
+            if FSelected then
+            begin
+              FSelected := False;
+              Exit;
+            end;
+            FSelection.StartPos := CaretPos;
+            Exit;
+          end
+          else if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
+          begin
+            SetCaretPosV(CaretPos.Y + 1);
+            if FVScrollBar.Visible then
+              FVScrollBar.LineDown;    // VScrollBarMove(self, FVScrollBar.Position+1);
+            FSelection.StartPos := CaretPos;
+            Exit;
+          end
+          else if not (ssCtrl in ShiftState) and (ssShift in ShiftState) then
+          begin
+            SetCaretPosV(CaretPos.Y + 1);
+            if not FSelected then
+            begin
+              FSelection.StartPos := fpgPoint(CaretPos.X, CaretPos.Y -1);
+              FSelection.EndPos := CaretPos;
+              FSelected     := True;
+            end
+            else
+            begin
+              FSelection.EndPos := CaretPos;
+              FSelected     := FSelection.HasContent;
+            end;
+          end;
+        end;
+
+    keyHome:
+        begin
+          if not (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
+          begin
+            if CaretPos.X = 0 then
+              CaretPos.X := GetLineFirstCharPos(CaretPos.Y)
+            else
+              CaretPos.X := 0;
+            if FSelected then
+            begin
+              FSelected := False;
+              Exit;
+            end;
+          end;
+          if ssCtrl in ShiftState then
+          begin
+            if ssShift in ShiftState then
+            begin
+              if not FSelected then
+              begin
+                FSelection.StartPos := CaretPos;
+                FSelected := True;
+              end;
+              CaretPos.Y := 0;
+              CaretPos.X := 0;
+              FSelection.EndPos := CaretPos;
+            end
+            else
+            begin
+              CaretPos.Y := 0;
+              CaretPos.X := 0;
+            end;
+            ScrollPos_V := 0;
+            UpdateScrollBars;
+            Exit;
+          end;
+          if ssShift in ShiftState then
+          begin
+            if not FSelected then
+            begin
+              FSelection.StartPos := CaretPos;
+              FSelected := True;
+            end;
+            CaretPos.X := 0;
+            FSelection.EndPos := CaretPos;
+            if FSelection.StartLine = FSelection.EndLine then
+              FSelected := FSelection.HasContent;
+          end;
+        end;
+
+    keyEnd:
+        begin
+          if not (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
+          begin
+            if CaretPos.Y <= pred(FLines.Count) then
+              CaretPos.X := Length(GetLineText(CaretPos.Y))
+            else
+              CaretPos.X := 0;
+          end;
+          if ssCtrl in ShiftState then
+          begin
+            if ssShift in ShiftState then
+            begin
+              if not FSelected then
+              begin
+                FSelection.StartPos := CaretPos;
+                FSelected := True;
+              end;
+              SetCaretPosV( pred(FLines.Count));
+              CaretPos.X := Length(GetLineText(CaretPos.Y));
+              FSelection.EndPos := fpgPoint(Length(GetLineText(CaretPos.Y)), pred(FLines.Count));
+            end else
+            begin
+              SetCaretPosV(pred(FLines.Count));
+              CaretPos.X := Length(GetLineText(CaretPos.Y));
+            end;
+            ScrollPos_V := CaretPos.Y - FVisLines;
+            UpdateScrollBars;
+            Exit;
+          end;
+          if ssShift in ShiftState then
+          begin
+            if not FSelected then
+            begin
+              if CaretPos.Y <= pred(FLines.Count) then
+                if CaretPos.X > Length(GetLineText(CaretPos.Y)) then
+                  CaretPos.X := Length(GetLineText(CaretPos.Y));
+              FSelection.StartPos := CaretPos;
+              FSelected := True;
+            end;
+            if CaretPos.Y <= pred(FLines.Count) then
+              CaretPos.X := Length(GetLineText(CaretPos.Y))
+            else
+              CaretPos.X := 0;
+            FSelection.EndPos := CaretPos;
+            if FSelection.EndLine = FSelection.StartLine then
+              FSelected := FSelection.HasContent;
+          end;
+        end;
+
+    keyPageUp, keyPageDown:
+        begin
+          if not FSelected then
+          begin
+            FSelection.StartPos := CaretPos;
+          end;
+          SaveYCaretOffset := CaretPos.Y - FTopLine;
+          if AKeyCode = keyPageUp then
+          begin
+            if VPos = 0 then
+            begin
+              CaretPos.Y := 0;
+              CaretPos.X := 0;
+            end
+            else
+            begin
+              // scroll text
+              if FVScrollBar.Visible then
+                FVScrollBar.PageUp;
+              // restore caret at same line offset as before
+              SetCaretPosV(FTopLine + SaveYCaretOffset);
+            end;
+          end
+          else
+          begin  { PageDown handling }
+            if VPos > (FLines.Count - FVisLines) then
+            begin
+              SetCaretPosV(FLines.Count-1);
+              CaretPos.X := UTF8Length(GetLineText(CaretPos.Y));
+            end
+            else
+            begin
+              // scroll text
+              if FVScrollBar.Visible then
+                FVScrollBar.PageDown;
+              // restore caret at same line offset as before
+              SetCaretPosV(FTopLine + SaveYCaretOffset);
+            end;
+          end;
+          if ssShift in ShiftState then
+          begin
+            FSelection.EndPos := CaretPos;
+            if not FSelected then
+              FSelected := True;
+          end;
+        end;
+  end;
+end;
+
+procedure TfpgBaseTextEdit.InitMemoObjects;
+begin
+  FGutterPan := TfpgGutter.CreateGutter(Self);
+  with FGutterPan do
+  begin
+    Left    := -Width - 1;
+    Visible := False;
+    LineGranularity:=5;
+  end;
+end;
+
+procedure TfpgBaseTextEdit.SetRightEdge(const AValue: Boolean);
+begin
+  if FRightEdge <> AValue then
+  begin
+    FRightEdge := AValue;
+    Invalidate;
+  end;
+end;
+
+procedure TfpgBaseTextEdit.SetRightEdgeCol(const AValue: Integer);
+var
+  v: Integer;
+begin
+  v := AValue;
+  if v < 20 then v := 20;
+  if v > 160 then v := 160;
+  if FRightEdgeCol <> v then
+  begin
+    FRightEdgeCol := v;
+    if FRightEdge then
+      Invalidate;
+  end;
+end;
+
+class procedure TfpgBaseTextEdit.ValidateCaretPosition(var APoint: TfpgPoint; ALines: TStrings);
+var
+  S: String;
+  L: PtrInt;
+begin
+  if (APoint.Y < 0) or (APoint.Y > ALines.Count-1) then
+    S := ''
+  else
+    S := ALines[APoint.Y];
+  L := Length8(S);
+  APoint.X := Min(L, APoint.X);
+end;
+
+procedure TfpgBaseTextEdit.HandleShow;
+begin
+  inherited HandleShow;
+  HandleResize(ActualWidth, ActualHeight);
+end;
+
+procedure TfpgBaseTextEdit.HandleResize(AWidth, AHeight: TfpgCoord);
+begin
+  inherited HandleResize(AWidth, AHeight);
+  if WindowAllocated then
+  begin
+    UpdateCharBounds;
+    UpdateScrollBars;
+    UpdateGutterCoords;
+  end;
+end;
+
+procedure TfpgBaseTextEdit.HandlePaint;
+begin
+  inherited HandlePaint;
+  if FLineChanged > -1 then
+  begin
+    { TODO: We would like Vertical and Underline cursor painting at some point }
+    DrawLine(FLineChanged, CaretPos.Y * FChrH);
+    FLineChanged := -1;
+    Exit;
+  end;
+
+  // normal house keeping
+  fpgStyle.DrawControlFrame(Canvas, 0, 0, ActualWidth, ActualHeight);
+  Canvas.SetClipRect(GetClientRect);
+  Canvas.Clear(BackgroundColor);
+  Canvas.SetFont(Font);
+
+  // do the actual drawing
+  DrawVisible;
+  DrawCaret(CaretPos.X, CaretPos.Y);
+  Canvas.ClearClipRect;
+
+  // The little square in the bottom right corner
+  if FHScrollBar.Visible and FVScrollBar.Visible then
+  begin
+    Canvas.SetColor(clButtonFace);
+    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.ActualWidth,
+                         FVScrollBar.Top+FVScrollBar.ActualHeight,
+                         FVScrollBar.ActualWidth,
+                         FHScrollBar.ActualHeight);
+  end;
+end;
+
+procedure TfpgBaseTextEdit.HandleMouseEnter;
+begin
+  inherited HandleMouseEnter;
+  MouseCursor := mcIBeam;
+end;
+
+procedure TfpgBaseTextEdit.HandleMouseExit;
+begin
+  inherited HandleMouseExit;
+  MouseCursor := mcDefault;
+end;
+
+procedure TfpgBaseTextEdit.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+var
+  RNo: Integer;
+  CNo: Integer;
+begin
+  inherited HandleLMouseDown(x, y, shiftstate);
+  if FGutterPan.Visible and (X <= FGutterPan.Width) then Exit;  //==>
+
+  GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, RNo, CNo);
+  CaretPos.X := CNo;
+  SetCaretPosV(RNo);
+
+  { Ctrl+Click: position caret then fire the OnCtrlClick event }
+  if (ssCtrl in shiftstate) and not (ssShift in shiftstate) then
+  begin
+    CheckCaretChanged;
+    if Assigned(FOnCtrlClick) then
+      FOnCtrlClick(Self);
+    Exit;  //==>
+  end;
+
+  if FSelection.HasContent and FSelection.Contains(fpgPoint(CNo, RNo)) then
+  begin
+    FSelDrag := sdMightDrag;
+//    writeln('  SelDrag is True!!!!');
+    Exit; //==>
+  end;
+  if not (ssShift in ShiftState) then
+  begin
+    if FSelected then
+    begin
+      { Erase old selection, if any... }
+      FSelected := False;
+    end;
+    FSelection.StartPos := fpgPoint(CNo, RNo);
+//    FSelected := True;
+    FSelMouseDwn := True;
+  end
+  else
+  begin
+    FSelection.StartPos := FSelection.Origin;
+    FSelection.EndPos := fpgPoint(CNo, RNo);
+    FSelected := True;
+  end;
+  Invalidate;
+  CheckCaretChanged;
+end;
+
+procedure TfpgBaseTextEdit.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleLMouseUp(x, y, shiftstate);
+
+  if not (ssShift in shiftstate) and (FSelDrag = sdMightDrag) and not FIsMultiClick and FSelected then
+  begin
+    FSelection.StartPos := CaretPos;
+    FSelected := False;
+    Invalidate;
+  end;
+
+  if FSelDrag <= sdMightDrag then
+    FSelDrag:=sdNone;
+
+  FSelMouseDwn:=False;
+  FIsMultiClick:=False;
+end;
+
+procedure TfpgBaseTextEdit.HandleMouseMove(x, y: integer; btnstate: word;
+  shiftstate: TShiftState);
+var
+  RNo, CNo: Integer;
+begin
+  inherited HandleMouseMove(x, y, btnstate, shiftstate);
+
+  { Show hand cursor when Ctrl is held, indicating Ctrl+Click navigation }
+  if Assigned(FOnCtrlClick) and (ssCtrl in shiftstate) then
+    MouseCursor := mcHand
+  else
+    MouseCursor := mcIBeam;
+
+  if FSelMouseDwn and (MOUSE_LEFT = btnstate) then
+  begin
+    GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, RNo, CNo);
+    SetCaretPosH(CNo);
+    SetCaretPosV(RNo);
+    FSelection.StartPos := FSelection.Origin;
+    FSelection.EndPos := fpgPoint(CNo, RNo);
+    FSelected:=True;
+    Invalidate;
+    CheckCaretChanged;
+  end;
+end;
+
+function TfpgBaseTextEdit.calcmousewheeldelta(var info: TfpgMsgParmMouse;
+               const fmin,fmax,deltamin,deltamax: double): double;
+var
+  frequ: double;
+begin
+  if (FLastScrollEventTime <> 0) and (FLastScrollEventTime <> info.timestamp) then
+  begin
+    frequ := 0.00003 /(info.timestamp-FLastScrollEventTime); // Hz
+    {$IFDEF gDEBUG}
+    writeln('frequ = ', Format('%3.9f', [frequ]));
+    {$ENDIF}
+    if frequ > fmax then
+    begin
+      frequ := fmax;
+    end;
+    if frequ < fmin then
+    begin
+      frequ := fmin;
+    end;
+    result := (frequ*(deltamax-deltamin)+(deltamin*fmax-deltamax*fmin)) / (fmax-fmin);
+  end
+  else
+  begin
+    result := deltamin;
+  end;
+{
+  if d > 0 then  // down
+  begin
+    d := - d;
+  end;
+}
+  {$IFDEF gDEBUG}
+  writeln('result = ', Format('%3.6f', [result]));
+  {$ENDIF}
+end;
+
+function TfpgBaseTextEdit.mousewheelacceleration(const avalue: double): double;
+var
+  info: TfpgMsgParmMouse;
+  d: double;
+begin
+  info.timestamp := FLastScrollEventTime + FLastScrollEventTime -
+                     FLastScrollEventTimeBefore;
+  d := calcmousewheeldelta(info,fmousewheelfrequmin,fmousewheelfrequmax,1,
+                      fmousewheelaccelerationmax);
+  result := avalue * d;
+end;
+
+function TfpgBaseTextEdit.mousewheelacceleration(const avalue: integer): integer;
+begin
+  result:= round(mousewheelacceleration(avalue*1.0));
+end;
+
+function TfpgBaseTextEdit.FindReplaceProc(TextToFind: TfpgString;
+    FindOptions: TfpgFindOptions; Backward, ReplaceMode: Boolean;
+    var ReplaceText: Boolean): Boolean;
+var
+  SrcBegin, SrcEnd, I, WordPos, ScrollX, ScrollY, Fill: Integer;
+  SLine, SrcWord: TfpgString;
+  FindPos: TPoint;
+  AllowScroll, ContinueSrc: Boolean;
+begin
+  Result := False;
+  if foEntireScope in FindOptions then
+  begin
+    SrcBegin := 0;
+    SrcEnd := pred(FLines.Count);
+  end
+  else
+  begin
+    SrcBegin := CaretPos.Y;
+    if Backward then
+      SrcEnd := 0
+    else
+      SrcEnd := pred(FLines.Count);
+  end;
+  if not (foMatchCase in FindOptions) then
+    SrcWord := UpperCase(TextToFind)
+  else
+    SrcWord := TextToFind;
+  if SrcBegin <= SrcEnd then
+  begin
+    for I := SrcBegin to SrcEnd do
+    begin
+      SLine := GetLineText(I);
+      if not (foMatchCase in FindOptions) then
+        SLine := UpperCase(SLine);
+      FindPos.x := 0;
+      WordPos := Pos(SrcWord, SLine);
+      while WordPos > 0 do
+      begin
+        if (I = CaretPos.Y) and (WordPos < CaretPos.X) then
+        begin
+          for Fill := WordPos to WordPos + Length(SrcWord) do
+            SLine[Fill] := '*';
+          FindPos.x := FindPos.x + WordPos;
+          WordPos := Pos(SrcWord, SLine);
+          Continue;
+        end;
+        FindPos.x := WordPos;
+        FindPos.y := I;
+        AllowScroll := True;
+        ContinueSrc := False;
+        if foWholeWords in FindOptions then
+        begin
+          if WordPos > 1 then
+            if (SLine[WordPos - 1] in ['a'..'z', 'A'..'Z']) then
+            begin
+              for Fill := WordPos to WordPos + Length(SrcWord) do
+                SLine[Fill] := '*';
+              FindPos.x := FindPos.x + WordPos;
+              WordPos := Pos(SrcWord, SLine);
+              Continue;
+            end;
+          if WordPos + Length(SrcWord) <= Length(SLine) then
+            if (SLine[WordPos + Length(SrcWord)] in ['a'..'z', 'A'..'Z']) then
+            begin
+              for Fill := WordPos to WordPos + Length(SrcWord) do
+                SLine[Fill] := '*';
+              FindPos.x := FindPos.x + WordPos;
+              WordPos := Pos(SrcWord, SLine);
+              Continue;
+            end;
+        end;
+        FSelection.StartPos := fpgPoint(FindPos.X -1, I);
+        FSelection.EndPos   := fpgPoint(FindPos.X + Length(SrcWord) - 1, I);
+        FSelected := True;
+        SetCaretPosV(I);
+        CaretPos.X := FindPos.x + Length(SrcWord) - 1;
+        if AllowScroll then
+        begin
+          ScrollX := 0;
+          ScrollY := FTopLine * FChrH;
+          if ((FindPos.x + Length(SrcWord)) * FChrW) - FChrW > GetClientRect.Width then
+            ScrollX := (FindPos.x * FChrW) - 2 * FChrW;
+          if (I < FTopLine) or (I > (FTopLine + FVisLines - 2)) then
+            ScrollY := (I-10) * FChrH;  // move selection into view
+          ScrollTo(ScrollX, ScrollY);
+        end;
+        Result := True;
+        Invalidate;
+        if ReplaceMode then
+        begin
+          if Assigned(FOnReplaceText) then
+            FOnReplaceText(Self, FindPos, AllowScroll, ReplaceText);
+//          RepPos := FindPos;
+        end
+        else
+        begin
+          if Assigned(FOnFindText) then
+            FOnFindText(Self, FindPos, AllowScroll);
+        end;
+        for Fill := WordPos to WordPos + Length(SrcWord) do
+          SLine[Fill] := '*';
+        WordPos := Pos(SrcWord, SLine);
+        if not ContinueSrc then
+          Exit;   //==>
+      end;  { while }
+    end;  { for I ... }
+  end { if..else }
+  else
+  begin
+    for I := SrcBegin downto SrcEnd do
+    begin
+      SLine := GetLineText(I);
+      if not (foMatchCase in FindOptions) then
+        SLine := UpperCase(SLine);
+      FindPos.x := 0;
+      WordPos := Pos(SrcWord, SLine);
+      while WordPos > 0 do
+      begin
+        if (I = CaretPos.Y) and (WordPos < CaretPos.X) then
+        begin
+          for Fill := WordPos to WordPos + Length(SrcWord) do
+            SLine[Fill] := '*';
+          FindPos.x := FindPos.x + WordPos;
+          WordPos := Pos(SrcWord, SLine);
+          Continue;
+        end;
+        FindPos.x := WordPos;
+        FindPos.y := I;
+        AllowScroll := True;
+        ContinueSrc := False;
+        if foWholeWords in FindOptions then
+        begin
+          if WordPos > 1 then
+            if (SLine[WordPos - 1] in ['a'..'z', 'A'..'Z']) then
+            begin
+              for Fill := WordPos to WordPos + Length(SrcWord) do
+                SLine[Fill] := '*';
+              FindPos.x := FindPos.x + WordPos;
+              WordPos := Pos(SrcWord, SLine);
+              Continue;
+            end;
+          if WordPos + Length(SrcWord) <= Length(SLine) then
+            if (SLine[WordPos + Length(SrcWord)] in ['a'..'z', 'A'..'Z']) then
+            begin
+              for Fill := WordPos to WordPos + Length(SrcWord) do
+                SLine[Fill] := '*';
+              FindPos.x := FindPos.x + WordPos;
+              WordPos := Pos(SrcWord, SLine);
+              Continue;
+            end;
+        end;
+        FSelection.StartPos := fpgPoint(FindPos.x - 1, I);
+        FSelection.EndPos   := fpgPoint(FindPos.x + Length(SrcWord) - 1, I);
+        FSelected := True;
+        CaretPos.Y := I;
+        CaretPos.X := FindPos.x + Length(SrcWord) - 1;
+        if AllowScroll then
+        begin
+          ScrollX := 0;
+          ScrollY := FTopLine * FChrH;
+          if ((FindPos.x + Length(SrcWord)) * FChrW) - FChrW > GetClientRect.Width then
+            ScrollX := (FindPos.x * FChrW) - (2 * FChrW);
+          if (I < FTopLine) or (I > (FTopLine + FVisLines - 2)) then
+            ScrollY := (I-10) * FChrH;  // move selection into view
+          ScrollTo(ScrollX, ScrollY);
+        end;
+        Result := True;
+        Invalidate;
+        if ReplaceMode then
+        begin
+          if Assigned(FOnReplaceText) then
+            FOnReplaceText(Self, FindPos, AllowScroll, ReplaceText);
+//          RepPos := FindPos;
+        end
+        else
+        begin
+          if Assigned(FOnFindText) then
+            FOnFindText(Self, FindPos, AllowScroll);
+        end;
+        for Fill := WordPos to WordPos + Length(SrcWord) do
+          SLine[Fill] := '*';
+        WordPos := Pos(SrcWord, SLine);
+        if not ContinueSrc then
+          Exit;   //==>
+      end;  { while }
+    end;  { for I ... }
+  end;
+end;
+
+procedure TfpgBaseTextEdit.CopyToClipboard;
+begin
+  if not FSelected then
+    Exit;
+  fpgClipboard.Text := GetSelectedText;
+end;
+
+procedure TfpgBaseTextEdit.CutToClipboard;
+begin
+  if not FSelected then
+    Exit;
+  CopyToClipboard;
+  DeleteSelection;
+end;
+
+procedure TfpgBaseTextEdit.PasteFromClipboard;
+begin
+  if FSelected then
+  begin
+    FUndoManager.BeginCompound;
+    DeleteSelection;
+    InsertTextAtPos(fpgClipboard.Text, CaretPos.X, CaretPos.Y);
+    FUndoManager.EndCompound;
+  end
+  else
+    InsertTextAtPos(fpgClipboard.Text, CaretPos.X, CaretPos.Y);
+
+  // this could be an option
+  FSelected:=False;
+end;
+
+procedure TfpgBaseTextEdit.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
+    delta: smallint);
+var
+  msg: TfpgMessageParams;
+  ldelta: integer;
+begin
+  inherited HandleMouseScroll(x, y, shiftstate, delta);
+  FillMem(@msg, sizeof(msg), 0);  // zero out the record - initialize it
+  msg.mouse.x := x;
+  msg.mouse.y := y;
+  msg.mouse.shiftstate := shiftstate;
+
+  FLastScrollEventTimeBefore := FLastScrollEventTime;
+  FLastScrollEventTime := Now;
+
+  { calculate a modified delta based on mouse scroll sensitivity setting }
+  ldelta := round(mousewheelacceleration(delta*fwheelsensitivity));
+
+  msg.mouse.delta := ldelta;
+
+  fpgPostMessage(self, FVScrollBar, FPGM_SCROLL, msg);
+end;
+
+procedure TfpgBaseTextEdit.HandleMultiClick(count: Integer; x, y: integer;
+  button: word; shiftstate: TShiftState);
+var
+  WordStart: Integer;
+  W: TfpgString;
+begin
+  case count of
+    2:  begin
+          W := GetWordAtPos(CaretPos.X, CaretPos.Y, WordStart);
+          if W <> '' then
+          begin
+            FSelection.StartPos := fpgPoint(WordStart, CaretPos.Y);
+            FSelection.EndPos   := fpgPoint(WordStart + Length8(W), CaretPos.Y);
+          end;
+        end;
+    3:  begin
+          FSelection.StartPos := fpgPoint(0, CaretPos.Y);
+          FSelection.EndPos := fpgPoint(Length8(GetLineText(CaretPos.Y)), CaretPos.Y);
+        end;
+    // 4: { select paragraph}
+  end;
+  if FSelection.HasContent then
+  begin
+    FSelected:=True;
+    Invalidate;
+    FIsMultiClick:=True;
+  end;
+  CheckCaretChanged;
+end;
+
+procedure TfpgBaseTextEdit.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
+var
+  SLine: TfpgString;
+  AddS: TfpgString;
+  lStrLen: PtrInt;
+  X: Integer;
+  CaretScroll: Boolean;
+  lIndentOffset: integer;
+  UndoAction: TUndoAction;
+begin
+  CaretScroll := False;
+  case CheckClipboardKey(keycode, shiftstate) of
+    ckCopy:
+      begin
+        CopyToClipboard;
+        consumed := True;
+      end;
+
+    ckPaste:
+      begin
+//        if not ReadOnly then
+          PasteFromClipboard;
+          consumed := True;
+      end;
+
+    ckCut:
+      begin
+        CutToClipboard;
+        consumed := True;
+      end;
+  end;
+
+  { Undo/Redo key bindings }
+  if not consumed then
+  begin
+    AddS := UpperCase(KeycodeToText(keycode, []));
+    if (shiftstate = [ssCtrl]) and (AddS = 'Z') then
+    begin
+      Undo;
+      consumed := True;
+    end
+    else if (shiftstate = [ssCtrl, ssShift]) and (AddS = 'Z') then
+    begin
+      Redo;
+      consumed := True;
+    end;
+  end;
+
+  { Add lines as we go, so we can cursor past EOF. }
+  { todo: This behaviour should be optional }
+  if CaretPos.Y > pred(FLines.Count) then
+  begin
+    FLines.Add('');
+    FVScrollBar.Max := FVScrollBar.Max + 1;
+    consumed := True;
+    Exit; //==>
+  end;
+
+  SLine := GetLineText(CaretPos.Y);
+
+  if not consumed then
+  begin
+  case keycode of
+    keyBackspace:
+        begin
+          if FSelected then
+          begin
+            FUndoManager.BreakMerge;
+            DeleteSelection;
+            consumed := True;
+            Exit;
+          end;
+          { Snap cursor to line end if beyond it }
+          if UTF8Length(SLine) >= CaretPos.X then
+            X := CaretPos.X
+          else
+          begin
+            X := UTF8Length(SLine);
+            CaretPos.X := X;
+          end;
+          if X > 0 then
+          begin
+            { Delete character before cursor }
+            UndoAction := TDeleteTextAction.Create(TStringList(FLines), CaretPos.Y, X - 1, 1);
+            UndoAction.CaretBefore := CaretPos;
+            FUndoManager.ExecuteAction(UndoAction);
+            CaretPos.X := CaretPos.X - 1;
+            UndoAction.CaretAfter := CaretPos;
+          end
+          else if CaretPos.Y > 0 then
+          begin
+            { At start of line — join with previous }
+            FUndoManager.BreakMerge;
+            X := UTF8Length(GetLineText(CaretPos.Y - 1));  { join point = end of previous line }
+            UndoAction := TJoinLinesAction.Create(TStringList(FLines), CaretPos.Y);
+            UndoAction.CaretBefore := CaretPos;
+            FUndoManager.ExecuteAction(UndoAction);
+            SetCaretPosV(CaretPos.Y - 1);
+            CaretPos.X := X;
+            UndoAction.CaretAfter := CaretPos;
+          end;
+          FSelection.StartPos := CaretPos;
+          consumed := True;
+        end;
+
+    keyTab:
+        begin
+          if (ssShift in ShiftState) then
+          begin
+            { Shift+Tab: unindent selected lines or current line }
+            if not FSelected then
+            begin
+              { Temporarily select current line so BlockUnindent can operate }
+              FSelection.FStartPos := fpgPoint(0, CaretPos.Y);
+              FSelection.FEndPos := fpgPoint(UTF8Length(GetLineText(CaretPos.Y)), CaretPos.Y);
+              FSelected := True;
+              BlockUnindent;
+              { Clear the temporary selection }
+              FSelected := False;
+              FSelection.StartPos := CaretPos;
+            end
+            else
+              BlockUnindent;
+            consumed := True;
+          end
+          else if FSelected then
+          begin
+            { Tab with selection: indent all selected lines }
+            BlockIndent;
+            consumed := True;
+          end
+          else
+          begin
+            { Tab without selection: insert spaces/tab at cursor }
+            FUndoManager.BreakMerge;
+            if FUseElasticTabstops then
+              AddS := #9
+            else
+              AddS := StringOfChar(' ', FIndentSize);
+            UndoAction := TInsertTextAction.Create(TStringList(FLines), CaretPos.Y, CaretPos.X, AddS);
+            UndoAction.CaretBefore := CaretPos;
+            FUndoManager.ExecuteAction(UndoAction);
+            CaretPos.X := CaretPos.X + UTF8Length(AddS);
+            UndoAction.CaretAfter := CaretPos;
+            FSelection.StartPos := CaretPos;
+            consumed := True;
+          end;
+        end;
+
+    keyReturn:
+        begin
+          FUndoManager.BreakMerge;
+
+          { Compute auto-indent from current line }
+          lIndentOffset := 0;
+          if AutoIndent then
+          begin
+            lStrLen := UTF8Length(SLine);
+            x := 1;
+            while (x <= lStrLen) and AnsiMatchStr(fpgCharAt(SLine, x), [#9, ' ']) do
+              Inc(x);
+            lIndentOffset := x - 1;
+          end;
+
+          AddS := DupeString(' ', lIndentOffset);
+          if lIndentOffset > 0 then
+            UndoAction := TSplitLineAction.Create(TStringList(FLines), CaretPos.Y, CaretPos.X, AddS)
+          else
+            UndoAction := TSplitLineAction.Create(TStringList(FLines), CaretPos.Y, CaretPos.X);
+          UndoAction.CaretBefore := CaretPos;
+          FUndoManager.ExecuteAction(UndoAction);
+
+          SetCaretPosV(CaretPos.Y + 1);
+          if AutoIndent then
+            CaretPos.X := lIndentOffset
+          else
+            CaretPos.X := 0;
+          UndoAction.CaretAfter := CaretPos;
+          CaretScroll := True;
+          FSelection.StartPos := CaretPos;
+          consumed := True;
+        end;
+
+    keyLeft, keyRight, keyUp, keyDown, keyHome, keyEnd, keyPrior, keyNext:
+        begin
+          { Ctrl+PageUp/PageDown: let parent handle tab switching }
+          if (ssCtrl in ShiftState) and
+             ((keycode = keyPrior) or (keycode = keyNext)) and
+             not (ssShift in ShiftState) then
+          begin
+            { do nothing - let key bubble up to form }
+          end
+          { Ctrl+Shift+Up/Down: let parent handle interface/implementation nav }
+          else if ([ssCtrl, ssShift] <= ShiftState) and
+             ((keycode = keyUp) or (keycode = keyDown)) then
+          begin
+            { do nothing - let key bubble up to form }
+          end
+          { Alt+Left/Right: let parent handle cursor history navigation }
+          else if (ssAlt in ShiftState) and not (ssCtrl in ShiftState) and
+             not (ssShift in ShiftState) and
+             ((keycode = keyLeft) or (keycode = keyRight)) then
+          begin
+            { do nothing - let key bubble up to form }
+          end
+          else
+          begin
+            KeyboardCaretNav(ShiftState, keycode);
+            CaretScroll := True;
+            consumed := True;
+          end;
+        end;
+
+    keyDelete:
+        begin
+          if FSelected then
+          begin
+            FUndoManager.BreakMerge;
+            DeleteSelection;
+            consumed := True;
+            Exit;
+          end;
+          if CaretPos.Y > pred(FLines.Count) then
+            Exit;
+          SLine := GetLineText(CaretPos.Y);
+          if UTF8Length(SLine) > CaretPos.X then
+          begin
+            { Delete character at cursor }
+            UndoAction := TDeleteTextAction.Create(TStringList(FLines), CaretPos.Y, CaretPos.X, 1);
+            UndoAction.CaretBefore := CaretPos;
+            FUndoManager.ExecuteAction(UndoAction);
+            UndoAction.CaretAfter := CaretPos;  { cursor stays }
+          end
+          else if CaretPos.Y + 1 <= pred(FLines.Count) then
+          begin
+            { At/beyond end of line — join next line onto this one }
+            FUndoManager.BreakMerge;
+            UndoAction := TJoinLinesAction.Create(TStringList(FLines), CaretPos.Y + 1);
+            UndoAction.CaretBefore := CaretPos;
+            FUndoManager.ExecuteAction(UndoAction);
+            UndoAction.CaretAfter := CaretPos;
+          end
+          else if (SLine = '') and (FLines.Count > 1) then
+          begin
+            { Empty line with content above — join onto previous }
+            FUndoManager.BreakMerge;
+            UndoAction := TJoinLinesAction.Create(TStringList(FLines), CaretPos.Y);
+            UndoAction.CaretBefore := CaretPos;
+            FUndoManager.ExecuteAction(UndoAction);
+            SetCaretPosV(CaretPos.Y - 1);
+            SetCaretPosH(UTF8Length(GetLineText(CaretPos.Y)));
+            UndoAction.CaretAfter := CaretPos;
+          end;
+          consumed := True;
+        end;
+  end;  // case keycode
+  end; // if not consumed
+
+  if CaretScroll then
+  begin
+    if CaretPos.X > HPos + FVisCols then
+      ScrollPos_H := CaretPos.X - FVisCols
+    else if CaretPos.X < HPos then
+      ScrollPos_H := CaretPos.X;
+
+    if CaretPos.Y < (FTopLine+1) then
+      ScrollPos_V := CaretPos.Y
+    else if CaretPos.Y > (FTopLine + FVisLines - 2) then
+      ScrollPos_V := CaretPos.Y - FVisLines + 2;
+  end;
+
+  if not consumed then
+    inherited HandleKeyPress(keycode, shiftstate, consumed);
+
+  if consumed then
+    Invalidate;
+  CheckCaretChanged;
+end;
+
+procedure TfpgBaseTextEdit.HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean);
+var
+  SLine: TfpgString;
+  InsertCol: Integer;
+  InsertText: string;
+  PadLen: Integer;
+  Action: TInsertTextAction;
+begin
+  if not consumed then
+  begin
+    { Tab is fully handled in HandleKeyPress — skip it here to avoid
+      a spurious DeleteSelection when a selection is active. }
+    if AText = #9 then
+      Exit;
+
+    if FSelected then
+    begin
+      FUndoManager.BreakMerge;
+      DeleteSelection;
+    end;
+    // Handle only printable characters
+    // UTF-8 characters beyond ANSI range are supposed to be printable
+    if ((Ord(AText[1]) > 31) and (Ord(AText[1]) < 127)) or (Length(AText) > 1) then
+    begin
+      SLine := GetLineText(CaretPos.Y);
+
+      { cursor was somewhere in whitespace, so we need to fill up the spaces }
+      if UTF8Length(SLine) < CaretPos.X then
+      begin
+        PadLen := CaretPos.X - UTF8Length(SLine);
+        InsertText := StringOfChar(' ', PadLen) + AText;
+        InsertCol := UTF8Length(SLine);
+      end
+      else
+      begin
+        InsertText := AText;
+        InsertCol := CaretPos.X;
+      end;
+
+      Action := TInsertTextAction.Create(TStringList(FLines), CaretPos.Y, InsertCol, InsertText);
+      Action.CaretBefore := CaretPos;
+      FUndoManager.ExecuteAction(Action);
+      CaretPos.X := CaretPos.X + 1;
+      Action.CaretAfter := CaretPos;
+      FSelection.StartPos := CaretPos;
+      consumed := True;
+    end;
+  end;
+
+  if consumed then
+    Repaint
+  else
+    inherited HandleKeyChar(AText, shiftstate, consumed);
+  CheckCaretChanged;
+end;
+
+function TfpgBaseTextEdit.GetDefaultDropHandler: TfpgDropHandler;
+begin
+  if not Assigned(FDefaultDropHandler) then
+    FDefaultDropHandler := TfpgDropEventHandler.Create(@DropEnter, nil, @DropDrop, @DropMove);
+
+  Result := FDefaultDropHandler;
+end;
+
+procedure TfpgBaseTextEdit.DrawVisible;
+var
+  I, Y, cntVis: Integer;
+begin
+  // Calculate elastic tabstops if enabled
+  if FUseElasticTabstops then
+    CalculateElasticTabstops;
+
+  Y := 0;
+  cntVis := 1;
+  GetSelBounds(StartNo, EndNo, StartOffs, EndOffs);
+
+  // Draw right edge line first, so text can draw over it.
+  if FRightEdge then
+  begin
+    if not FGutterPan.Visible then
+    begin
+      with Canvas do
+      begin
+        Canvas.Color := clShadow1; // FEnvironment.RightEdgeColor;
+        Canvas.DrawLine((FRightEdgeCol * FChrW) - (HPos * FChrW), GetClientRect.Top, (FRightEdgeCol * FChrW) - (HPos * FChrW), GetClientRect.Height);
+      end;
+    end else
+      with Canvas do
+      begin
+        Canvas.Color := clShadow1; // FEnvironment.RightEdgeColor;
+        Canvas.DrawLine((FRightEdgeCol * FChrW) - (HPos * FChrW) + FGutterPan.ActualWidth, GetClientRect.Top, (FRightEdgeCol * FChrW) - (HPos * FChrW) + FGutterPan.ActualWidth, GetClientRect.Height);
+      end;
+  end;
+
+  // Draw lines of text
+  for I := FTopLine to FTopLine + FVisLines do
+  begin
+    DrawLine(I, Y);
+    Y := Y + FChrH;
+    cntVis := cntVis + 1;
+    if cntVis > FVisLines then
+      Break;  //==>
+  end;
+end;
+
+procedure TfpgBaseTextEdit.DrawLine(const ALineIndex, Y: Integer);
+var
+  X: Integer;
+  GSz: Integer;
+  HighlightCol, BgCol: TfpgColor;
+  R: TfpgRect;
+begin
+  if FGutterPan.Visible then
+  begin
+    GSz := FGutterPan.Width + GetClientRect.Left + 1;
+    if FGutterPan.ShowNum and (FGutterPan.StartNum <> FTopLine + 1) then
+    begin
+      FGutterPan.StartNum := FTopLine + 1;
+      FGutterPan.Invalidate;
+    end;
+  end
+  else
+    GSz := GetClientRect.Left + 1; // gutter size if no gutter panel
+
+  { Execution line highlight (debugger) — visible even when not focused.
+    Takes priority over the caret line highlight. }
+  if (FExecutionLine >= 0) and (ALineIndex = FExecutionLine) then
+  begin
+    R.SetRect(GSz, Y, GetClientRect.Width, FChrH);
+    Canvas.Color := FExecutionLineColor;
+    Canvas.FillRectangle(R);
+    if FRightEdge then
+    begin
+      Canvas.Color := clShadow1;
+      X := (FRightEdgeCol * FChrW) - (HPos * FChrW);
+      if FGutterPan.Visible then
+        X := X + FGutterPan.ActualWidth;
+      Canvas.DrawLine(X, Y, X, Y + FChrH);
+    end;
+  end
+  { Current line highlighting — fill full line width before text renders on top }
+  else if (ALineIndex = CaretPos.Y) and Focused then
+  begin
+    if FLineHighlightColor <> clNone then
+      HighlightCol := FLineHighlightColor
+    else
+    begin
+      { Auto-calculate: slightly darken or lighten the background }
+      BgCol := fpgColorToRGB(BackgroundColor);
+      if fpgGetRed(BgCol) + fpgGetGreen(BgCol) + fpgGetBlue(BgCol) > 384 then
+        HighlightCol := fpgDarker(BgCol, 95)   { light background → darken slightly }
+      else
+        HighlightCol := fpgLighter(BgCol, 95);  { dark background → lighten slightly }
+    end;
+    R.SetRect(GSz, Y, GetClientRect.Width, FChrH);
+    Canvas.Color := HighlightCol;
+    Canvas.FillRectangle(R);
+    { Redraw right edge segment over the highlight }
+    if FRightEdge then
+    begin
+      Canvas.Color := clShadow1;
+      X := (FRightEdgeCol * FChrW) - (HPos * FChrW);
+      if FGutterPan.Visible then
+        X := X + FGutterPan.ActualWidth;
+      Canvas.DrawLine(X, Y, X, Y + FChrH);
+    end;
+  end;
+
+  if ALineIndex < FLines.Count then
+  begin
+    X := -(HPos * FChrW) + GSz;
+    FormatLine(ALineIndex, X, Y);
+  end;
+end;
+
+procedure TfpgBaseTextEdit.FormatLine(const ALineIndex, X, Y: Integer);
+var
+  S, CorrectS, SS: TfpgString;
+  TI, Si, Ei, T: Integer;
+  R: TfpgRect;
+  AllowDraw: Boolean;
+  cells: TStringList;
+  positions: TIntegerList;
+  i, currentX: Integer;
+begin
+  if FLines.Count = 0 then
+    Exit; //==>
+  if (ALineIndex < 0) or (ALineIndex > FLines.Count-1) then
+    Exit; //==>
+
+  S := GetLineText(ALineIndex);
+  if Length(s) = 0 then
+    Exit; // no text to draw, so we are done
+
+  // Handle elastic tabstops if enabled
+  if FUseElasticTabstops and Assigned(FElasticTabstops) and
+     (ALineIndex < TTabstopsList(FElasticTabstops).Count) and (Pos(#9, S) > 0) then
+  begin
+    // Elastic tabstops rendering
+    cells := TStringList.Create;
+    try
+      cells.Delimiter := #9;
+      cells.StrictDelimiter := True;
+      cells.DelimitedText := S;
+      positions := TTabstopsList(FElasticTabstops)[ALineIndex];
+
+      // Allow custom drawing via OnDrawLine event
+      R.SetRect(X, Y, Width, FChrH);
+      AllowDraw := True;
+      if Assigned(FOnDrawLine) then
+        FOnDrawLine(self, S, ALineIndex, Canvas, R, AllowDraw);
+
+      if AllowDraw then
+      begin
+        Canvas.TextColor := FFontColor;
+        currentX := X;
+        for i := 0 to cells.Count - 1 do
+        begin
+          Canvas.DrawString(currentX, Y, cells[i]);
+          if i < positions.Count then
+            currentX := X + positions[i]
+          else
+            inc(currentX, Font.GetTextWidth(cells[i]));
+        end;
+      end;
+    finally
+      cells.Free;
+    end;
+    Exit; // Done with elastic tabstops rendering
+  end;
+
+  // Standard tab handling (convert tabs to spaces)
+  if Pos(#9, S) > 0 then
+  begin
+    CorrectS := '';
+    for TI := 1 to Length(S) do    // no need to use utf8 version here
+    begin
+      if S[TI] = #9 then
+      begin
+        for T := 1 to FTabWidth do
+          CorrectS := CorrectS + ' ';
+      end
+      else
+        CorrectS := CorrectS + S[TI];
+    end;
+    S := CorrectS;
+  end; { if }
+
+  { start drawing formatted text }
+  R.SetRect(X, Y, UTF8Length(S) * FChrW, FChrH);
+  AllowDraw := True;
+
+  { end-user can hook in here to do syntax highlighting and other custom drawing }
+  if Assigned(FOnDrawLine) then
+    FOnDrawLine(self, S, ALineIndex, Canvas, R, AllowDraw);
+
+  { Draw simple text line... }
+  if AllowDraw then
+  begin
+    Canvas.TextColor := FFontColor;
+    Canvas.DrawString(R.Left, R.Top, S);
+  end;
+
+  if FSelected then
+  begin
+    if (ALineIndex > StartNo) and (ALineIndex < EndNo) then     // whole line is selected
+    begin
+      R.SetRect(X, Y, UTF8Length(S) * FChrW, FChrH);
+      Canvas.TextColor := FSelectionTextColor;
+      Canvas.Color := fpgColorToRGB(FSelectionColor);
+      Canvas.FillRectangle(R);
+      Canvas.DrawString(R.Left, R.Top, S);
+    end
+    else
+    begin
+      Ei := EndOffs;
+      Si := StartOffs;
+      if (ALineIndex = StartNo) and (ALineIndex = EndNo) then  // start/end selection on same line
+      begin
+        SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si);
+        if Ei > UTF8Length(S) then
+          SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si)
+        else
+          SS := UTF8Copy(S, Si + 1, Ei - Si);
+        R.SetRect(X+(Si * FChrW), Y, (UTF8Length(SS) * FChrW), FChrH);
+        Canvas.TextColor := FSelectionTextColor;
+        Canvas.Color := fpgColorToRGB(FSelectionColor);
+        Canvas.FillRectangle(R);
+        Canvas.DrawString(R.Left, R.Top, SS);
+      end
+      else
+      begin
+        if (ALineIndex = StartNo) and (ALineIndex < EndNo) then
+        begin
+          SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si);
+          R.SetRect(X+(Si * FChrW), Y, (UTF8Length(SS) * FChrW), FChrH);
+          Canvas.TextColor := FSelectionTextColor;
+          Canvas.Color := fpgColorToRGB(FSelectionColor);
+          Canvas.FillRectangle(R);
+          Canvas.DrawString(R.Left, R.Top, SS);
+        end
+        else
+        begin
+          if (ALineIndex > StartNo) and (ALineIndex = EndNo) then
+          begin
+            if Ei > UTF8Length(S) then
+              Ei := UTF8Length(S);
+            SS := UTF8Copy(S, 1, Ei);
+            R.SetRect(X, Y, (UTF8Length(SS) * FChrW), FChrH);
+            Canvas.TextColor := FSelectionTextColor;
+            Canvas.Color := fpgColorToRGB(FSelectionColor);
+            Canvas.FillRectangle(R);
+            Canvas.DrawString(R.Left, R.Top, SS);
+          end;
+        end;
+      end;
+    end;
+  end; { if FSelected... }
+
+  if UTF8Length(S) > FMaxScrollH then
+  begin
+    FMaxScrollH := UTF8Length(S);
+    UpdateScrollBars;
+  end;
+end;
+
+procedure TfpgBaseTextEdit.DrawCaret(const X, Y: Integer);
+var
+  Xp, Yp: Integer;
+begin
+  if csDesigning in ComponentState then
+    Exit; //==>
+
+  {$IFDEF gDEBUG}
+  writeln('X:', X, '  Y:', Y, '  FTopLine:', FTopLine, ' HPos:', HPos, '  VPos:', VPos);
+  {$ENDIF}
+
+  if (Y < FTopLine) or (Y > FTopLine + FVisLines) then
+  begin
+    fpgCaret.UnSetCaret(Canvas);
+    Exit;  //==>
+  end;
+  Yp := ((Y - FTopLine) * FChrH) + 1;
+  Xp := ((X - HPos) * FChrW) + GetClientRect.Left;
+
+  if FGutterPan.Visible then
+    Xp := Xp + FGutterPan.Width;
+  if (Xp < 0) or (Xp > GetClientRect.Width) then
+  begin
+    fpgCaret.UnSetCaret(Canvas);
+    Exit; //==>
+  end;
+  //with Canvas do
+  //begin
+    //if ShowCaret then
+    //begin
+      //Pen.Mode := pmNotMerge;
+      //Pen.Color := Font.Color;
+    //end else
+    //begin
+      //if not FSelected then
+        //Pen.Color := Self.Color
+      //else
+        //Pen.Color := FEnvironment.SelectionBackground;
+      //Pen.Mode := pmCopy;
+    //end;
+    //MoveTo(Xp, Yp);
+    //LineTo(Xp, Yp + FChrH);
+    //Pen.Mode := pmCopy;
+  //end;
+  if Focused then
+    fpgCaret.SetCaret(Canvas, Xp, Yp, fpgCaret.Width, Font.GetHeight)
+  else
+    fpgCaret.UnSetCaret(Canvas);
+
+  if not FSelected then
+  begin
+    FSelection.StartPos := CaretPos;
+  end;
+end;
+
+constructor TfpgBaseTextEdit.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  Focusable     := True;
+  FontDesc      := '#Edit2';
+  Width         := 320;
+  Height        := 240;
+  FLines        := TStringList.Create;
+  OnDragStartDetected:=@DragStartDetected;
+  CaretPos.x    := 0;
+  CaretPos.y    := 0;
+  FLastCaretPos.X := -1;
+  FLastCaretPos.Y := -1;
+  FTopLine      := 0;
+  FTabWidth     := 8;
+  FIndentSize   := 2;
+  FFontColor    := clBlack;
+  FSelectionColor := clSelection;
+  FSelectionTextColor := clWhite;
+  FLineHighlightColor := clNone;
+  FExecutionLine := -1;
+  FExecutionLineColor := TfpgColor($ffFFF3A3);  // pale yellow fallback; overridden by theme
+  FMaxScrollH   := 1;
+  VPos          := 0;
+  HPos          := 0;
+  FTracking     := True;
+  FFullRedraw   := False;
+  FSelected     := False;
+  FSelection.FEdit := Self;
+  FRightEdge    := False;
+  FRightEdgeCol := 80;
+  FLineChanged := -1;
+  FAutoIndent := True;
+  FElasticTabstops := nil;
+  FTabPadding := 8;
+  FUseElasticTabstops := False;
+  FUndoManager := TUndoManager.Create;
+
+  fmousewheelfrequmin := 1;
+  fmousewheelfrequmax := 100;
+  fmousewheeldeltamin := 0.05;
+  fmousewheeldeltamax := 30;
+  fmousewheelaccelerationmax := 30;
+  fwheelsensitivity := 1.5;
+
+  FLastScrollEventTime := 0;
+  FLastScrollEventTimeBefore := 0;
+
+  // do this first so scrollbars have the highest Z order
+  InitMemoObjects;
+  TStringList(FLines).OnChange := @LinesChanged;
+
+  FVScrollBar          := TfpgScrollBar.Create(self);
+  FVScrollBar.Orientation := orVertical;
+  FVScrollBar.OnScroll := @VScrollBarMove;
+  FVScrollBar.Visible  := False;
+
+  FHScrollBar          := TfpgScrollBar.Create(self);
+  FHScrollBar.Orientation := orHorizontal;
+  FHScrollBar.OnScroll := @HScrollBarMove;
+//  FHScrollBar.ScrollStep := 5;
+  FHScrollBar.Visible  := False;
+end;
+
+destructor TfpgBaseTextEdit.Destroy;
+begin
+  FUndoManager.Free;
+  FLines.Free;
+  if Assigned(FDefaultDropHandler) then
+    FDefaultDropHandler.Free;
+  if Assigned(FElasticTabstops) then
+    TTabstopsList(FElasticTabstops).Free;
+  { Nil scrollbar refs before inherited, because child destruction
+    triggers Parent.Invalidate which calls GetClientRect }
+  FVScrollBar := nil;
+  FHScrollBar := nil;
+  inherited Destroy;
+end;
+
+function TfpgBaseTextEdit.GetClientRect: TfpgRect;
+begin
+  FillMem(@Result, SizeOf(TfpgRect), 0);
+  // widget has a 2 pixel 3D border
+  Result.SetRect(2, 2, ActualWidth-4, ActualHeight-4);
+  if Assigned(FVScrollBar) and FVScrollBar.Visible then
+    Result.Width := Result.Width - FVScrollBar.Width;
+  if Assigned(FHScrollBar) and FHScrollBar.Visible then
+    Result.Height := Result.Height - FHScrollBar.Height;
+end;
+
+function TfpgBaseTextEdit.GetWordAtPos(const X, Y: Integer; out XBegin: Integer): TfpgString;
+{ todo: This needs to be made UTF8 compliant! It currently is not. }
+const
+  ValidChars = ['a'..'z', 'A'..'Z', '0'..'9', '#'];
+var
+  S: TfpgString;
+  C: Char;
+  I, Si, Ei, CrX: Integer;
+  lX: integer;
+begin
+  Result := '';
+  XBegin := -1;
+  Si := 0;
+  Ei := 0;
+  lX := X;
+  if Y > pred(FLines.Count) then Exit;  //==>
+  S := GetLineText(Y);
+  if S = '' then Exit;  //==>
+  if lX > UTF8Length(S) - 1 then
+    lX := UTF8Length(S) - 1;
+  if not (S[lX + 1] in ValidChars) then
+  begin
+    CrX := lX - 1;
+    for I := CrX downto 1 do
+    begin
+      C := S[I + 1];
+      if (C in ValidChars) then
+      begin
+        lX := I;
+        Break;
+      end;
+    end;
+    if lX = 0 then Exit;  //==>
+  end;
+  for I := (lX + 1) downto 1 do
+    if S[I] in ValidChars then
+      Si := I
+    else
+      Break;
+  for I := (lX + 1) to Length(S) do
+    if S[I] in ValidChars then
+      Ei := I + 1
+    else
+      Break;
+  if Ei >= Si then
+  begin
+    Result := UTF8Copy(S, Si, Ei - Si);
+    XBegin := Si - 1;
+  end;
+end;
+
+procedure TfpgBaseTextEdit.GetRowColAtPos(const X, Y: Integer; out Row, Col: Integer);
+var
+  Fine: Integer;
+  lX: Integer;
+begin
+  Row := Y div FChrH;
+  if Row > Flines.Count then
+    Row := FLines.Count;
+
+  lX := X - GetClientRect.Left;
+  if FGutterPan.Visible then
+  begin
+    if lX < FGutterPan.Width then
+      lX := FGutterPan.Width;
+    Col   := (lX - FGutterPan.Width) div FChrW;
+    Fine  := (lX - FGutterPan.Width) mod FChrW;
+  end
+  else
+  begin
+    if lX < 0 then
+      lX := 0;
+    Col   := lX div FChrW;
+    Fine  := lX mod FChrW;
+  end;
+  if Fine > (FChrW div 2) - 1 then
+    Col := Col + 1;
+end;
+
+procedure TfpgBaseTextEdit.Clear;
+begin
+  CaretPos.x := 0;
+  CaretPos.y := 0;
+  ScrollTo(0, 0);
+  FSelection.StartPos := fpgPoint(0,0);
+  FLines.Clear;
+  FSelected := False;
+  FUndoManager.Clear;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.InsertTextAtPos(S: TfpgString; Col, Row: Integer);
+var
+  Block: TTextBlockAction;
+  SLine, BufS1, BufS2, BufS: TfpgString;
+  I, L, OldLineCount: Integer;
+  AddedEmptyLine: Boolean;
+begin
+  if S = '' then
+    Exit;
+  if Row > FLines.Count then
+    Exit;
+
+  AddedEmptyLine := (Row = FLines.Count);
+  if AddedEmptyLine then
+    FLines.Add('');
+
+  OldLineCount := FLines.Count;
+
+  { Capture before state for undo }
+  Block := TTextBlockAction.Create(TStringList(FLines), Row);
+  Block.SaveBefore(Row);
+  Block.CaretBefore := Point(Col, Row);
+
+  { --- Original mutation code --- }
+  SLine := GetLineText(Row);
+  if Col > UTF8Length(SLine) then
+  begin
+    L := UTF8Length(SLine);
+    for I := L to Col do
+      SLine := Sline + ' ';
+  end;
+  BufS1 := Copy(SLine, 1, Col);
+  BufS2 := Copy(SLine, Col + 1, Length(SLine) - Col);
+  SLine := BufS1 + S + BufS2;
+  FSelected := True;
+  { Handles both Windows and *nix line endings - maybe there is a better way? }
+  I := pos(#13#10, SLine);
+  if I > 0 then
+  begin
+    BufS := '';
+    FSelection.StartPos := fpgPoint(Length(BufS1), Row);
+    while I > 0 do
+    begin
+      BufS := Copy(SLine, 1, I - 1);
+      FLines.Insert(Row, BufS);
+      Delete(SLine, 1, I+1);
+      I := pos(#13#10, SLine);
+      SetCaretPosV(Row);
+      SetCaretPosH(Length(BufS));
+      FSelection.EndPos := CaretPos;
+      Row := Row + 1;
+    end;
+    if (SLine <> '') and (Row < FLines.Count) then
+    begin
+      FLines[Row] := SLine;
+      SetCaretPosV(Row);
+      SetCaretPosH(Length(SLine) - Length(BufS2));
+      FSelection.EndPos := CaretPos;
+    end;
+    Invalidate;
+  end
+  else
+  begin
+    I := pos(#10, SLine);
+    if I > 0 then
+    begin
+      BufS := '';
+      FSelection.StartPos := fpgPoint(Length(BufS1), Row);
+      while I > 0 do
+      begin
+        BufS := Copy(SLine, 1, I - 1);
+        FLines.Insert(Row, BufS);
+        Delete(SLine, 1, I);
+        I := pos(#10, SLine);
+        SetCaretPosV(Row);
+        SetCaretPosH(Length(BufS));
+        FSelection.EndPos := CaretPos;
+        Row := Row + 1;
+      end;
+      if (SLine <> '') and (Row < FLines.Count) then
+      begin
+        FLines[Row] := SLine;
+        SetCaretPosV(Row);
+        SetCaretPosH(Length(SLine) - Length(BufS2));
+        FSelection.EndPos := CaretPos;
+      end;
+      Invalidate;
+    end else
+    begin
+      SetCaretPosV(Row);
+      if Row < FLines.Count then
+        FLines[Row] := SLine;
+      SetCaretPosH(Col + Length(S));
+      FSelection.StartPos := fpgPoint(Length(BufS1), Row);
+      FSelection.EndPos   := fpgPoint(CaretPos.X, Row);
+      Invalidate;
+    end;
+  end;
+  { --- End original mutation code --- }
+
+  { Capture after state and push to undo }
+  Block.SaveAfter(Block.CaretBefore.Y + (FLines.Count - OldLineCount));
+  Block.CaretAfter := CaretPos;
+  FUndoManager.BreakMerge;
+  FUndoManager.ExecuteAction(Block);
+end;
+
+procedure TfpgBaseTextEdit.ScrollTo(X, Y: Integer);
+begin
+  SetVPos(Y div FChrH);
+  SetHPos(X div FChrW);
+  UpdateScrollBars;
+end;
+
+procedure TfpgBaseTextEdit.GotoLine(ALine: integer);
+begin
+  CaretPos.X := 0;
+  SetCaretPosV(ALine - 1);  { ALine is 1-based, CaretPos.Y is 0-based }
+  if ALine > 5 then
+    ScrollPos_V := ALine - 5  // scrolling a few lines short so cursor is not on top line
+  else
+    ScrollPos_V := 0;
+  UpdateScrollBars;
+  CheckCaretChanged;
+end;
+
+procedure TfpgBaseTextEdit.DeleteSelection;
+var
+  Block: TTextBlockAction;
+  FirstPart, LastPart, SLine: TfpgString;
+  StartLine, StartPos, EndLine, EndPos, I, DelLine: Integer;
+begin
+  if not FSelected then Exit;
+
+  StartLine := FSelection.StartLine;
+  EndLine   := FSelection.EndLine;
+
+  if (StartLine < 0) or (EndLine < 0) then
+    Exit;
+  StartPos  := FSelection.StartPos.X;
+  EndPos    := FSelection.EndPos.X;
+
+  if StartLine > (FLines.Count-1) then
+    Exit;
+  if EndLine > (FLines.Count-1) then
+    EndLine := (FLines.Count-1);
+
+  { Capture before state for undo }
+  Block := TTextBlockAction.Create(TStringList(FLines), StartLine);
+  Block.SaveBefore(EndLine);
+  Block.CaretBefore := CaretPos;
+
+  { Perform the deletion }
+  SLine := GetLineText(StartLine);
+  FirstPart := UTF8Copy(SLine, 1, StartPos);
+  SLine := GetLineText(EndLine);
+  if EndPos > UTF8Length(SLine) then
+    EndPos := UTF8Length(SLine);
+  LastPart := UTF8Copy(SLine, EndPos + 1, UTF8Length(SLine) - EndPos);
+  DelLine := StartLine + 1;
+  for I := DelLine to EndLine do
+    FLines.Delete(DelLine);
+  if StartLine < FLines.Count then
+    FLines[StartLine] := FirstPart + LastPart;
+
+  SetCaretPosV(StartLine);
+  SetCaretPosH(StartPos);
+  FSelected := False;
+
+  { Capture after state and push to undo }
+  Block.SaveAfter(StartLine);
+  Block.CaretAfter := CaretPos;
+  FUndoManager.ExecuteAction(Block);
+
+  UpdateScrollbars;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.DuplicateLine;
+var
+  Block: TTextBlockAction;
+  LineNum: Integer;
+begin
+  LineNum := CaretPos.Y;
+  if (LineNum < 0) or (LineNum >= FLines.Count) then
+    Exit;
+
+  FUndoManager.BreakMerge;
+
+  Block := TTextBlockAction.Create(TStringList(FLines), LineNum);
+  Block.SaveBefore(LineNum);
+  Block.CaretBefore := CaretPos;
+
+  FLines.Insert(LineNum + 1, GetLineText(LineNum));
+  SetCaretPosV(LineNum + 1);
+
+  Block.SaveAfter(LineNum + 1);
+  Block.CaretAfter := CaretPos;
+  FUndoManager.ExecuteAction(Block);
+
+  UpdateScrollBars;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.DeleteLine;
+var
+  Block: TTextBlockAction;
+  LineNum: Integer;
+begin
+  LineNum := CaretPos.Y;
+  if (LineNum < 0) or (LineNum >= FLines.Count) then
+    Exit;
+
+  FUndoManager.BreakMerge;
+
+  Block := TTextBlockAction.Create(TStringList(FLines), LineNum);
+  Block.SaveBefore(LineNum);
+  Block.CaretBefore := CaretPos;
+
+  if FLines.Count > 1 then
+  begin
+    FLines.Delete(LineNum);
+    if LineNum >= FLines.Count then
+      SetCaretPosV(FLines.Count - 1);
+  end
+  else
+    FLines[0] := '';
+
+  CaretPos.X := 0;
+
+  Block.SaveAfter(CaretPos.Y);
+  Block.CaretAfter := CaretPos;
+  FUndoManager.ExecuteAction(Block);
+
+  FSelected := False;
+  UpdateScrollBars;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.BlockIndent;
+var
+  Block: TTextBlockAction;
+  StartLine, EndLine, I: Integer;
+  Indent: string;
+begin
+  if not FSelected then Exit;
+
+  StartLine := FSelection.StartLine;
+  EndLine   := FSelection.EndLine;
+
+  if StartLine > (FLines.Count - 1) then Exit;
+  if EndLine > (FLines.Count - 1) then
+    EndLine := FLines.Count - 1;
+
+  FUndoManager.BreakMerge;
+
+  Block := TTextBlockAction.Create(TStringList(FLines), StartLine);
+  Block.SaveBefore(EndLine);
+  Block.CaretBefore := CaretPos;
+
+  Indent := StringOfChar(' ', FIndentSize);
+  for I := StartLine to EndLine do
+    if I < FLines.Count then
+      FLines[I] := Indent + GetLineText(I);
+
+  { Adjust selection and caret to account for added indent }
+  FSelection.FStartPos.X := FSelection.FStartPos.X + FIndentSize;
+  FSelection.FEndPos.X   := FSelection.FEndPos.X + FIndentSize;
+  CaretPos.X := CaretPos.X + FIndentSize;
+
+  Block.SaveAfter(EndLine);
+  Block.CaretAfter := CaretPos;
+  FUndoManager.ExecuteAction(Block);
+
+  UpdateScrollBars;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.BlockUnindent;
+var
+  Block: TTextBlockAction;
+  StartLine, EndLine, I, J, Remove: Integer;
+  Line: string;
+  StartRemoved, EndRemoved: Integer;
+begin
+  if not FSelected then Exit;
+
+  StartLine := FSelection.StartLine;
+  EndLine   := FSelection.EndLine;
+
+  if StartLine > (FLines.Count - 1) then Exit;
+  if EndLine > (FLines.Count - 1) then
+    EndLine := FLines.Count - 1;
+
+  FUndoManager.BreakMerge;
+
+  Block := TTextBlockAction.Create(TStringList(FLines), StartLine);
+  Block.SaveBefore(EndLine);
+  Block.CaretBefore := CaretPos;
+
+  StartRemoved := 0;
+  EndRemoved := 0;
+  for I := StartLine to EndLine do
+  begin
+    Line := GetLineText(I);
+    if (Length(Line) > 0) and (Line[1] = #9) then
+    begin
+      { Remove one leading tab }
+      Delete(Line, 1, 1);
+      Remove := 1;
+    end
+    else
+    begin
+      { Remove up to FIndentSize leading spaces }
+      Remove := 0;
+      for J := 1 to Length(Line) do
+      begin
+        if Remove >= FIndentSize then
+          Break;
+        if Line[J] = ' ' then
+          Inc(Remove)
+        else
+          Break;
+      end;
+      if Remove > 0 then
+        Delete(Line, 1, Remove);
+    end;
+    if I < FLines.Count then
+      FLines[I] := Line;
+    if I = StartLine then
+      StartRemoved := Remove;
+    if I = EndLine then
+      EndRemoved := Remove;
+  end;
+
+  { Adjust selection and caret }
+  if FSelection.FStartPos.X >= StartRemoved then
+    FSelection.FStartPos.X := FSelection.FStartPos.X - StartRemoved
+  else
+    FSelection.FStartPos.X := 0;
+  if FSelection.FEndPos.X >= EndRemoved then
+    FSelection.FEndPos.X := FSelection.FEndPos.X - EndRemoved
+  else
+    FSelection.FEndPos.X := 0;
+  { Adjust caret based on whichever line it is on }
+  if CaretPos.Y = EndLine then
+    Remove := EndRemoved
+  else
+    Remove := StartRemoved;
+  if CaretPos.X >= Remove then
+    CaretPos.X := CaretPos.X - Remove
+  else
+    CaretPos.X := 0;
+
+  Block.SaveAfter(EndLine);
+  Block.CaretAfter := CaretPos;
+  FUndoManager.ExecuteAction(Block);
+
+  UpdateScrollBars;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.Undo;
+begin
+  if not FUndoManager.CanUndo then
+    Exit;
+  FUndoManager.Undo;
+  SetCaretPosH(FUndoManager.LastCaretPos.X);
+  SetCaretPosV(FUndoManager.LastCaretPos.Y);
+  FSelected := False;
+  FSelection.StartPos := CaretPos;
+  UpdateScrollBars;
+  Invalidate;
+  CheckCaretChanged;
+end;
+
+procedure TfpgBaseTextEdit.Redo;
+begin
+  if not FUndoManager.CanRedo then
+    Exit;
+  FUndoManager.Redo;
+  SetCaretPosH(FUndoManager.LastCaretPos.X);
+  SetCaretPosV(FUndoManager.LastCaretPos.Y);
+  FSelected := False;
+  FSelection.StartPos := CaretPos;
+  UpdateScrollBars;
+  Invalidate;
+  CheckCaretChanged;
+end;
+
+function TfpgBaseTextEdit.CanUndo: Boolean;
+begin
+  Result := FUndoManager.CanUndo;
+end;
+
+function TfpgBaseTextEdit.CanRedo: Boolean;
+begin
+  Result := FUndoManager.CanRedo;
+end;
+
+function TfpgBaseTextEdit.GetSelectedText: TfpgString;
+var
+  StartLine, StartPos, EndLine, EndPos, I, LineI: Integer;
+  FirstPart, LastPart, SLine: string;
+begin
+  Result := '';
+  if not FSelected then Exit;
+
+  StartLine := FSelection.StartLine;
+  EndLine   := FSelection.EndLine;
+  StartPos  := FSelection.StartPos.X;
+  EndPos    := FSelection.EndPos.X;
+
+  if StartLine > pred(FLines.Count) then Exit;
+  if EndLine > pred(FLines.Count) then
+    EndLine := pred(FLines.Count);
+  SLine := GetLineText(StartLine);
+  if StartLine < EndLine then
+  begin
+    FirstPart := Copy(SLine, StartPos + 1, Length(SLine) - StartPos);
+    SLine := GetLineText(EndLine);
+    if EndPos > Length(SLine) then
+      EndPos := Length(SLine);
+    LastPart := Copy(SLine, 1, EndPos);
+    LineI := StartLine + 1;
+    Result := FirstPart;
+    for I := LineI to (EndLine - 1) do
+      Result := Result + LineEnding + GetLineText(I);
+    Result := Result + LineEnding + LastPart;
+  end
+  else
+    Result := Copy(SLine, StartPos + 1, EndPos - StartPos);
+end;
+
+procedure TfpgBaseTextEdit.SaveToFile(const AFileName: TfpgString);
+var
+  BuffList: TStringList;
+  SLine: TfpgString;
+  I, P: Integer;
+  Replace: Boolean;
+begin
+  BuffList := TStringList.Create;
+  try
+    BuffList.Assign(FLines);
+    for I := 0 to pred(BuffList.Count) do
+    begin
+      SLine := BuffList[I];
+      P := UTF8Length(SLine);
+      Replace := (P > 0) and (SLine <> '');
+      if Replace then
+      begin
+        while (fpgCharAt(SLine, P) = ' ') do
+        begin
+          UTF8Delete(SLine, P, 1);
+          P := UTF8Length(SLine);
+        end;
+        BuffList[I] := SLine;
+      end;
+    end;
+    BuffList.SaveToFile(fpgToOSEncoding(AFileName));
+  finally
+    BuffList.Free;
+  end;
+end;
+
+procedure TfpgBaseTextEdit.LoadFromFile(const AFileName: TfpgString);
+begin
+  if not fpgFileExists(AFileName) then
+    Exit; //==>
+  Clear;
+  FLines.LoadFromFile(fpgToOSEncoding(AFileName));
+  HandleResize(ActualWidth, ActualHeight);
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.FindText(TextToFind: TfpgString; FindOptions: TfpgFindOptions; Backward: Boolean);
+var
+  Rep, SrcRes: Boolean;
+begin
+  Rep := False;
+  SrcRes := FindReplaceProc(TextToFind, FindOptions, Backward, False, Rep);
+  if Assigned(FOnSearchEnd) then
+    FOnSearchEnd(Self, SrcRes, False);
+end;
+
+procedure TfpgBaseTextEdit.SetUseElasticTabstops(const AValue: Boolean);
+begin
+  if FUseElasticTabstops = AValue then Exit;
+  FUseElasticTabstops := AValue;
+  if FUseElasticTabstops then
+    CalculateElasticTabstops;
+  Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.CalculateElasticTabstops;
+var
+  cellsPerLine: TObjectList; // of TStringList
+  widthsPerLine: TTabstopsList;
+  maxedWidthsPerLine: TTabstopsList;
+  widthsPerCol: TTabstopsList;
+  maxNumCells, i, j, k, l, lmaxWidth, runningTotal: integer;
+  line, cellText: string;
+  cells: TStringList;
+  widths, col, positions: TIntegerList;
+begin
+  {$IFDEF gDEBUG}
+  writeln('CalculateElasticTabstops called: Lines=', FLines.Count);
+  {$ENDIF}
+  // Free previous tabstops and re-create
+  if Assigned(FElasticTabstops) then
+    TTabstopsList(FElasticTabstops).Free;
+  FElasticTabstops := TTabstopsList.Create(True); // Owns the TIntegerLists
+
+  if (FLines.Count = 0) or (not FUseElasticTabstops) then Exit;
+
+  // --- Part 1: Grid of cell widths ---
+  cellsPerLine := TObjectList.Create(True); // Owns the TStringLists
+  widthsPerLine := TTabstopsList.Create(True);
+  maxNumCells := 0;
+  try
+    for i := 0 to FLines.Count - 1 do
+    begin
+      line := GetLineText(i);
+      cells := TStringList.Create;
+      cells.Delimiter := #9;
+      cells.StrictDelimiter := True;
+      cells.DelimitedText := line;
+      cellsPerLine.Add(cells);
+
+      widths := TIntegerList.Create;
+      for cellText in cells do
+        widths.Add(Font.GetTextWidth(cellText));
+      widthsPerLine.Add(widths);
+
+      if cells.Count > maxNumCells then
+        maxNumCells := cells.Count;
+    end;
+    if maxNumCells = 0 then maxNumCells := 1;
+
+    // --- Part 2: Transpose and find max adjacent ---
+    widthsPerCol := TTabstopsList.Create(False); // Does NOT own TIntegerLists
+    try
+      for j := 0 to maxNumCells - 2 do
+      begin
+        col := TIntegerList.Create;
+        for i := 0 to FLines.Count - 1 do
+        begin
+          widths := widthsPerLine[i];
+          if j < widths.Count then
+            col.Add(widths[j])
+          else
+            col.Add(-1); // Use -1 as sentinel for "no cell"
+        end;
+        widthsPerCol.Add(col);
+      end;
+
+      // Find max in adjacent runs for each column
+      for j := 0 to widthsPerCol.Count - 1 do
+      begin
+        col := widthsPerCol[j];
+        i := 0;
+        while i < col.Count do
+        begin
+          if col[i] >= 0 then
+          begin
+            // Start of a run of non-nil values
+            l := i;
+            lmaxWidth := 0;
+            while (l < col.Count) and (col[l] >= 0) do
+            begin
+              if col[l] > lmaxWidth then
+                lmaxWidth := col[l];
+              inc(l);
+            end;
+
+            // Apply max width to the run
+            for k := i to l - 1 do
+              col[k] := lmaxWidth;
+
+            i := l; // Continue after the run
+          end
+          else
+            inc(i); // It's a sentinel, just skip
+        end;
+      end;
+
+      // --- Part 3: Transpose back and calculate positions ---
+      maxedWidthsPerLine := TTabstopsList.Create(True);
+      try
+        for i := 0 to FLines.Count - 1 do
+          maxedWidthsPerLine.Add(TIntegerList.Create);
+
+        for j := 0 to widthsPerCol.Count - 1 do
+        begin
+          col := widthsPerCol[j];
+          for i := 0 to col.Count - 1 do
+          begin
+            if col[i] >= 0 then
+              maxedWidthsPerLine[i].Add(col[i]);
+          end;
+        end;
+
+        // Finally, calculate the running total for the tabstop positions for each line
+        for i := 0 to FLines.Count - 1 do
+        begin
+          widths := maxedWidthsPerLine[i];
+          positions := TIntegerList.Create;
+          runningTotal := 0;
+          {$IFDEF gDEBUG}
+          write('Line ', i, ' tabstops: ');
+          {$ENDIF}
+          for k := 0 to widths.Count - 1 do
+          begin
+            inc(runningTotal, widths[k] + FTabPadding);
+            positions.Add(runningTotal);
+            {$IFDEF gDEBUG}
+            write(runningTotal, ' ');
+            {$ENDIF}
+          end;
+          {$IFDEF gDEBUG}
+          writeln;
+          {$ENDIF}
+          TTabstopsList(FElasticTabstops).Add(positions);
+        end;
+      finally
+        maxedWidthsPerLine.Free;
+      end;
+    finally
+      widthsPerCol.Free;
+    end;
+  finally
+    cellsPerLine.Free;
+    widthsPerLine.Free;
+  end;
+end;
+
+
+end.
+

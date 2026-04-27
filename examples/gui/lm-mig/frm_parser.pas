@@ -96,11 +96,11 @@ begin
   ShowHint := true;
 
   // Debug: Show DPI information
-  WriteLn(Format('DEBUG Screen DPI: X=%d Y=%d', [fpgApplication.Screen_dpi_x, fpgApplication.Screen_dpi_y]));
+  DebugLn(Format('DEBUG Screen DPI: X=%d Y=%d', [fpgApplication.Screen_dpi_x, fpgApplication.Screen_dpi_y]));
 
   // Create MigLayout with 2-column grid
   mig := TfpgMigLayoutManager.Create;
-  mig.LC.SetWrapAfter(2);  // Wrap after 2 components
+  mig.LC.WrapAfter(2);  // Wrap after 2 components
   mig.LC.Fill;             // Fill both horizontally and vertically
   mig.LC.InsetsAll('10lpx'); // Using string insets - 10 logical pixels all sides
   if FDebug then
@@ -113,7 +113,6 @@ begin
   lblTitle.Text := 'ConstraintParser String Syntax Examples';
   lblTitle.FontDesc := '#Label2';
   lblTitle.Alignment := taCenter;
-  lblTitle.AutoSize := True;
   mig.AddLayoutComponent(lblTitle,
     TfpgMigCC.Create()
       .SpanX(2)        // Span 2 columns
@@ -125,7 +124,6 @@ begin
   lblUnits.Name := 'lblUnits';
   lblUnits.Text := '1. Unit Types (px, %, mm, lpx):';
   lblUnits.FontDesc := '#Label2';
-  lblUnits.AutoSize := True;
   mig.AddLayoutComponent(lblUnits,
     TfpgMigCC.Create()
       .SpanX(2)
@@ -166,7 +164,6 @@ begin
   lblMM := TfpgLabel.Create(Self);
   lblMM.Name := 'lblMM';
   lblMM.Text := 'Millimeters (50mm):';
-  lblMM.AutoSize := True;
   mig.AddLayoutComponent(lblMM, TfpgMigCC.Create());
 
   edtMM := TfpgEdit.Create(Self);
@@ -191,7 +188,6 @@ begin
   lblMinPrefMax := TfpgLabel.Create(Self);
   lblMinPrefMax.Name := 'lblMinPrefMax';
   lblMinPrefMax.Text := 'Min:Pref:Max (100:200:300):';
-  lblMinPrefMax.AutoSize := True;
   mig.AddLayoutComponent(lblMinPrefMax, TfpgMigCC.Create());
 
   edtBounds := TfpgEdit.Create(Self);
@@ -209,7 +205,6 @@ begin
   lblAlign.Name := 'lblAlign';
   lblAlign.Text := '3. Alignment Keywords (left, center, right):';
   lblAlign.FontDesc := '#Label2';
-  lblAlign.AutoSize := True;
   mig.AddLayoutComponent(lblAlign,
     TfpgMigCC.Create()
       .SpanX(2)
@@ -247,7 +242,6 @@ begin
   lblOps.Name := 'lblOps';
   lblOps.Text := '4. Operations (min, max, +, -):';
   lblOps.FontDesc := '#Label2';
-  lblOps.AutoSize := True;
   mig.AddLayoutComponent(lblOps,
     TfpgMigCC.Create()
       .SpanX(2)
@@ -256,7 +250,6 @@ begin
   lblOpExample := TfpgLabel.Create(Self);
   lblOpExample.Name := 'lblOpExample';
   lblOpExample.Text := 'Max operation (max(150px,30%)):';
-  lblOpExample.AutoSize := True;
   mig.AddLayoutComponent(lblOpExample, TfpgMigCC.Create());
 
   edtOperation := TfpgEdit.Create(Self);
