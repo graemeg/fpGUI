@@ -2,7 +2,7 @@
   Release notes for fpGUI
   =======================
 
-v2.1.0 (2026-04-26)
+v2.1.0 (2026-04-27)
 
   - Event Loop Rearchitecture
     * Worker threads can now wake the main event loop instantly on all
@@ -20,7 +20,6 @@ v2.1.0 (2026-04-26)
       No extra build profile is required; the 'agg' and 'freetype'
       profiles have been removed.
     * Cached bitmap glyph rendering for fast syntax-highlighted text.
-    * Deferred text rendering for correct z-order with alien widgets.
     * Platform buffer managers added for Windows (GDI) and macOS (Cocoa).
     * Performance: fast-path for opaque rectangle fills, bypassing AggPas
       blending when alpha is not needed.
@@ -85,6 +84,8 @@ v2.1.0 (2026-04-26)
     * Project restructured and added as a PasBuild module.
     * Fixed rendering stopping prematurely, leaving a blank area at the
       bottom of the document.
+    * Fixed DocView statusbar colour being reset to the wrong default.
+    * DocView navigation toolbar now uses some HVIF vector icons.
   - UI Designer
     * Added style preview support, showing the designer form in the
       user-selected style.
@@ -103,6 +104,12 @@ v2.1.0 (2026-04-26)
       positioning logic into fpg_form.pas.
     * Experimental multi-monitor and per-screen DPI support.
     * Fixed several bounds-checking issues in the text editor component.
+    * Deprecated old DrawXXX widget paint methods in TfpgCanvas.
+    * Fixed ComboBox text not clipped to exclude the dropdown button area.
+    * Fixed TfpgLabel not auto-sizing to text content when no
+      PreferredSize was set.
+    * Fixed developer-set text colour ignored by style DrawString.
+    * Fixed popup calendar generating deprecation warnings.
   - Code Hygiene
     * Replaced bundled SynRegExpr with FPC's standard RegExpr unit.
     * Replaced bundled mPasLex with FPC's fcl-passrc for Procedure List.
@@ -148,15 +155,6 @@ v2.1.0 (2026-04-26)
       at 16/32/48/64 px.
     * File > Open Recent with persistent last-used directory.
     * Window position and size restored across sessions.
-  - Framework Bug Fixes
-    * Deprecated old DrawXXX widget paint methods in TfpgCanvas.
-    * Fixed ComboBox text not clipped to exclude the dropdown button area.
-    * Fixed TfpgLabel not auto-sizing to text content when no
-      PreferredSize was set.
-    * Fixed developer-set text colour ignored by style DrawString.
-    * Fixed DocView statusbar colour being reset to the wrong default.
-    * Fixed popup calendar generating deprecation warnings.
-    * DocView navigation toolbar now uses HVIF vector icons.
 
 
 v2.0.3 (2026-02-14)
