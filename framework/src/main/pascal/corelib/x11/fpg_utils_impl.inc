@@ -17,7 +17,6 @@
 uses
   Unix,
   BaseUnix,
-  process,
   fpg_constants,
   fpg_stringutils;
 
@@ -33,11 +32,42 @@ begin
   Result := aString;
 end;
 
+procedure fpgSpawnDetached(const AExecutable: TfpgString; const AParams: array of TfpgString);
+var
+  pid: TPid;
+  status: cInt;
+  i: integer;
+  argv: array of PChar;
+begin
+  SetLength(argv, Length(AParams) + 2);
+  argv[0] := PChar(AExecutable);
+  for i := 0 to High(AParams) do
+    argv[i + 1] := PChar(AParams[i]);
+  argv[High(argv)] := nil;
+
+  pid := FpFork;
+  if pid < 0 then
+    raise Exception.Create('fpgSpawnDetached: fork failed');
+
+  if pid = 0 then
+  begin
+    // Intermediate child: fork again to orphan the grandchild so it is
+    // reparented to init and won't zombie when it exits.
+    if FpFork <> 0 then
+      FpExit(0);
+    // Grandchild only: exec the target; FpExecVP searches PATH for bare names.
+    FpExecVP(PChar(AExecutable), PPChar(@argv[0]));
+    FpExit(127);
+  end;
+
+  // Parent: reap the intermediate child synchronously (exits in microseconds).
+  FpWaitPid(pid, @status, 0);
+end;
+
 var
   fpgOpenURLhelper: string = '';
 procedure fpgOpenURL(const aURL: TfpgString);
 var
-  p: TProcess;
   s: string;
   function which(const name: string; var pname: string): integer;
   var
@@ -77,16 +107,7 @@ begin
        fpgOpenURLhelper := s;
   end;
   if fpgOpenURLhelper <> '' then
-  begin
-    p := TProcess.create(nil);
-    try
-      p.Executable := fpgOpenURLhelper;
-      p.Parameters.Add(aURL);
-      p.Execute;
-    finally
-      p.Free;
-    end;
-  end
+    fpgSpawnDetached(fpgOpenURLhelper, [aURL]);
 end;
 
 function fpgFileSize(const AFilename: TfpgString): integer;

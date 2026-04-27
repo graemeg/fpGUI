@@ -17,7 +17,6 @@
 uses
   Unix,
   BaseUnix,
-  process,
   fpg_constants,
   fpg_stringutils;
 
@@ -33,14 +32,39 @@ begin
   Result := aString;
 end;
 
-// TODO: This still needs a MacOS implementation
+procedure fpgSpawnDetached(const AExecutable: TfpgString; const AParams: array of TfpgString);
+var
+  pid: TPid;
+  status: cInt;
+  i: integer;
+  argv: array of PChar;
+begin
+  SetLength(argv, Length(AParams) + 2);
+  argv[0] := PChar(AExecutable);
+  for i := 0 to High(AParams) do
+    argv[i + 1] := PChar(AParams[i]);
+  argv[High(argv)] := nil;
+
+  pid := FpFork;
+  if pid < 0 then
+    raise Exception.Create('fpgSpawnDetached: fork failed');
+
+  if pid = 0 then
+  begin
+    if FpFork <> 0 then
+      FpExit(0);
+    FpExecVP(PChar(AExecutable), PPChar(@argv[0]));
+    FpExit(127);
+  end;
+
+  FpWaitPid(pid, @status, 0);
+end;
+
 procedure fpgOpenURL(const aURL: TfpgString);
 var
   Helper: string;
-  p: TProcess;
 begin
   Helper := '';
-  //TODO: Catch "which" command output to run the browser from there
   if fpsystem('which xdg-open') = 0 then
     Helper := 'xdg-open'
   else if FileExists('/usr/bin/sensible-browser') then
@@ -54,23 +78,14 @@ begin
   else if fpsystem('which opera') = 0 then
     Helper := 'opera'
   else if fpsystem('which mozilla') = 0 then
-     Helper := 'mozilla'
+    Helper := 'mozilla'
   else if fpsystem('which chrome') = 0 then
-     Helper := 'chrome'
+    Helper := 'chrome'
   else if fpsystem('which chromium') = 0 then
-     Helper := 'chromium';
+    Helper := 'chromium';
 
   if Helper <> '' then
-  begin
-    p := TProcess.create(nil);
-    try
-      p.Executable := Helper;
-      p.Parameters.Add(aURL);
-      p.Execute;
-    finally
-      p.Free;
-    end;
-  end
+    fpgSpawnDetached(Helper, [aURL]);
 end;
 
 function fpgFileSize(const AFilename: TfpgString): integer;

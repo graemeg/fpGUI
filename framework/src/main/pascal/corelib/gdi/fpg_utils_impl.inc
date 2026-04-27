@@ -15,7 +15,7 @@
 {%mainunit fpg_utils.pas}
 
 uses
-  Shellapi, Windows, fpg_constants, fpg_stringutils;
+  Shellapi, Windows, process, fpg_constants, fpg_stringutils;
   
 // GDI specific implementations of encoding functions
 
@@ -27,6 +27,22 @@ end;
 function fpgFromOSEncoding(aString: string): TfpgString;
 begin
   Result := AnsiToUtf8(aString);
+end;
+
+procedure fpgSpawnDetached(const AExecutable: TfpgString; const AParams: array of TfpgString);
+var
+  p: TProcess;
+  i: integer;
+begin
+  p := TProcess.Create(nil);
+  try
+    p.Executable := AExecutable;
+    for i := 0 to High(AParams) do
+      p.Parameters.Add(AParams[i]);
+    p.Execute;
+  finally
+    p.Free;
+  end;
 end;
 
 procedure fpgOpenURL(const aURL: TfpgString);

@@ -69,8 +69,8 @@ implementation
 
 Uses
   SysUtils,
-  process,
   simpleipc,
+  fpg_utils,
   fpg_dbugmsg;
 
 const
@@ -237,20 +237,16 @@ end;
 
 function StartDebugServer : Integer;
 begin
-  With TProcess.Create(Nil) do
+  Result := 0;
+  try
+    fpgSpawnDetached('dbugsrv', []);
+    Result := 1;
+  except on E: Exception do
     begin
-    Try
-      CommandLine:='dbugsrv';
-      Execute;
-      Result:=ProcessID;
-    Except On E: Exception do
-      begin
-      SendError := Format(SServerStartFailed,[E.Message]);
+      SendError := Format(SServerStartFailed, [E.Message]);
       Result := 0;
-      end;
     end;
-    Free;
-    end;
+  end;
 end;
 
 procedure FreeDebugClient;

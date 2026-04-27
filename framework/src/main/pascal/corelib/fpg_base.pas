@@ -1123,7 +1123,6 @@ uses
   fpg_form,  // needed for fpgApplication.CreateForms()
   fpg_widget,// needed for ActiveWidget
   typinfo,
-  process,
   dateutils,
   math,
   regexpr;
@@ -4208,7 +4207,7 @@ end;
 
 function TfpgApplicationBase.ContextHelp(const AHelpContext: THelpContext): Boolean;
 var
-  p: TProcess;
+  lParams: array of TfpgString;
 begin
   Result := False;
   if fpgExtractFilePath(GetHelpViewer) = '' then
@@ -4218,28 +4217,28 @@ begin
   else if not fpgFileExists(GetHelpViewer) then
     raise EfpGUIUserFeedbackException.Create(rsFailedToFindHelpViewer);
 
-  p := TProcess.Create(nil);
-  try
-    p.Executable := GetHelpViewer;
-    if fpgFileExists(HelpFile) then
+  if fpgFileExists(HelpFile) then
+  begin
+    if AHelpContext > 0 then
     begin
-      p.Parameters.Add(HelpFile);
-      if AHelpContext > 0 then
-      begin
-        p.Parameters.Add('-n');
-        p.Parameters.Add(IntToStr(AHelpContext));
-      end;
+      SetLength(lParams, 3);
+      lParams[0] := HelpFile;
+      lParams[1] := '-n';
+      lParams[2] := IntToStr(AHelpContext);
+    end
+    else
+    begin
+      SetLength(lParams, 1);
+      lParams[0] := HelpFile;
     end;
-    Result := True;
-    p.Execute;
-  finally
-    p.Free;
   end;
+  Result := True;
+  fpgSpawnDetached(GetHelpViewer, lParams);
 end;
 
 function TfpgApplicationBase.KeywordHelp(const AHelpKeyword: string): Boolean;
 var
-  p: TProcess;
+  lParams: array of TfpgString;
 begin
   Result := False;
   if fpgExtractFilePath(GetHelpViewer) = '' then
@@ -4249,20 +4248,15 @@ begin
   else if not fpgFileExists(GetHelpViewer) then
     raise EfpGUIUserFeedbackException.Create(rsFailedToFindHelpViewer);
 
-  p := TProcess.Create(nil);
-  try
-    p.Executable := GetHelpViewer;
-    if fpgFileExists(HelpFile) then
-    begin
-      p.Parameters.Add(HelpFile);
-      p.Parameters.Add('-s');
-      p.Parameters.Add(AHelpKeyword);
-    end;
-    Result := True;
-    p.Execute;
-  finally
-    p.Free;
+  if fpgFileExists(HelpFile) then
+  begin
+    SetLength(lParams, 3);
+    lParams[0] := HelpFile;
+    lParams[1] := '-s';
+    lParams[2] := AHelpKeyword;
   end;
+  Result := True;
+  fpgSpawnDetached(GetHelpViewer, lParams);
 end;
 
 { TfpgClipboardBase }

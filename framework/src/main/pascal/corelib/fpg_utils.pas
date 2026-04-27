@@ -30,6 +30,7 @@ uses
 function  fpgToOSEncoding(aString: TfpgString): string;
 function  fpgFromOSEncoding(aString: string): TfpgString;
 procedure fpgOpenURL(const aURL: TfpgString);
+procedure fpgSpawnDetached(const AExecutable: TfpgString; const AParams: array of TfpgString);
 function  fpgFileSize(const AFilename: TfpgString): integer;
 
 
