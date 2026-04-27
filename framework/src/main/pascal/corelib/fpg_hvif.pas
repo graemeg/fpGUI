@@ -166,6 +166,11 @@ uses
   agg_span_gradient,
   agg_span_interpolator_linear;
 
+{$ifdef MSWINDOWS}
+const
+  RT_RCDATA = PChar(10);
+{$endif}
+
 
 { ===================================================================
   Byte buffer helpers
