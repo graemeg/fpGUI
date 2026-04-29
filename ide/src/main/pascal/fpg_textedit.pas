@@ -208,6 +208,7 @@ type
     procedure   UpdateScrollBarCoords;
     procedure   UpdateGutterCoords;
     procedure   KeyboardCaretNav(const ShiftState: TShiftState; const AKeyCode: Word);
+    procedure   ApplySelectionAfterMove(const AOldPos: TPoint; const AShiftState: TShiftState);
     procedure   InitMemoObjects;
     procedure   SetRightEdge(const AValue: Boolean);
     procedure   SetRightEdgeCol(const AValue: Integer);
@@ -1149,9 +1150,29 @@ end;
 
 { This procedure is used to set caret position on keyboard navigation and
   to set selection if Shift key is pressed. }
+procedure TfpgBaseTextEdit.ApplySelectionAfterMove(const AOldPos: TPoint; const AShiftState: TShiftState);
+begin
+  if ssShift in AShiftState then
+  begin
+    if not FSelected then
+    begin
+      FSelected := True;
+      FSelection.StartPos := AOldPos;
+    end;
+    FSelection.EndPos := CaretPos;
+    FSelected := FSelection.HasContent;
+  end
+  else
+  begin
+    FSelected := False;
+    FSelection.StartPos := CaretPos;
+  end;
+end;
+
 procedure TfpgBaseTextEdit.KeyboardCaretNav(const ShiftState: TShiftState; const AKeyCode: Word);
 var
   SaveYCaretOffset: Integer;
+  OldPos: TPoint;
 
   procedure CtrlKeyLeftKey;
   var
@@ -1342,194 +1363,71 @@ begin
         begin
           if CaretPos.Y = 0 then
             Exit;
-          if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) then
-          begin
-            SetCaretPosV(CaretPos.Y - 1);
-            // scroll text
-            if FVScrollBar.Visible and (CaretPos.Y < FTopLine) then
+          OldPos := CaretPos;
+          SetCaretPosV(CaretPos.Y - 1);
+          if FVScrollBar.Visible then
+            if (ssCtrl in ShiftState) or (CaretPos.Y < FTopLine) then
               FVScrollBar.LineUp;
-            if FSelected then
-            begin
-              FSelected := False;
-              Exit;
-            end;
-            FSelection.StartPos := CaretPos;
-            Exit;
-          end
-          else if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
-          begin
-            SetCaretPosV(CaretPos.Y - 1);
-            if FVScrollBar.Visible then
-              FVScrollBar.LineUp;    // VScrollBarMove(self, FVScrollBar.Position-1);
-            FSelection.StartPos := CaretPos;
-            Exit;
-          end
-          else if not (ssCtrl in ShiftState) and (ssShift in ShiftState) then
-          begin
-            SetCaretPosV(CaretPos.Y - 1);
-            if not FSelected then
-            begin
-              FSelection.StartPos := fpgPoint(CaretPos.X, CaretPos.Y +1);
-              FSelection.EndPos := CaretPos;
-              FSelected := True;
-            end
-            else
-            begin
-              FSelection.EndPos := CaretPos;
-              FSelected := FSelection.HasContent;
-            end;
-          end;
+          ApplySelectionAfterMove(OldPos, ShiftState);
         end;
 
     keyDown:
         begin
           if Succ(CaretPos.Y) >= FLines.Count then
             Exit;
-          if ShiftState = [] then
-          begin
-            SetCaretPosV(CaretPos.Y + 1);
-            // scroll text
-            if FVScrollBar.Visible and (CaretPos.Y > FTopLine+FVisLines-2) then
+          OldPos := CaretPos;
+          SetCaretPosV(CaretPos.Y + 1);
+          if FVScrollBar.Visible then
+            if (ssCtrl in ShiftState) or (CaretPos.Y > FTopLine + FVisLines - 2) then
               FVScrollBar.LineDown;
-            if FSelected then
-            begin
-              FSelected := False;
-              Exit;
-            end;
-            FSelection.StartPos := CaretPos;
-            Exit;
-          end
-          else if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
-          begin
-            SetCaretPosV(CaretPos.Y + 1);
-            if FVScrollBar.Visible then
-              FVScrollBar.LineDown;    // VScrollBarMove(self, FVScrollBar.Position+1);
-            FSelection.StartPos := CaretPos;
-            Exit;
-          end
-          else if not (ssCtrl in ShiftState) and (ssShift in ShiftState) then
-          begin
-            SetCaretPosV(CaretPos.Y + 1);
-            if not FSelected then
-            begin
-              FSelection.StartPos := fpgPoint(CaretPos.X, CaretPos.Y -1);
-              FSelection.EndPos := CaretPos;
-              FSelected     := True;
-            end
-            else
-            begin
-              FSelection.EndPos := CaretPos;
-              FSelected     := FSelection.HasContent;
-            end;
-          end;
+          ApplySelectionAfterMove(OldPos, ShiftState);
         end;
 
     keyHome:
         begin
-          if not (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
+          OldPos := CaretPos;
+          if ssCtrl in ShiftState then
+          begin
+            CaretPos.Y := 0;
+            CaretPos.X := 0;
+            ScrollPos_V := 0;
+            UpdateScrollBars;
+          end
+          else if ssShift in ShiftState then
+            CaretPos.X := 0
+          else
           begin
             if CaretPos.X = 0 then
               CaretPos.X := GetLineFirstCharPos(CaretPos.Y)
             else
               CaretPos.X := 0;
-            if FSelected then
-            begin
-              FSelected := False;
-              Exit;
-            end;
           end;
-          if ssCtrl in ShiftState then
-          begin
-            if ssShift in ShiftState then
-            begin
-              if not FSelected then
-              begin
-                FSelection.StartPos := CaretPos;
-                FSelected := True;
-              end;
-              CaretPos.Y := 0;
-              CaretPos.X := 0;
-              FSelection.EndPos := CaretPos;
-            end
-            else
-            begin
-              CaretPos.Y := 0;
-              CaretPos.X := 0;
-            end;
-            ScrollPos_V := 0;
-            UpdateScrollBars;
-            Exit;
-          end;
-          if ssShift in ShiftState then
-          begin
-            if not FSelected then
-            begin
-              FSelection.StartPos := CaretPos;
-              FSelected := True;
-            end;
-            CaretPos.X := 0;
-            FSelection.EndPos := CaretPos;
-            if FSelection.StartLine = FSelection.EndLine then
-              FSelected := FSelection.HasContent;
-          end;
+          ApplySelectionAfterMove(OldPos, ShiftState);
         end;
 
     keyEnd:
         begin
-          if not (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
-          begin
-            if CaretPos.Y <= pred(FLines.Count) then
-              CaretPos.X := Length(GetLineText(CaretPos.Y))
-            else
-              CaretPos.X := 0;
-          end;
+          OldPos := CaretPos;
           if ssCtrl in ShiftState then
           begin
-            if ssShift in ShiftState then
-            begin
-              if not FSelected then
-              begin
-                FSelection.StartPos := CaretPos;
-                FSelected := True;
-              end;
-              SetCaretPosV( pred(FLines.Count));
-              CaretPos.X := Length(GetLineText(CaretPos.Y));
-              FSelection.EndPos := fpgPoint(Length(GetLineText(CaretPos.Y)), pred(FLines.Count));
-            end else
-            begin
-              SetCaretPosV(pred(FLines.Count));
-              CaretPos.X := Length(GetLineText(CaretPos.Y));
-            end;
+            SetCaretPosV(pred(FLines.Count));
+            CaretPos.X := Length(GetLineText(CaretPos.Y));
             ScrollPos_V := CaretPos.Y - FVisLines;
             UpdateScrollBars;
-            Exit;
-          end;
-          if ssShift in ShiftState then
+          end
+          else
           begin
-            if not FSelected then
-            begin
-              if CaretPos.Y <= pred(FLines.Count) then
-                if CaretPos.X > Length(GetLineText(CaretPos.Y)) then
-                  CaretPos.X := Length(GetLineText(CaretPos.Y));
-              FSelection.StartPos := CaretPos;
-              FSelected := True;
-            end;
             if CaretPos.Y <= pred(FLines.Count) then
               CaretPos.X := Length(GetLineText(CaretPos.Y))
             else
               CaretPos.X := 0;
-            FSelection.EndPos := CaretPos;
-            if FSelection.EndLine = FSelection.StartLine then
-              FSelected := FSelection.HasContent;
           end;
+          ApplySelectionAfterMove(OldPos, ShiftState);
         end;
 
     keyPageUp, keyPageDown:
         begin
-          if not FSelected then
-          begin
-            FSelection.StartPos := CaretPos;
-          end;
+          OldPos := CaretPos;
           SaveYCaretOffset := CaretPos.Y - FTopLine;
           if AKeyCode = keyPageUp then
           begin
@@ -1540,10 +1438,8 @@ begin
             end
             else
             begin
-              // scroll text
               if FVScrollBar.Visible then
                 FVScrollBar.PageUp;
-              // restore caret at same line offset as before
               SetCaretPosV(FTopLine + SaveYCaretOffset);
             end;
           end
@@ -1556,19 +1452,12 @@ begin
             end
             else
             begin
-              // scroll text
               if FVScrollBar.Visible then
                 FVScrollBar.PageDown;
-              // restore caret at same line offset as before
               SetCaretPosV(FTopLine + SaveYCaretOffset);
             end;
           end;
-          if ssShift in ShiftState then
-          begin
-            FSelection.EndPos := CaretPos;
-            if not FSelected then
-              FSelected := True;
-          end;
+          ApplySelectionAfterMove(OldPos, ShiftState);
         end;
   end;
 end;
