@@ -3,7 +3,7 @@
   <name>examples-gui-lmmig</name>
 
   <build>
-    <mainSource>lm-mig.lpr</mainSource>
+    <mainSource>lm-mig.pas</mainSource>
     <sourceDirectory>.</sourceDirectory>
     <executableName>lm-mig</executableName>
   </build>

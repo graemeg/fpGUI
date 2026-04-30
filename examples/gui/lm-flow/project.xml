@@ -3,7 +3,7 @@
   <name>examples-gui-lmflow</name>
 
   <build>
-    <mainSource>lm-flow.lpr</mainSource>
+    <mainSource>lm-flow.pas</mainSource>
     <sourceDirectory>.</sourceDirectory>
     <executableName>lm-flow</executableName>
   </build>
