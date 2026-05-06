@@ -536,30 +536,65 @@ begin
 end;
 
 procedure TMainForm.miFileNewUnit(Sender: TObject);
+const
+  cUnitSkeleton =
+    'unit %s;'#10 +
+    ''#10 +
+    '{$mode objfpc}{$H+}'#10 +
+    ''#10 +
+    'interface'#10 +
+    ''#10 +
+    'implementation'#10 +
+    ''#10 +
+    'end.'#10;
 var
   newunit: TfpgString;
+  uname: TfpgString;
+  initdir: TfpgString;
+  pb: TPasBuildProjectBackend;
   sl: TStringList;
-  FInternalMacroList: TIDEMacroList;
-  i: integer;
 begin
-  if fpgInputQuery('New Unit', 'Please give the new unit a file name', newunit) then
+  { Default initial dir for the save dialog }
+  if GProject.ProjectFormat = pfPasBuild then
   begin
-    if GProject.UnitList.FileExists(newunit) then
+    pb := TPasBuildProjectBackend(GProject);
+    if pb.IsAggregator and (pb.ActiveModule <> nil) then
     begin
-      ShowMessage(Format('The unit <%s> already exists in the project', [newunit]));
-      Exit;
-    end;
-    sl := TStringList.Create;
-    try
-      sl.LoadFromFile(GMacroList.ExpandMacro('${TEMPLATEDIR}default/unit.pas'));
-      sl.Text := StringReplace(sl.Text, '${UNITNAME}', fpgChangeFileExt(fpgExtractFileName(newunit), ''), [rfReplaceAll, rfIgnoreCase]);
-      sl.SaveToFile(GProject.ProjectDir + newunit);
-    finally
-      sl.Free;
-    end;
-//    AddUnitToProject(newunit);
+      { For aggregators, derive source dir via FindModuleInfoForFile or fall
+        back to the module's project dir + default source subdir }
+      initdir := pb.ActiveModule.ProjectDir + SetDirSeparators('src/main/pascal/');
+    end
+    else
+      initdir := pb.ProjectDir + SetDirSeparators(pb.SourceDirectory + '/');
+  end
+  else
+    initdir := GProject.ProjectDir;
 
-    OpenEditorPage(newunit);
+  newunit := SelectFileDialog(sfdSave,
+      Format(cFileFilterTemplate, ['Source Files', cSourceFiles, cSourceFiles]),
+      initdir);
+  if newunit = '' then
+    Exit;
+
+  if fpgFileExists(newunit) then
+  begin
+    ShowMessage(Format('The file <%s> already exists.', [newunit]));
+    Exit;
+  end;
+
+  uname := fpgChangeFileExt(fpgExtractFileName(newunit), '');
+  sl := TStringList.Create;
+  try
+    sl.Text := Format(cUnitSkeleton, [uname]);
+    sl.SaveToFile(newunit);
+  finally
+    sl.Free;
+  end;
+  OpenEditorPage(newunit);
+  if GProject.ProjectFormat = pfPasBuild then
+  begin
+    SetupProjectTree;
+    PopuplateProjectTree;
   end;
 end;
 
