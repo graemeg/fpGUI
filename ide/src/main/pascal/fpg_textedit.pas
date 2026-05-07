@@ -1067,7 +1067,10 @@ begin
   begin
     { todo: implement scrolling children }
 //    ScrollChildren(0, (OldPos - VPos) * FChrH);
-    FTopLine := VPos;
+
+    // Contrain to visible lines - but be at least 0
+    // if the TopLine is the last line then we are scolled past the text
+    FTopLine := Max(0, Min(VPos, Lines.Count - FVisLines+1));
 
     if FFullRedraw then
       Invalidate
@@ -2244,6 +2247,20 @@ begin
             UndoAction.CaretAfter := CaretPos;
           end;
           consumed := True;
+        end;
+      keyA: // Ctrl+A
+        begin
+          if shiftstate - [ssCaps] = [ssCtrl] then
+          begin
+            FSelection.FStartPos := fpgPoint(0,0);
+            FSelection.FEndPos := fpgPoint(UTF8Length(Lines[Lines.Count-1])-1, Lines.Count-1);
+            FSelected := True;
+            SetCaretPosH(FSelection.EndPos.X);
+            SetCaretPosV(FSelection.EndPos.Y);
+            ScrollPos_V:=CaretPos_V;
+            ScrollPos_H:=CaretPos_H;
+            consumed:=True;
+          end;
         end;
   end;  // case keycode
   end; // if not consumed
