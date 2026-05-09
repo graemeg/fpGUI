@@ -2253,12 +2253,12 @@ begin
           if shiftstate - [ssCaps] = [ssCtrl] then
           begin
             FSelection.FStartPos := fpgPoint(0,0);
-            FSelection.FEndPos := fpgPoint(UTF8Length(Lines[Lines.Count-1])-1, Lines.Count-1);
+            FSelection.FEndPos := fpgPoint(UTF8Length(Lines[Lines.Count-1])-1, Lines.Count);
             FSelected := True;
-            SetCaretPosH(FSelection.EndPos.X);
             SetCaretPosV(FSelection.EndPos.Y);
+            CaretPos.X := Length(GetLineText(CaretPos.Y));
             ScrollPos_V:=CaretPos_V;
-            ScrollPos_H:=CaretPos_H;
+            ScrollPos_H:=0;
             consumed:=True;
           end;
         end;
