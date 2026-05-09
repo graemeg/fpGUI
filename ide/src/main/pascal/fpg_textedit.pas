@@ -739,7 +739,7 @@ begin
   if Drop.SourceWidget = Self then
     Drop.DropAction := daMove;
 
-  GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, CursorCaret.Y, CursorCaret.X);
+  GetRowColAtPos(X + HPos * FChrW, Y + FTopLine * FChrH, CursorCaret.Y, CursorCaret.X);
 
   ValidateCaretPosition(CursorCaret, FLines);
 
