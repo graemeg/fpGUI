@@ -1583,7 +1583,7 @@ begin
   inherited HandleLMouseDown(x, y, shiftstate);
   if FGutterPan.Visible and (X <= FGutterPan.Width) then Exit;  //==>
 
-  GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, RNo, CNo);
+  GetRowColAtPos(X + HPos * FChrW, Y + FTopLine * FChrH, RNo, CNo);
   CaretPos.X := CNo;
   SetCaretPosV(RNo);
 
@@ -1656,7 +1656,7 @@ begin
 
   if FSelMouseDwn and (MOUSE_LEFT = btnstate) then
   begin
-    GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, RNo, CNo);
+    GetRowColAtPos(X + HPos * FChrW, Y + FTopLine * FChrH, RNo, CNo);
     SetCaretPosH(CNo);
     SetCaretPosV(RNo);
     FSelection.StartPos := FSelection.Origin;
