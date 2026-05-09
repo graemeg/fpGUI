@@ -2256,7 +2256,7 @@ begin
             FSelection.FEndPos := fpgPoint(UTF8Length(Lines[Lines.Count-1])-1, Lines.Count);
             FSelected := True;
             SetCaretPosV(FSelection.EndPos.Y);
-            CaretPos.X := Length(GetLineText(CaretPos.Y));
+            SetCaretPosH(Length(GetLineText(CaretPos.Y)));
             ScrollPos_V:=CaretPos_V;
             ScrollPos_H:=0;
             consumed:=True;
