@@ -19,6 +19,7 @@ uses
   Classes, SysUtils, Math,
   fpcunit, testregistry,
   fpg_hvif,
+  fpg_hvif_model,
   fpg_hvif_writer;
 
 type

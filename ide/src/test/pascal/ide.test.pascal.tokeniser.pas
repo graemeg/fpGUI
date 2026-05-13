@@ -27,6 +27,8 @@ uses
   ide.pascal.tokeniser;
 
 type
+  TFpgPasTokenKindArray = array of TFpgPasTokenKind;
+  TStringArray = array of string;
 
   { TTestPascalTokeniser }
 
@@ -37,7 +39,10 @@ type
     procedure CollectTokens(const ASource: string;
       out AKinds: array of TFpgPasTokenKind;
       out ATexts: array of string;
-      out ACount: Integer);
+      out ACount: Integer); overload;
+    procedure CollectTokens(const ASource: string;
+      out AKinds: TFpgPasTokenKindArray;
+      out ATexts: TStringArray); overload;
   protected
     procedure SetUp; override;
     procedure TearDown; override;
@@ -159,6 +164,25 @@ begin
     end;
     Inc(ACount);
   until False;
+end;
+
+procedure TTestPascalTokeniser.CollectTokens(const ASource: string;
+  out AKinds: TFpgPasTokenKindArray;
+  out ATexts: TStringArray);
+var
+  count: Integer;
+  localKinds: array[0..63] of TFpgPasTokenKind;
+  localTexts: array[0..63] of string;
+  i: Integer;
+begin
+  CollectTokens(ASource, localKinds, localTexts, count);
+  SetLength(AKinds, count);
+  SetLength(ATexts, count);
+  for i := 0 to count - 1 do
+  begin
+    AKinds[i] := localKinds[i];
+    ATexts[i] := localTexts[i];
+  end;
 end;
 
 procedure TTestPascalTokeniser.SetUp;

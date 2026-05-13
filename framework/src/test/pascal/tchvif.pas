@@ -22,7 +22,8 @@ interface
 uses
   Classes, SysUtils,
   fpcunit, testregistry,
-  fpg_hvif;
+  fpg_hvif,
+  fpg_hvif_model;
 
 type
 
@@ -254,7 +255,7 @@ begin
     Fail('Expected EHvifFormatError was not raised');
   except
     on EHvifFormatError do
-      { expected — pass };
+      begin end; { expected - pass }
   end;
 end;
 
@@ -272,7 +273,7 @@ begin
     Fail('Expected EHvifParseError was not raised');
   except
     on EHvifFormatError do
-      { acceptable — format / parse error hierarchy };
+      begin end; { acceptable - format / parse error hierarchy }
   end;
 end;
 
