@@ -739,7 +739,7 @@ begin
   if Drop.SourceWidget = Self then
     Drop.DropAction := daMove;
 
-  GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, CursorCaret.Y, CursorCaret.X);
+  GetRowColAtPos(X + HPos * FChrW, Y + FTopLine * FChrH, CursorCaret.Y, CursorCaret.X);
 
   ValidateCaretPosition(CursorCaret, FLines);
 
@@ -1067,7 +1067,10 @@ begin
   begin
     { todo: implement scrolling children }
 //    ScrollChildren(0, (OldPos - VPos) * FChrH);
-    FTopLine := VPos;
+
+    // Contrain to visible lines - but be at least 0
+    // if the TopLine is the last line then we are scolled past the text
+    FTopLine := Max(0, Min(VPos, Lines.Count - FVisLines+1));
 
     if FFullRedraw then
       Invalidate
@@ -1580,7 +1583,7 @@ begin
   inherited HandleLMouseDown(x, y, shiftstate);
   if FGutterPan.Visible and (X <= FGutterPan.Width) then Exit;  //==>
 
-  GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, RNo, CNo);
+  GetRowColAtPos(X + HPos * FChrW, Y + FTopLine * FChrH, RNo, CNo);
   CaretPos.X := CNo;
   SetCaretPosV(RNo);
 
@@ -1653,7 +1656,7 @@ begin
 
   if FSelMouseDwn and (MOUSE_LEFT = btnstate) then
   begin
-    GetRowColAtPos(X + HPos * FChrW, Y + VPos * FChrH, RNo, CNo);
+    GetRowColAtPos(X + HPos * FChrW, Y + FTopLine * FChrH, RNo, CNo);
     SetCaretPosH(CNo);
     SetCaretPosV(RNo);
     FSelection.StartPos := FSelection.Origin;
@@ -2244,6 +2247,27 @@ begin
             UndoAction.CaretAfter := CaretPos;
           end;
           consumed := True;
+        end;
+      keyA: // Ctrl+A
+        begin
+          if shiftstate - [ssCaps] = [ssCtrl] then
+          begin
+            if Lines.Count = 0 then
+            begin
+              consumed := True;
+              Exit;
+            end;
+            { Assign FStartPos/FEndPos directly to avoid SetStartPos resetting
+              FEndPos to the same value as FStartPos. }
+            FSelection.FStartPos := fpgPoint(0, 0);
+            FSelection.FEndPos := fpgPoint(UTF8Length(Lines[Lines.Count-1]), Lines.Count-1);
+            FSelected := True;
+            SetCaretPosV(FSelection.EndPos.Y);
+            SetCaretPosH(UTF8Length(GetLineText(CaretPos.Y)));
+            ScrollPos_V := CaretPos_V;
+            ScrollPos_H := 0;
+            consumed := True;
+          end;
         end;
   end;  // case keycode
   end; // if not consumed
