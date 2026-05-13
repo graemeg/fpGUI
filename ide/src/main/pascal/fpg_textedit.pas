@@ -2252,14 +2252,21 @@ begin
         begin
           if shiftstate - [ssCaps] = [ssCtrl] then
           begin
-            FSelection.FStartPos := fpgPoint(0,0);
-            FSelection.FEndPos := fpgPoint(UTF8Length(Lines[Lines.Count-1])-1, Lines.Count);
+            if Lines.Count = 0 then
+            begin
+              consumed := True;
+              Exit;
+            end;
+            { Assign FStartPos/FEndPos directly to avoid SetStartPos resetting
+              FEndPos to the same value as FStartPos. }
+            FSelection.FStartPos := fpgPoint(0, 0);
+            FSelection.FEndPos := fpgPoint(UTF8Length(Lines[Lines.Count-1]), Lines.Count-1);
             FSelected := True;
             SetCaretPosV(FSelection.EndPos.Y);
-            SetCaretPosH(Length(GetLineText(CaretPos.Y)));
-            ScrollPos_V:=CaretPos_V;
-            ScrollPos_H:=0;
-            consumed:=True;
+            SetCaretPosH(UTF8Length(GetLineText(CaretPos.Y)));
+            ScrollPos_V := CaretPos_V;
+            ScrollPos_H := 0;
+            consumed := True;
           end;
         end;
   end;  // case keycode
