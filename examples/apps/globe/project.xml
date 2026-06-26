@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-apps-globe</name>
+
+  <build>
+    <mainSource>globe.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>globe</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

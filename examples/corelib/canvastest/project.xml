@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-corelib-canvastest</name>
+
+  <build>
+    <mainSource>fpgcanvas.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>fpgcanvas</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>
