@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-modalforms</name>
+
+  <build>
+    <mainSource>modalforms.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>modalforms</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

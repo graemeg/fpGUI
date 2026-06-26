@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-tabtest</name>
+
+  <build>
+    <mainSource>tabtest.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>tabtest</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

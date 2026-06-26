@@ -13,28 +13,28 @@ You will need PasBuild installed and the 'fpc' executable available in your
 PATH. Your global fpc.cfg file should be set up correctly so the FPC compiler
 can find the RTL and FCL units.
 
-To compile the framework from the project root directory:
+All commands are run from the project root directory.
+
+To compile everything (framework, applications, examples, and tools):
+   pasbuild compile -p unix
+   pasbuild compile -p windows
+
+To compile the framework only:
 
 Under Linux and FreeBSD run:
-   pasbuild compile -p unix,agg
+   pasbuild compile -m fpgui-framework -p unix
 
 Under Windows run:
-   pasbuild compile -p windows,agg
-
-   By default on Windows, the Win32 TrueType font engine is used, which
-   does not require any external DLLs. To use the FreeType font engine
-   instead (recommended for better text rendering), add the freetype
-   profile. This requires freetype.dll to be available at runtime:
-   pasbuild compile -p windows,agg,freetype
+   pasbuild compile -m fpgui-framework -p windows
 
 Under MacOS run:
-   pasbuild compile -p macos,agg
+   pasbuild compile -m fpgui-framework -p macos
 
 To compile with debug information, add the debug profile:
-   pasbuild compile -p unix,agg,debug
+   pasbuild compile -m fpgui-framework -p unix,debug
 
 To run unit tests:
-   pasbuild test -p unix,agg,debug
+   pasbuild test -m fpgui-framework -p unix,debug
 
 All compiled units (*.o and *.ppu) are output to the
 <fpgui>/framework/target/units/ directory.
@@ -166,15 +166,13 @@ Compiling any of the examples from the Command Line
 ═══════════════════════════════════════════════════
 
 You need to compile fpGUI first, as mentioned above!
-Every project in the `examples` directory has its own `extrafpc.cfg` file.
-You only need to specify that config file and the project unit to compile
-it.
+All examples are compiled using PasBuild from the project root directory.
 
-fpc @extrafpc.cfg <project_unit>
+To compile all examples at once:
+   pasbuild compile -m fpgui-examples -p unix
 
-Example:
-  cd examples/gui/alignment
-  fpc @extrafpc.cfg aligntest.lpr
+To compile a specific example:
+   pasbuild compile -m examples-gui-lmmig -p unix
 
 
 

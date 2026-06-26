@@ -42,8 +42,7 @@ begin
   WindowPosition := wpOneThirdDown;
 
   mig := TfpgMigLayoutManager.Create;
-  mig.LC.SetWrapAfter(1);
-  mig.LC.Fill;
+  mig.LC.WrapAfter(1).Fill;
   LayoutManager := mig;
 
   memo := TfpgMemo.Create(self);

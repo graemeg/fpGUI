@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-memo</name>
+
+  <build>
+    <mainSource>memotest.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>memotest</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-gridtest</name>
+
+  <build>
+    <mainSource>gridtest.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>gridtest</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

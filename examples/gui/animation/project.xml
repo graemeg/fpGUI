@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-animation</name>
+
+  <build>
+    <mainSource>anim_test.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>anim_test</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

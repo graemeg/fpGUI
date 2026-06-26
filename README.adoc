@@ -95,15 +95,33 @@ pasbuild compile -m fpgui-framework -p windows,debug  # with debug symbols
 pasbuild test
 ----
 
-=== Compiling Applications
+=== Compiling Everything
 
-Most applications use `@extrafpc.cfg` files and should be built from their respective
-`src/` directories:
+To compile the entire project (framework, applications, examples, and tools):
 
 [source,bash]
 ----
-cd docview/src
-fpc @extrafpc.cfg docview.lpr
+pasbuild compile -p unix
+pasbuild compile -p windows
+----
+
+=== Compiling Individual Applications
+
+To compile a specific module:
+
+[source,bash]
+----
+# DocView
+pasbuild compile -m fpgui-docview -p unix
+
+# UI Designer
+pasbuild compile -m fpgui-uidesigner -p unix
+
+# All examples at once
+pasbuild compile -m fpgui-examples -p unix
+
+# A specific example (e.g. MigLayout demo)
+pasbuild compile -m examples-gui-lmmig -p unix
 ----
 
 

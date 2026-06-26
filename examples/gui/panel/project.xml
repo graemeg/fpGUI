@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-panel</name>
+
+  <build>
+    <mainSource>panel_test.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>panel_test</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

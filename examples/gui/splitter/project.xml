@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-splitter</name>
+
+  <build>
+    <mainSource>splitter_test.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>splitter_test</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

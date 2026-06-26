@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-scrollframe</name>
+
+  <build>
+    <mainSource>bigframe_test.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>bigframe_test</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

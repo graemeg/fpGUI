@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-embeddedform</name>
+
+  <build>
+    <mainSource>demo1.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>demo1</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-combobox</name>
+
+  <build>
+    <mainSource>comboboxtest.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>comboboxtest</executableName>
+
+    <unitPaths>
+      <path>../common</path>
+    </unitPaths>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

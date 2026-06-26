@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-editsextrahint</name>
+
+  <build>
+    <mainSource>edits_extrahint.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>edits_extrahint</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

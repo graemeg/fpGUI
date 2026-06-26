@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-alignmentresize</name>
+
+  <build>
+    <mainSource>alignment_resize.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>alignment_resize</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

@@ -7,6 +7,63 @@
   </build>
 
   <modules>
-    <module>gui</module>
+    <!-- all "apps" examples -->
+    <module>apps/globe</module>
+
+    <!-- all "corelib" examples -->
+    <module>corelib/canvastest</module>
+
+    <!-- all "gui" examples -->
+    <module>gui/aboutdialog</module>
+    <module>gui/alignment</module>
+    <module>gui/alignment_resize</module>
+    <module>gui/animation</module>
+    <module>gui/bevel</module>
+    <module>gui/calendar</module>
+    <module>gui/colorlistbox</module>
+    <module>gui/colorwheel</module>
+    <module>gui/combobox</module>
+    <module>gui/command_interface</module>
+    <module>gui/customstyles</module>
+    <module>gui/customwindow</module>
+    <module>gui/dbtest</module>
+    <module>gui/drag_n_drop</module>
+    <module>gui/edits</module>
+    <module>gui/edits_extrahint</module>
+    <module>gui/embedded_form</module>
+    <module>gui/filedialog</module>
+    <module>gui/filegrid</module>
+    <module>gui/fontselect</module>
+    <module>gui/gauges</module>
+    <module>gui/gridediting</module>
+    <module>gui/gridtest</module>
+    <module>gui/helloworld</module>
+    <module>gui/hintwindow</module>
+    <module>gui/imgtest</module>
+    <module>gui/imgtest_jpeg</module>
+    <module>gui/led_matrix_display</module>
+    <module>gui/listbox</module>
+    <module>gui/listviewtest</module>
+    <module>gui/lm-border</module>
+    <module>gui/lm-flow</module>
+    <module>gui/lm-mig</module>
+    <module>gui/memo</module>
+    <module>gui/menu_headers</module>
+    <module>gui/menutest</module>
+    <module>gui/modalforms</module>
+    <module>gui/mousecursor</module>
+    <module>gui/panel</module>
+    <module>gui/reporting</module>
+    <module>gui/scrollframe</module>
+    <module>gui/splashscreen</module>
+    <module>gui/splitter</module>
+    <module>gui/sprites</module>
+    <module>gui/stdimages</module>
+    <module>gui/tabtest</module>
+    <module>gui/threads1</module>
+    <module>gui/timertest</module>
+    <module>gui/togglebox</module>
+    <module>gui/treeviewtest</module>
+    <module>gui/wulinetest</module>
   </modules>
 </project>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-hintwindow</name>
+
+  <build>
+    <mainSource>hintwindowtest.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>hintwindowtest</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

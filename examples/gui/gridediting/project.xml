@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-gridediting</name>
+
+  <build>
+    <mainSource>gridediting.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>gridediting</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

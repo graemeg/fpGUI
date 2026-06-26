@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-mousecursor</name>
+
+  <build>
+    <mainSource>cursordemo.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>cursordemo</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

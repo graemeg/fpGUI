@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-helloworld</name>
+
+  <build>
+    <mainSource>helloworld.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>helloworld</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

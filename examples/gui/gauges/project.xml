@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-gauges</name>
+
+  <build>
+    <mainSource>gaugetest.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>gaugetest</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

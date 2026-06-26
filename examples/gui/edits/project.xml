@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-edits</name>
+
+  <build>
+    <mainSource>edittest.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>edittest</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

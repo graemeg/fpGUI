@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-commandinterface</name>
+
+  <build>
+    <mainSource>test.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>test</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

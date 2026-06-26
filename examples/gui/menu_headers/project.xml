@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-menuheaders</name>
+
+  <build>
+    <mainSource>menuheadertest.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>menuheadertest</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

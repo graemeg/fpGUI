@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-imgtest</name>
+
+  <build>
+    <mainSource>bitmaptest.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>bitmaptest</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

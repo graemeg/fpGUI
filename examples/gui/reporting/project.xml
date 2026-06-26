@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-reporting</name>
+
+  <build>
+    <mainSource>pdf_demo.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>pdf_demo</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

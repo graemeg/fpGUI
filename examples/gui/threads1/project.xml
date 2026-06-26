@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-threads1</name>
+
+  <build>
+    <mainSource>threadtest.pas</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>threadtest</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

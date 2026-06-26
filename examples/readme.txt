@@ -6,20 +6,15 @@
  ===================================================
 
 You need to compile the fpGUI toolkit first as mentioned in the
-README.txt file located in the <fpgui>/docs/ directory.
+docs/INSTALL.txt file.
 
-I'll assume the fpc executable path has been setup so you can execute 'fpc'
-from any directory. Every project in the 'examples' directory has its
-own extrafpc.cfg file. You only need to specify that config file and the
-project's main unit to compile it.
+All examples are compiled using PasBuild from the project root directory.
 
-The format is as follows:
-  fpc @extrafpc.cfg <project main unit>
+To compile all examples at once:
+  pasbuild compile -m fpgui-examples -p unix
 
-Example:
-    fpc @extrafpc.cfg docedit.lpr
-  or
-    fpc @extrafpc.cfg helloworld.pas
+To compile a specific example:
+  pasbuild compile -m examples-gui-lmmig -p unix
 
 
       =======================================================

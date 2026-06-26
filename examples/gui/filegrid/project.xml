@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-filegrid</name>
+
+  <build>
+    <mainSource>filegrid.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>filegrid</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

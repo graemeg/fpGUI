@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-ledmatrixdisplay</name>
+
+  <build>
+    <mainSource>led_demo.pas</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>led_demo</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>
