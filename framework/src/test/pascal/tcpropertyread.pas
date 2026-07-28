@@ -32,6 +32,20 @@ type
     procedure TestWordOffset_ExactWordBoundary;
   end;
 
+  { The read loop must terminate on every reply a peer can produce. An earlier
+    version looped while 'remaining' was non-zero without requiring that each
+    pass actually consumed bytes, so a format of 0 (property absent) meant it
+    span forever on the GUI thread - which froze the whole X session, not just
+    the application. These pin the termination rule. }
+
+  TTestReadLoopTermination = class(TTestCase)
+  published
+    procedure TestTerminates_WhenFormatIsZero;
+    procedure TestTerminates_WhenFormatIsUnknown;
+    procedure TestTerminates_WhenNoBytesConsumedDespiteRemaining;
+    procedure TestContinues_WhileBytesAreBeingConsumed;
+  end;
+
 
 procedure RegisterTests;
 
@@ -57,9 +71,26 @@ begin
 end;
 
 
+{ Mirrors ReadWholeProperty's decision for a single pass: given what the server
+  reported, does the loop continue? It may only continue when the pass consumed
+  something, otherwise it would spin without making progress. }
+function LoopContinues(AFormat: Integer; ACount, ARemaining: QWord): Boolean;
+var
+  bytes: QWord;
+begin
+  if AFormat = 0 then
+    Exit(False); // property absent / fully consumed
+  bytes := FormatToBytes(AFormat, ACount);
+  if bytes = 0 then
+    Exit(False); // unknown format, or nothing consumed - must not spin
+  Result := ARemaining > 0;
+end;
+
+
 procedure RegisterTests;
 begin
   RegisterTest(TTestPropertyArithmetic);
+  RegisterTest(TTestReadLoopTermination);
 end;
 
 
@@ -95,6 +126,40 @@ procedure TTestPropertyArithmetic.TestWordOffset_ExactWordBoundary;
 begin
   AssertEquals('exact multiple must not round up',
       QWord(1000), BytesToWordOffset(4000));
+end;
+
+
+{ TTestReadLoopTermination }
+
+procedure TTestReadLoopTermination.TestTerminates_WhenFormatIsZero;
+begin
+  { Format 0 means the property does not exist. The server may still report
+    bytes remaining; looping on that is what caused the freeze. }
+  AssertFalse('format 0 must end the loop even with bytes remaining',
+      LoopContinues(0, 0, 5000));
+end;
+
+procedure TTestReadLoopTermination.TestTerminates_WhenFormatIsUnknown;
+begin
+  AssertFalse('an uninterpretable format must end the loop',
+      LoopContinues(7, 100, 5000));
+end;
+
+procedure TTestReadLoopTermination.TestTerminates_WhenNoBytesConsumedDespiteRemaining;
+begin
+  { A peer reporting "more to come" while handing back nothing must not keep
+    us looping. }
+  AssertFalse('no progress must end the loop',
+      LoopContinues(8, 0, 5000));
+end;
+
+procedure TTestReadLoopTermination.TestContinues_WhileBytesAreBeingConsumed;
+begin
+  { The normal large-transfer case must still iterate. }
+  AssertTrue('a productive pass with data remaining should continue',
+      LoopContinues(8, 65536, 200000));
+  AssertFalse('a productive pass with nothing remaining should stop',
+      LoopContinues(8, 65536, 0));
 end;
 
 

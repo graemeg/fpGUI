@@ -282,6 +282,8 @@ type
       signals the end. }
     FIncrActive: Boolean;
     FIncrBuffer: TfpgString;
+    { absolute tick by which the next clipboard event must arrive }
+    FIncrDeadline: QWord;
     xia_selection: TAtom;
     xsa_manager: TfpgString;
     procedure   SendClipboardToManager;
@@ -576,6 +578,9 @@ var
 const
   FPG_XDND_VERSION: TAtom = 5; // our supported XDND version
   PIXMAP_RESIZE_SIZE = 50;
+  { How long to wait for a selection owner to respond, in milliseconds. For an
+    INCR transfer this is the budget per chunk, not for the whole transfer. }
+  CLIPBOARD_TIMEOUT_MS = 5000;
 
 
 type
@@ -838,7 +843,9 @@ begin
     end;
     ATypeOut := actualtype;
     { An INCR reply carries no payload; the caller must switch to incremental
-      mode instead of treating this as the data. }
+      mode instead of treating this as the data. The property has already been
+      deleted by this read (ADelete), which is what tells the owner to start
+      sending chunks. }
     if actualtype = xapplication.xia_incr then
     begin
       if data <> nil then
@@ -846,13 +853,19 @@ begin
       Exit(True); // ==>
     end;
     { 'count' is expressed in units of actualformat, so convert to bytes.
-      Selection text is format 8, but be explicit rather than assume it. }
+      Selection text is format 8, but be explicit rather than assume it.
+      A format of 0 means the property does not exist (or is now fully
+      consumed) - there is nothing more to read. }
+    if actualformat = 0 then
+      Break; // ==>
     case actualformat of
       8:  bytes := count;
       16: bytes := count * 2;
       32: bytes := count * SizeOf(culong); { 32-bit properties arrive as longs }
     else
-      bytes := 0;
+      { Unknown format: we cannot interpret it, and looping would spin
+        forever because we would consume nothing. }
+      Break; // ==>
     end;
 
     if (bytes > 0) and (data <> nil) then
@@ -871,6 +884,12 @@ begin
       offset := 0
     else
       offset := offset + clong((bytes + 3) div 4);
+    { Safety net: every iteration must consume something. Without this a peer
+      that keeps reporting bytes remaining while handing back none would spin
+      here forever, and because the X server is single threaded that hangs the
+      whole session, not just this application. }
+    if bytes = 0 then
+      Break; // ==>
   until remaining = 0;
   Result := True;
 end;
@@ -905,6 +924,7 @@ begin
       clip.FIncrActive := True;
       clip.FIncrBuffer := '';
       clip.FRetriedAsString := False;
+      clip.FIncrDeadline := fpgGetTickCount + CLIPBOARD_TIMEOUT_MS;
       Exit; // ==>
     end;
 
@@ -943,7 +963,9 @@ begin
   else
     clip := fpgClipboard;
 
-  if not clip.FIncrActive then
+  { Only react to writes on the window we actually made the request from, and
+    only while a transfer is genuinely in progress. }
+  if (not clip.FIncrActive) or (ev.xproperty.window <> clip.FClipboardWndHandle) then
     Exit; // ==>
 
   if not ReadWholeProperty(ev.xproperty.window, ev.xproperty.atom, True,
@@ -966,7 +988,11 @@ begin
     clip.FWaitingForSelection := False;
   end
   else
+  begin
     clip.FIncrBuffer := clip.FIncrBuffer + s;
+    { Progress was made, so allow the next chunk a fresh budget. }
+    clip.FIncrDeadline := fpgGetTickCount + CLIPBOARD_TIMEOUT_MS;
+  end;
 end;
 
 // clipboard event
@@ -4498,9 +4524,25 @@ begin
   FWaitingForSelection := True;
   fpgDeliverMessages; // delivering the remaining messages
 
+  { Bounded wait. A selection owner that dies mid-transfer, or an INCR stream
+    that stalls, must not hang us here: this loop runs on the GUI thread, so
+    spinning in it freezes the application (and, because the X server is
+    single threaded, can take the desktop session with it). FIncrDeadline is
+    extended by each INCR chunk that arrives, so a large but healthy transfer
+    is never cut short. }
+  FIncrDeadline := fpgGetTickCount + CLIPBOARD_TIMEOUT_MS;
   repeat
     fpgWaitWindowMessage;
     fpgDeliverMessages;
+    if fpgGetTickCount > FIncrDeadline then
+    begin
+      DebugLn('fpGUI/X11: timed out waiting for clipboard data');
+      FWaitingForSelection := False;
+      FIncrActive := False;
+      FIncrBuffer := '';
+      FClipboardText := '';
+      Break; // ==>
+    end;
   until not FWaitingForSelection;
 
   Result := FClipboardText;
