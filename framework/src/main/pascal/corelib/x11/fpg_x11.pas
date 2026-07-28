@@ -276,6 +276,12 @@ type
     FOwnsSelection: Boolean;
     { guards the one-shot UTF8_STRING -> XA_STRING retry in ProcessSelection }
     FRetriedAsString: Boolean;
+    { INCR (incremental selection transfer) state. When the owner replies with
+      type INCR instead of the data itself, the content arrives as a series of
+      property writes which we accumulate here until a zero-length write
+      signals the end. }
+    FIncrActive: Boolean;
+    FIncrBuffer: TfpgString;
     xia_selection: TAtom;
     xsa_manager: TfpgString;
     procedure   SendClipboardToManager;
@@ -359,6 +365,8 @@ type
     xia_text_plain_utf8: TAtom;
     xia_text_plain: TAtom;
     xia_text: TAtom;
+    { marks an incremental (chunked) selection transfer - ICCCM INCR }
+    xia_incr: TAtom;
     netlayer: TNETWindowLayer;
     InputMethod: PXIM;
     InputContext: PXIC;
@@ -786,14 +794,92 @@ begin
     Result := '#' + IntToStr(Event);
 end;
 
+{ Read a whole window property, however large, into AResult. X11 returns at
+  most the requested number of 32-bit words per call and reports what is left
+  in 'remaining', so we loop until nothing remains rather than assuming the
+  content fits in one read. ADelete removes the property as it is consumed,
+  which is what the INCR protocol requires.
+
+  Returns the property's actual type in ATypeOut so callers can spot an INCR
+  handshake. AResult is empty for a zero-length property. }
+function ReadWholeProperty(AWin: TWindow; AProperty: TAtom; ADelete: Boolean;
+    out ATypeOut: TAtom; out AResult: TfpgString): Boolean;
+const
+  { 32-bit words per call: 64k of payload at a time }
+  chunk_words = 16384;
+var
+  actualtype: TAtom;
+  actualformat: cint;
+  count, remaining: culong;
+  bytes: culong;
+  data: PChar;
+  offset: clong;
+  r: cint;
+begin
+  Result := False;
+  ATypeOut := None;
+  AResult := '';
+  offset := 0;
+  repeat
+    data := nil;
+    count := 0;
+    remaining := 0;
+    r := XGetWindowProperty(xapplication.Display, AWin, AProperty,
+        offset, chunk_words,
+        TBool(ADelete),
+        AnyPropertyType,
+        @actualtype, @actualformat, @count, @remaining,
+        @data);
+    if r <> Success then
+    begin
+      if data <> nil then
+        XFree(data);
+      Exit; // ==>
+    end;
+    ATypeOut := actualtype;
+    { An INCR reply carries no payload; the caller must switch to incremental
+      mode instead of treating this as the data. }
+    if actualtype = xapplication.xia_incr then
+    begin
+      if data <> nil then
+        XFree(data);
+      Exit(True); // ==>
+    end;
+    { 'count' is expressed in units of actualformat, so convert to bytes.
+      Selection text is format 8, but be explicit rather than assume it. }
+    case actualformat of
+      8:  bytes := count;
+      16: bytes := count * 2;
+      32: bytes := count * SizeOf(culong); { 32-bit properties arrive as longs }
+    else
+      bytes := 0;
+    end;
+
+    if (bytes > 0) and (data <> nil) then
+    begin
+      { Append exactly 'bytes' bytes: clipboard payloads are not guaranteed to
+        be NUL terminated, and text may legitimately contain embedded NULs. }
+      SetLength(AResult, System.Length(AResult) + bytes);
+      Move(data^, AResult[System.Length(AResult) - bytes + 1], bytes);
+    end;
+    if data <> nil then
+      XFree(data);
+    { Offset is counted in 32-bit words, not bytes. When deleting as we read,
+      the consumed part is gone, so the next read starts at 0 again; otherwise
+      we advance past what we already have. }
+    if ADelete then
+      offset := 0
+    else
+      offset := offset + clong((bytes + 3) div 4);
+  until remaining = 0;
+  Result := True;
+end;
+
 // clipboard event
 procedure ProcessSelection(var ev: TXEvent);
 var
-  s: string;
-  actualformat: TAtom;
-  actualtype: cint;
-  count, remaining: culong;
-  data: PChar;
+  s: TfpgString;
+  proptype: TAtom;
   clip: TfpgX11Selection;
 begin
   if ev.xselection._property = xapplication.xia_selection then
@@ -802,16 +888,27 @@ begin
     clip := fpgClipboard;
   if ev.xselection._property > 0 then
   begin
-    XGetWindowProperty(xapplication.Display, ev.xselection.requestor,
-        ev.xselection._property, 0, 16000,
-        TBool(false), // delete
-        0, // type
-        @actualformat, @actualtype, @count, @remaining,
-        @data);
-    s := data;
+    if not ReadWholeProperty(ev.xselection.requestor, ev.xselection._property,
+        True, proptype, s) then
+    begin
+      clip.FClipboardText := '';
+      clip.FRetriedAsString := False;
+      clip.FWaitingForSelection := False;
+      Exit; // ==>
+    end;
+
+    if proptype = xapplication.xia_incr then
+    begin
+      { Large transfer: the data follows as a series of property writes on our
+        clipboard window, each announced by a PropertyNotify. Stay in the wait
+        loop until HandleIncrProperty sees the terminating zero-length write. }
+      clip.FIncrActive := True;
+      clip.FIncrBuffer := '';
+      clip.FRetriedAsString := False;
+      Exit; // ==>
+    end;
 
     clip.FClipboardText := s;
-    XFree(data);
   end
   else
   begin
@@ -830,6 +927,46 @@ begin
   clip.FRetriedAsString := False;
 
   clip.FWaitingForSelection := false;
+end;
+
+{ One step of an INCR transfer. The owner writes each chunk to the property on
+  our window and we consume it (deleting as we read, which signals the owner to
+  send the next one). A zero-length write ends the transfer. }
+procedure HandleIncrProperty(var ev: TXEvent);
+var
+  clip: TfpgX11Selection;
+  proptype: TAtom;
+  s: TfpgString;
+begin
+  if ev.xproperty.atom = xapplication.xia_selection then
+    clip := TfpgX11Selection(xapplication.selection)
+  else
+    clip := fpgClipboard;
+
+  if not clip.FIncrActive then
+    Exit; // ==>
+
+  if not ReadWholeProperty(ev.xproperty.window, ev.xproperty.atom, True,
+      proptype, s) then
+  begin
+    { Give up rather than wait forever for a transfer that has gone wrong. }
+    clip.FIncrActive := False;
+    clip.FIncrBuffer := '';
+    clip.FClipboardText := '';
+    clip.FWaitingForSelection := False;
+    Exit; // ==>
+  end;
+
+  if System.Length(s) = 0 then
+  begin
+    { Zero-length write: transfer complete. }
+    clip.FIncrActive := False;
+    clip.FClipboardText := clip.FIncrBuffer;
+    clip.FIncrBuffer := '';
+    clip.FWaitingForSelection := False;
+  end
+  else
+    clip.FIncrBuffer := clip.FIncrBuffer + s;
 end;
 
 // clipboard event
@@ -1806,6 +1943,7 @@ begin
   xia_text_plain_utf8   := XInternAtom(FDisplay, 'text/plain;charset=utf-8', TBool(False));
   xia_text_plain        := XInternAtom(FDisplay, 'text/plain', TBool(False));
   xia_text              := XInternAtom(FDisplay, 'TEXT', TBool(False));
+  xia_incr              := XInternAtom(FDisplay, 'INCR', TBool(False));
   xia_motif_wm_hints    := XInternAtom(FDisplay, '_MOTIF_WM_HINTS', TBool(False));
   xia_wm_protocols      := XInternAtom(FDisplay, 'WM_PROTOCOLS', TBool(False));
   xia_wm_delete_window  := XInternAtom(FDisplay, 'WM_DELETE_WINDOW', TBool(False));
@@ -2655,7 +2793,12 @@ begin
               ReportLostWindow(ev)
             else
               w.DoWindowNetStateChanged;
-          end;
+          end
+          { A chunk of an in-progress INCR clipboard transfer. }
+          else if (ev.xproperty.state = PropertyNewValue)
+              and ((ev.xproperty.atom = xia_selection)
+                or (ev.xproperty.atom = xia_clipboard)) then
+            HandleIncrProperty(ev);
         end
 
     else
@@ -4379,6 +4522,9 @@ begin
   xsa_manager:='PRIMARY_MANAGER';
   FClipboardWndHandle := XCreateSimpleWindow(xapplication.Display,
       xapplication.RootWindow, 10, 10, 10, 10, 0, 0, 0);
+  { INCR transfers deliver their chunks as PropertyNotify events on this
+    window, so we must ask to receive them. }
+  XSelectInput(xapplication.Display, FClipboardWndHandle, PropertyChangeMask);
 end;
 
 destructor TfpgX11Selection.Destroy;

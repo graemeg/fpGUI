@@ -35,6 +35,7 @@ uses
   tctimer,
   tcmsgcoalesce,
   tcprocessmessages,
+  tcpropertyread,
   tcasynctask,
   tchvif,
   tchvif_writer;
