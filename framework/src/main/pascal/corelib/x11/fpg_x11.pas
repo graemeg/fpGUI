@@ -845,11 +845,14 @@ begin
     { An INCR reply carries no payload; the caller must switch to incremental
       mode instead of treating this as the data. The property has already been
       deleted by this read (ADelete), which is what tells the owner to start
-      sending chunks. }
+      sending chunks - but only once that delete actually reaches the server,
+      hence the flush. Without it both sides wait on each other forever. }
     if actualtype = xapplication.xia_incr then
     begin
       if data <> nil then
         XFree(data);
+      if ADelete then
+        XFlush(xapplication.Display);
       Exit(True); // ==>
     end;
     { 'count' is expressed in units of actualformat, so convert to bytes.
@@ -879,9 +882,13 @@ begin
       XFree(data);
     { Offset is counted in 32-bit words, not bytes. When deleting as we read,
       the consumed part is gone, so the next read starts at 0 again; otherwise
-      we advance past what we already have. }
+      we advance past what we already have. The delete must be flushed: during
+      an INCR transfer it is the acknowledgement that asks for the next chunk. }
     if ADelete then
-      offset := 0
+    begin
+      XFlush(xapplication.Display);
+      offset := 0;
+    end
     else
       offset := offset + clong((bytes + 3) div 4);
     { Safety net: every iteration must consume something. Without this a peer
