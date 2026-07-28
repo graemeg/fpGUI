@@ -274,6 +274,8 @@ type
   private
     FWaitingForSelection: Boolean;
     FOwnsSelection: Boolean;
+    { guards the one-shot UTF8_STRING -> XA_STRING retry in ProcessSelection }
+    FRetriedAsString: Boolean;
     xia_selection: TAtom;
     xsa_manager: TfpgString;
     procedure   SendClipboardToManager;
@@ -352,6 +354,11 @@ type
     xia_net_wm_icon: TAtom;
     xia_targets: TAtom;
     xia_save_targets: TAtom;
+    { text flavours we advertise for the selection/clipboard }
+    xia_utf8_string: TAtom;
+    xia_text_plain_utf8: TAtom;
+    xia_text_plain: TAtom;
+    xia_text: TAtom;
     netlayer: TNETWindowLayer;
     InputMethod: PXIM;
     InputContext: PXIC;
@@ -808,14 +815,27 @@ begin
   end
   else
   begin
+    { The owner refused the conversion (property = None). If we asked for
+      UTF8_STRING, retry once with XA_STRING for owners that only speak the
+      older flavour; FRetriedAsString stops that retry looping. }
+    if not clip.FRetriedAsString then
+    begin
+      clip.FRetriedAsString := True;
+      XConvertSelection(xapplication.Display, clip.xia_selection, XA_STRING,
+        clip.xia_selection, clip.FClipboardWndHandle, 0);
+      Exit; // ==> stay in the wait loop for the second reply
+    end;
     clip.FClipboardText := '';
   end;
+  clip.FRetriedAsString := False;
 
   clip.FWaitingForSelection := false;
 end;
 
 // clipboard event
-procedure HandleAtom(var e: TXSelectionEvent; const Atom: TAtom; Prop: TAtom); forward;
+{ Returns False when we cannot supply the requested target, so the caller can
+  refuse the conversion properly (ICCCM: reply with property = None). }
+function HandleAtom(var e: TXSelectionEvent; const Atom: TAtom; Prop: TAtom): Boolean; forward;
 
 
 procedure HandleMultiple(var e: TXSelectionEvent);
@@ -863,10 +883,23 @@ begin
   end;
 end;
 
-procedure HandleAtom(var e: TXSelectionEvent; const Atom: TAtom; Prop: TAtom);
+{ True for the targets DoSetTargets advertises as plain text. We hand back the
+  stored UTF-8 bytes for each of them. }
+function IsTextTarget(const Atom: TAtom): Boolean;
+begin
+  Result := (Atom = XA_STRING)
+         or (Atom = xapplication.xia_utf8_string)
+         or (Atom = xapplication.xia_text_plain_utf8)
+         or (Atom = xapplication.xia_text_plain)
+         or (Atom = xapplication.xia_text);
+end;
+
+function HandleAtom(var e: TXSelectionEvent; const Atom: TAtom; Prop: TAtom): Boolean;
 var
   clip: TfpgX11Selection;
+  data: PByte;
 begin
+  Result := False;
   if Atom = None then
   begin
     Exit; // ==>
@@ -879,18 +912,28 @@ begin
   if Atom = xapplication.xia_targets then
   begin
     clip.DoSetTargets(e.requestor, Prop);
+    Result := True;
   end
   else if Atom = XInternAtom(xapplication.Display, 'MULTIPLE', False) then
   begin
     // multiple targets
     HandleMultiple(e);
+    Result := True;
   end
-  else// if Atom = XA_STRING then
+  else if IsTextTarget(Atom) then
   begin
+    if clip.FClipboardText = '' then
+      data := nil
+    else
+      data := PByte(@clip.FClipboardText[1]);
     XChangeProperty(xapplication.Display, e.requestor, Prop, Atom,
-              8, PropModeReplace, PByte(@clip.FClipboardText[1]), Length(clip.FClipboardText));
+              8, PropModeReplace, data, Length(clip.FClipboardText));
+    Result := True;
   end;
-  //else WriteLn('Unhandled Selection atom: ', XGetAtomName(xapplication.Display, Atom));
+  { Anything else (TIMESTAMP, image/*, application/*, ...) we cannot supply.
+    Returning the text bytes typed as the requested target - as this used to do
+    - hands the requestor garbage, and clipboard managers that probe with a
+    target they know we should not have will reject the whole offer. }
 end;
 
 procedure ProcessSelectionRequest(var ev: TXEvent);
@@ -905,7 +948,10 @@ begin
   e.time        := ev.xselectionrequest.time;
   e._property   := ev.xselectionrequest._property;
 
-  HandleAtom(e, e.target, e._property);
+  { ICCCM: a conversion we cannot perform must be refused by sending back the
+    SelectionNotify with property = None, not by inventing data for it. }
+  if not HandleAtom(e, e.target, e._property) then
+    e._property := None;
 
   XSendEvent(xapplication.Display, e.requestor, false, 0, @e );
 end;
@@ -1756,6 +1802,10 @@ begin
   xia_selection         := XInternAtom(FDisplay, 'PRIMARY', TBool(False));
   xia_targets           := XInternAtom(FDisplay, 'TARGETS', TBool(False));
   xia_save_targets      := XInternAtom(FDisplay, 'SAVE_TARGETS', TBool(False));
+  xia_utf8_string       := XInternAtom(FDisplay, 'UTF8_STRING', TBool(False));
+  xia_text_plain_utf8   := XInternAtom(FDisplay, 'text/plain;charset=utf-8', TBool(False));
+  xia_text_plain        := XInternAtom(FDisplay, 'text/plain', TBool(False));
+  xia_text              := XInternAtom(FDisplay, 'TEXT', TBool(False));
   xia_motif_wm_hints    := XInternAtom(FDisplay, '_MOTIF_WM_HINTS', TBool(False));
   xia_wm_protocols      := XInternAtom(FDisplay, 'WM_PROTOCOLS', TBool(False));
   xia_wm_delete_window  := XInternAtom(FDisplay, 'WM_DELETE_WINDOW', TBool(False));
@@ -4265,16 +4315,22 @@ end;
 
 procedure TfpgX11Selection.DoSetTargets(AWin: TWindow; AProperty: TAtom);
 const
-  target_count = 3;
+  target_count = 7;
 var
   targets: array[0..target_count-1] of TAtom;
 begin
-
-  targets[0] := XA_STRING;
-  targets[1] := xapplication.xia_targets;
-  targets[2] := xapplication.xia_save_targets;
-  //targets[3] := XInternAtom(xapplication.Display, 'UTF8_STRING', True);
-  //targets[4] := XInternAtom(xapplication.Display, 'MULTIPLE', True);
+  { fpGUI stores selection text as UTF-8, so the UTF-8 flavours must be listed
+    first: well behaved pasters (GTK, Qt, Chromium, XWayland's X->Wayland
+    clipboard bridge) ask for TARGETS and then request only what is listed
+    here. Advertising XA_STRING alone meant they either got nothing at all, or
+    fell back to STRING and decoded our UTF-8 bytes as Latin-1. }
+  targets[0] := xapplication.xia_utf8_string;
+  targets[1] := xapplication.xia_text_plain_utf8;
+  targets[2] := xapplication.xia_text_plain;
+  targets[3] := xapplication.xia_text;
+  targets[4] := XA_STRING;
+  targets[5] := xapplication.xia_targets;
+  targets[6] := xapplication.xia_save_targets;
 
   // list the types of data we have in the clipboard
   XChangeProperty(xapplication.Display, AWin, AProperty, XA_ATOM, 32,
@@ -4286,8 +4342,15 @@ begin
   if FOwnsSelection then
     Exit(FClipboardText); // ==>
 
-  XConvertSelection(xapplication.Display, xia_selection, XA_STRING,
-    xia_selection, FClipboardWndHandle, 0);
+  { Ask for UTF8_STRING rather than XA_STRING. ProcessSelection stores the
+    returned bytes verbatim into FClipboardText, which is UTF-8, but XA_STRING
+    is Latin-1 by ICCCM - so requesting it mangled any non-ASCII text pasted
+    in from other applications. Owners that cannot supply UTF8_STRING refuse
+    the conversion (property = None) and ProcessSelection falls back to the
+    XA_STRING request below. }
+  FRetriedAsString := False;
+  XConvertSelection(xapplication.Display, xia_selection,
+    xapplication.xia_utf8_string, xia_selection, FClipboardWndHandle, 0);
 
   FWaitingForSelection := True;
   fpgDeliverMessages; // delivering the remaining messages
