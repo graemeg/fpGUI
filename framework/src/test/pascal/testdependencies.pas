@@ -34,6 +34,7 @@ uses
   tcmig_quickstart,
   tctimer,
   tcmsgcoalesce,
+  tcprocessmessages,
   tcasynctask,
   tchvif,
   tchvif_writer;

@@ -1936,14 +1936,26 @@ end;
 procedure TfpgApplication.ProcessMessages;
 begin
   Flush;
+  { Drain fpGUI's own message queue first. MessagesPending only reports
+    native platform events (e.g. XPending on X11), but widget repaints are
+    queued internally via fpgPostMessage(FPGM_PAINT). Without this call a
+    "Label.Text := ...; ProcessMessages" sequence would never repaint when
+    no platform events happen to be pending. }
+  fpgDeliverMessages;
   while MessagesPending do
   begin
-    WaitWindowMessage(250);
+    { Use a zero timeout: messages are known to be pending, so there is no
+      reason to block here and stall the caller. }
+    WaitWindowMessage(0);
     Flush;
   end;
+  { Handlers run above may have queued further messages (a paint triggered
+    by a resize, for example), so drain once more. }
+  fpgDeliverMessages;
   { Always process invoke queue — items may be pending even when
     no platform messages exist }
   fpgProcessInvokeQueue;
+  Flush;
 end;
 
 procedure TfpgApplication.SetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
