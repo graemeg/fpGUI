@@ -33,6 +33,7 @@ uses
   tcmig_linkhandler,
   tcmig_layoututil,
   tcmig_grid,
+  tcgridstretch,
   tcmig_quickstart,
   tctimer,
   tcmsgcoalesce,

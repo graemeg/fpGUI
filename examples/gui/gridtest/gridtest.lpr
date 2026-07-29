@@ -265,6 +265,8 @@ begin
 //    ScrollBarStyle:= ssHorizVisible;
 //    ScrollBarStyle:= ssVertiVisible;
 //    ScrollBarStyle:= ssBothVisible;
+    ColumnStretch[4] := 2;
+    ColumnStretch[5] := 1;
   end;
 
   chkShowHeader := TfpgCheckBox.Create(self);

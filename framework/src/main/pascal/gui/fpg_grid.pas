@@ -126,6 +126,8 @@ type
     property    Objects[ACol, ARow: Integer]: TObject read GetObjects write SetObjects;
     property    ColumnTitle[ACol: Integer]: string read GetColumnTitle write SetColumnTitle;
     property    ColumnWidth[ACol: Integer]: integer read GetColumnWidth write SetColumnWidth;
+    property    ColumnStretch;
+    property    ColumnMinWidth;
     property    ColumnAlignment[ACol: Integer]: TAlignment read GetColumnAlignment write SetColumnAlignment;
     property    ColumnBackgroundColor;
     property    ColumnTextColor;

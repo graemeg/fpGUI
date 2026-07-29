@@ -42,11 +42,19 @@ type
     FHMargin: Integer;
     FTitle: string;
     FWidth: integer;
+    FMinWidth: integer;
+    FStretch: integer;
     FBackgroundColor: TfpgColor;
     FTextColor: TfpgColor;
   public
     constructor Create; virtual;
     property    Width: integer read FWidth write FWidth;
+    { Lower bound honoured when stretch weights redistribute the width. }
+    property    MinWidth: integer read FMinWidth write FMinWidth;
+    { Share of the grid's client width this column claims. 0 keeps the column
+      at its set Width; values above 0 share the available space in proportion
+      to the total of all weights. }
+    property    Stretch: integer read FStretch write FStretch;
     property    Title: string read FTitle write FTitle;
     property    Alignment: TAlignment read FAlignment write FAlignment;
     property    Layout: TLayout read FLayout write FLayout;
@@ -74,6 +82,10 @@ type
     procedure   SetRowCount(const AValue: Integer); virtual;
     function    GetColumnWidth(ACol: Integer): integer; override;
     procedure   SetColumnWidth(ACol: Integer; const AValue: integer); override;
+    function    GetColumnStretch(ACol: Integer): integer; override;
+    procedure   SetColumnStretch(ACol: Integer; const AValue: integer); override;
+    function    GetColumnMinWidth(ACol: Integer): integer; override;
+    procedure   SetColumnMinWidth(ACol: Integer; const AValue: integer); override;
     function    GetColumnBackgroundColor(ACol: Integer): TfpgColor; override;
     procedure   SetColumnBackgroundColor(ACol: Integer; const AValue: TfpgColor); override;
     function    GetColumnTextColor(ACol: Integer): TfpgColor; override;
@@ -100,6 +112,8 @@ implementation
 constructor TfpgGridColumn.Create;
 begin
   Width     := 65;
+  MinWidth  := 8;
+  Stretch   := 0;
   Title     := '';
   Alignment := taLeftJustify;
   Layout := tlCenter;
@@ -243,6 +257,62 @@ begin
     Result := TfpgGridColumn(FColumns[ACol]).Width
   else
     result := DefaultColWidth;
+end;
+
+function TfpgCustomGrid.GetColumnStretch(ACol: Integer): integer;
+begin
+  if (ACol >= 0) and (ACol < ColumnCount) then
+    Result := TfpgGridColumn(FColumns[ACol]).Stretch
+  else
+    Result := 0;
+end;
+
+procedure TfpgCustomGrid.SetColumnStretch(ACol: Integer; const AValue: integer);
+var
+  lCol: TfpgGridColumn;
+  lValue: integer;
+begin
+  if (ACol < 0) or (ACol >= ColumnCount) then
+    Exit; //==>
+
+  lValue := AValue;
+  if lValue < 0 then
+    lValue := 0;
+
+  lCol := TfpgGridColumn(FColumns[ACol]);
+  if lCol.Stretch <> lValue then
+  begin
+    lCol.Stretch := lValue;
+    Update;
+  end;
+end;
+
+function TfpgCustomGrid.GetColumnMinWidth(ACol: Integer): integer;
+begin
+  if (ACol >= 0) and (ACol < ColumnCount) then
+    Result := TfpgGridColumn(FColumns[ACol]).MinWidth
+  else
+    Result := 0;
+end;
+
+procedure TfpgCustomGrid.SetColumnMinWidth(ACol: Integer; const AValue: integer);
+var
+  lCol: TfpgGridColumn;
+  lValue: integer;
+begin
+  if (ACol < 0) or (ACol >= ColumnCount) then
+    Exit; //==>
+
+  lValue := AValue;
+  if lValue < 1 then
+    lValue := 1;
+
+  lCol := TfpgGridColumn(FColumns[ACol]);
+  if lCol.MinWidth <> lValue then
+  begin
+    lCol.MinWidth := lValue;
+    Update;
+  end;
 end;
 
 procedure TfpgCustomGrid.SetColumnWidth(ACol: Integer; const AValue: integer);

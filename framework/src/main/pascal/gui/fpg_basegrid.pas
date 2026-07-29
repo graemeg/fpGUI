@@ -119,6 +119,13 @@ type
     function    GetHeaderText(ACol: Integer): string; virtual;
     function    GetColumnWidth(ACol: Integer): integer; virtual;
     procedure   SetColumnWidth(ACol: Integer; const AValue: integer); virtual;
+    function    GetColumnStretch(ACol: Integer): integer; virtual;
+    procedure   SetColumnStretch(ACol: Integer; const AValue: integer); virtual;
+    function    GetColumnMinWidth(ACol: Integer): integer; virtual;
+    procedure   SetColumnMinWidth(ACol: Integer; const AValue: integer); virtual;
+    { Recalculates the stretch columns against the current client area. Called
+      on resize, before the scrollbars are updated. }
+    procedure   ApplyStretchWidths;
     function    GetBackgroundColor(ARow: integer; ACol: integer): TfpgColor; virtual;
     function    GetColumnBackgroundColor(ACol: Integer): TfpgColor; virtual;
     procedure   SetColumnBackgroundColor(ACol: Integer; const AValue: TfpgColor); virtual;
@@ -169,6 +176,39 @@ type
     property    TotalColumnWidth: integer read GetTotalColumnWidth;
 //    property    ColResizing: boolean read FColResizing write FColResizing;
     property    ColumnWidth[ACol: Integer]: integer read GetColumnWidth write SetColumnWidth;
+    { The share of the grid's spare width that column ACol claims when the grid
+      is resized.
+
+      A weight of 0 (the default) leaves the column fixed at its ColumnWidth.
+      Any column with a weight above 0 grows and shrinks with the grid, taking a
+      portion of the available width in proportion to its weight against the sum
+      of all weights. Fixed columns are subtracted first, so the stretch columns
+      only ever share what is left over.
+
+      Given a 300 pixel wide grid with a 60 pixel fixed column:
+
+        ColumnWidth[0]   := 60;   // fixed, always 60
+        ColumnStretch[1] := 2;    // gets 160 - two thirds of the 240 remaining
+        ColumnStretch[2] := 1;    // gets  80 - one third
+
+      Widths are recalculated on every resize and always add up to the available
+      width exactly; any rounding remainder goes to the last stretch column.
+      A column never shrinks below its ColumnMinWidth - if the grid becomes too
+      narrow to honour every minimum, the columns overflow and the horizontal
+      scrollbar appears as usual.
+
+      Note that dragging a column's header divider clears that column's weight,
+      pinning it at the width it was dragged to. Assign a weight again to return
+      the column to sharing the available width.
+
+      See also: ColumnMinWidth, ColumnWidth, HasStretchColumns }
+    property    ColumnStretch[ACol: Integer]: integer read GetColumnStretch write SetColumnStretch;
+    { The width below which column ACol will not shrink while stretch weights are
+      being distributed. Defaults to 8 pixels. Has no effect on columns with a
+      stretch weight of 0, which always keep their ColumnWidth.
+
+      See also: ColumnStretch }
+    property    ColumnMinWidth[ACol: Integer]: integer read GetColumnMinWidth write SetColumnMinWidth;
     property    ColumnBackgroundColor[ACol: Integer]: TfpgColor read GetColumnBackgroundColor write SetColumnBackgroundColor;
     property    ColumnTextColor[ACol: Integer]: TfpgColor read GetColumnTextColor write SetColumnTextColor;
     property    VisibleRows: Integer read VisibleLines;
@@ -190,6 +230,12 @@ type
     function    GetClientRect: TfpgRect; override;
     function    VisibleWidth: integer;
     function    VisibleHeight: integer;
+    { True when at least one column carries a stretch weight above 0. }
+    function    HasStretchColumns: boolean;
+    { Shares AAvailableWidth between the columns carrying a stretch weight.
+      Normally called for you on resize - use it directly only when you need to
+      redistribute against a width of your own choosing. }
+    procedure   DistributeStretchWidths(AAvailableWidth: integer);
   end;
 
 
@@ -386,6 +432,99 @@ begin
     FTemp := AValue;
     UpdateScrollBars;
     Repaint;
+  end;
+end;
+
+function TfpgBaseGrid.GetColumnStretch(ACol: Integer): integer;
+begin
+  // Overridden in descendants that own column data objects.
+  Result := 0;
+end;
+
+procedure TfpgBaseGrid.SetColumnStretch(ACol: Integer; const AValue: integer);
+begin
+  // Overridden in descendants that own column data objects.
+end;
+
+function TfpgBaseGrid.GetColumnMinWidth(ACol: Integer): integer;
+begin
+  // Overridden in descendants that own column data objects.
+  Result := 0;
+end;
+
+procedure TfpgBaseGrid.SetColumnMinWidth(ACol: Integer; const AValue: integer);
+begin
+  // Overridden in descendants that own column data objects.
+end;
+
+function TfpgBaseGrid.HasStretchColumns: boolean;
+var
+  i: integer;
+begin
+  Result := False;
+  for i := 0 to ColumnCount-1 do
+    if ColumnStretch[i] > 0 then
+    begin
+      Result := True;
+      Exit; //==>
+    end;
+end;
+
+{ Shares AAvailableWidth between the columns carrying a stretch weight. Columns
+  with a weight of 0 keep their current width and are simply subtracted from the
+  pool. Any rounding remainder lands on the last stretch column so the widths
+  always add up to AAvailableWidth exactly. }
+procedure TfpgBaseGrid.DistributeStretchWidths(AAvailableWidth: integer);
+var
+  i: integer;
+  totalweight: integer;
+  fixedwidth: integer;
+  pool: integer;
+  remaining: integer;
+  lastcol: integer;
+  cw: integer;
+begin
+  totalweight := 0;
+  fixedwidth := 0;
+  lastcol := -1;
+  for i := 0 to ColumnCount-1 do
+  begin
+    if ColumnStretch[i] > 0 then
+    begin
+      inc(totalweight, ColumnStretch[i]);
+      lastcol := i;
+    end
+    else
+      inc(fixedwidth, ColumnWidth[i]);
+  end;
+
+  if totalweight = 0 then
+    Exit; //==>
+
+  pool := AAvailableWidth - fixedwidth;
+  if pool < 0 then
+    pool := 0;
+
+  remaining := pool;
+  for i := 0 to ColumnCount-1 do
+  begin
+    if ColumnStretch[i] <= 0 then
+      Continue;
+
+    if i = lastcol then
+      cw := remaining          // last stretch column mops up the remainder
+    else
+      cw := (pool * ColumnStretch[i]) div totalweight;
+
+    if cw < ColumnMinWidth[i] then
+      cw := ColumnMinWidth[i];
+    if cw < 1 then
+      cw := 1;
+
+    ColumnWidth[i] := cw;
+    dec(remaining, cw);
+    if remaining < 0 then
+      remaining := 0;
   end;
 end;
 
@@ -1155,7 +1294,30 @@ begin
   if csUpdating in ComponentState then
     Exit; //==>
   if WindowAllocated then
+  begin
+    ApplyStretchWidths;
     UpdateScrollBars;
+  end;
+end;
+
+{ Recalculates stretch column widths against the current client area. Columns
+  sharing out the client width leave nothing to scroll horizontally, so only the
+  vertical scrollbar has to be allowed for here. }
+procedure TfpgBaseGrid.ApplyStretchWidths;
+var
+  avail: integer;
+begin
+  if not HasStretchColumns then
+    Exit; //==>
+
+  avail := GetClientRect.Width;
+  if FVScrollBar.Visible then
+    dec(avail, FVScrollBar.ActualWidth-1);
+  if ShowGrid then
+    dec(avail, ColumnCount);
+
+  if avail > 0 then
+    DistributeStretchWidths(avail);
 end;
 
 procedure TfpgBaseGrid.HandleKeyPress(var keycode: word;
@@ -1404,6 +1566,10 @@ begin
       cw := (ColumnWidth[FResizedCol]+x)-FDragPos;
       if cw < 1 then
         cw := 1;
+      { A manual drag pins the column: drop any stretch weight so the new width
+        survives the next resize instead of being recalculated away. }
+      if ColumnStretch[FResizedCol] > 0 then
+        ColumnStretch[FResizedCol] := 0;
       SetColumnWidth(FResizedCol, cw);
       FDragPos := x;
     end;
