@@ -270,6 +270,21 @@ type
   end;
 
 
+  { One outgoing INCR transfer. When a requestor asks for more text than fits
+    in a single X request we reply with type INCR and then push the content in
+    chunks, one per PropertyDelete the requestor sends back. }
+  TfpgX11IncrSend = class(TObject)
+  public
+    Requestor: TWindow;
+    Prop: TAtom;
+    Target: TAtom;
+    Data: TfpgString;
+    Offset: Integer;      { bytes already handed over }
+    Deadline: QWord;      { abandon the transfer if the requestor goes quiet }
+    Finished: Boolean;    { terminating zero-length write has been sent }
+  end;
+
+
   TfpgX11Selection = class(TfpgClipboardBase)
   private
     FWaitingForSelection: Boolean;
@@ -574,6 +589,8 @@ var
   xrrGetMonitors  : TXRRGetMonitorsFunc  = nil;
   xrrFreeMonitors : TXRRFreeMonitorsProc = nil;
   xrandrAvailable : Boolean = False;
+  { in-flight outgoing INCR transfers, owned by this list }
+  uIncrSendList   : TList = nil;
 
 const
   FPG_XDND_VERSION: TAtom = 5; // our supported XDND version
@@ -1067,6 +1084,148 @@ begin
          or (Atom = xapplication.xia_text);
 end;
 
+{ Largest payload we are willing to put in a single XChangeProperty. The X
+  protocol caps a request at XMaxRequestSize 32-bit words; leave generous room
+  for the request header. Anything larger has to go out via INCR. }
+function MaxSinglePropertyBytes: Integer;
+var
+  maxwords: clong;
+begin
+  maxwords := XMaxRequestSize(xapplication.Display);
+  if maxwords <= 0 then
+    maxwords := 65535; { conservative fallback }
+  Result := (maxwords - 64) * 4;
+  if Result < 4096 then
+    Result := 4096;
+end;
+
+{ Bytes per INCR chunk. Kept well inside the single-request limit. }
+function IncrChunkBytes: Integer;
+begin
+  Result := MaxSinglePropertyBytes div 2;
+end;
+
+procedure FreeIncrSend(AItem: TfpgX11IncrSend);
+begin
+  if uIncrSendList <> nil then
+    uIncrSendList.Remove(AItem);
+  AItem.Free;
+end;
+
+{ Drop transfers whose requestor has gone quiet, so a dead client cannot leak
+  the buffered text indefinitely. }
+procedure ExpireIncrSends;
+var
+  i: Integer;
+  item: TfpgX11IncrSend;
+  now_: QWord;
+begin
+  if uIncrSendList = nil then
+    Exit; // ==>
+  now_ := fpgGetTickCount;
+  for i := uIncrSendList.Count - 1 downto 0 do
+  begin
+    item := TfpgX11IncrSend(uIncrSendList[i]);
+    if now_ > item.Deadline then
+    begin
+      {$IFDEF GDEBUG}
+      DebugLn('fpGUI/X11: abandoning stalled outgoing INCR transfer');
+      {$ENDIF}
+      FreeIncrSend(item);
+    end;
+  end;
+end;
+
+function FindIncrSend(AWin: TWindow; AProp: TAtom): TfpgX11IncrSend;
+var
+  i: Integer;
+  item: TfpgX11IncrSend;
+begin
+  Result := nil;
+  if uIncrSendList = nil then
+    Exit; // ==>
+  for i := 0 to uIncrSendList.Count - 1 do
+  begin
+    item := TfpgX11IncrSend(uIncrSendList[i]);
+    if (item.Requestor = AWin) and (item.Prop = AProp) then
+      Exit(item); // ==>
+  end;
+end;
+
+{ Push the next chunk of an outgoing INCR transfer. Each write is answered by
+  the requestor deleting the property, which brings us back here. A final
+  zero-length write ends the transfer. }
+procedure SendNextIncrChunk(AItem: TfpgX11IncrSend);
+var
+  remaining, chunk: Integer;
+  data: PByte;
+begin
+  if AItem.Finished then
+  begin
+    { The requestor consumed our terminating zero-length write - done. }
+    FreeIncrSend(AItem);
+    Exit; // ==>
+  end;
+
+  remaining := System.Length(AItem.Data) - AItem.Offset;
+  if remaining > 0 then
+  begin
+    chunk := IncrChunkBytes;
+    if chunk > remaining then
+      chunk := remaining;
+    data := PByte(@AItem.Data[AItem.Offset + 1]);
+    XChangeProperty(xapplication.Display, AItem.Requestor, AItem.Prop,
+        AItem.Target, 8, PropModeReplace, data, chunk);
+    AItem.Offset := AItem.Offset + chunk;
+  end
+  else
+  begin
+    { Zero-length write signals the end of the transfer. }
+    XChangeProperty(xapplication.Display, AItem.Requestor, AItem.Prop,
+        AItem.Target, 8, PropModeReplace, nil, 0);
+    AItem.Finished := True;
+  end;
+  AItem.Deadline := fpgGetTickCount + CLIPBOARD_TIMEOUT_MS;
+  XFlush(xapplication.Display);
+end;
+
+{ Begin an outgoing INCR transfer: tell the requestor how much is coming and
+  wait for it to start consuming. }
+procedure StartIncrSend(ARequestor: TWindow; AProp, ATarget: TAtom;
+    const AData: TfpgString);
+var
+  item: TfpgX11IncrSend;
+  total: culong;
+begin
+  if uIncrSendList = nil then
+    uIncrSendList := TList.Create;
+
+  { A repeat request for the same property replaces any stale transfer. }
+  item := FindIncrSend(ARequestor, AProp);
+  if item <> nil then
+    FreeIncrSend(item);
+
+  item := TfpgX11IncrSend.Create;
+  item.Requestor := ARequestor;
+  item.Prop := AProp;
+  item.Target := ATarget;
+  item.Data := AData;
+  item.Offset := 0;
+  item.Finished := False;
+  item.Deadline := fpgGetTickCount + CLIPBOARD_TIMEOUT_MS;
+  uIncrSendList.Add(item);
+
+  { We must be told when the requestor deletes the property, which is how it
+    asks for each subsequent chunk. }
+  XSelectInput(xapplication.Display, ARequestor, PropertyChangeMask);
+
+  { The INCR property value is a lower bound on the total size. }
+  total := System.Length(AData);
+  XChangeProperty(xapplication.Display, ARequestor, AProp,
+      xapplication.xia_incr, 32, PropModeReplace, @total, 1);
+  XFlush(xapplication.Display);
+end;
+
 function HandleAtom(var e: TXSelectionEvent; const Atom: TAtom; Prop: TAtom): Boolean;
 var
   clip: TfpgX11Selection;
@@ -1095,12 +1254,22 @@ begin
   end
   else if IsTextTarget(Atom) then
   begin
-    if clip.FClipboardText = '' then
-      data := nil
+    if Length(clip.FClipboardText) > MaxSinglePropertyBytes then
+    begin
+      { Too large for one request - hand it over incrementally instead. The
+        SelectionNotify our caller sends names the property as usual; the
+        requestor sees type INCR on it and switches to chunked mode. }
+      StartIncrSend(e.requestor, Prop, Atom, clip.FClipboardText);
+    end
     else
-      data := PByte(@clip.FClipboardText[1]);
-    XChangeProperty(xapplication.Display, e.requestor, Prop, Atom,
-              8, PropModeReplace, data, Length(clip.FClipboardText));
+    begin
+      if clip.FClipboardText = '' then
+        data := nil
+      else
+        data := PByte(@clip.FClipboardText[1]);
+      XChangeProperty(xapplication.Display, e.requestor, Prop, Atom,
+                8, PropModeReplace, data, Length(clip.FClipboardText));
+    end;
     Result := True;
   end;
   { Anything else (TIMESTAMP, image/*, application/*, ...) we cannot supply.
@@ -2024,6 +2193,8 @@ begin
 end;
 
 destructor TfpgX11Application.Destroy;
+var
+  i: Integer;
 begin
   Classes.WakeMainThread := nil;
   if WakeChannel <> nil then
@@ -2031,6 +2202,14 @@ begin
   WakeChannel := nil;
   FSelection.free;
   netlayer.Free;
+  { abandon any outgoing INCR transfers still in flight }
+  if uIncrSendList <> nil then
+  begin
+    for i := uIncrSendList.Count - 1 downto 0 do
+      TfpgX11IncrSend(uIncrSendList[i]).Free;
+    uIncrSendList.Clear;
+    FreeAndNil(uIncrSendList);
+  end;
   XCloseDisplay(FDisplay);
   inherited Destroy;
 end;
@@ -2136,6 +2315,7 @@ var
   Popup: TfpgWidget;
   needToWait: boolean;
   eformwidget: TfpgForm;
+  incrsend: TfpgX11IncrSend;
 
   // debug purposes only
   procedure PrintKeyEvent(const event: TXEvent);
@@ -2830,11 +3010,22 @@ begin
             else
               w.DoWindowNetStateChanged;
           end
-          { A chunk of an in-progress INCR clipboard transfer. }
+          { A chunk of an in-progress INCR clipboard transfer we are receiving. }
           else if (ev.xproperty.state = PropertyNewValue)
               and ((ev.xproperty.atom = xia_selection)
                 or (ev.xproperty.atom = xia_clipboard)) then
-            HandleIncrProperty(ev);
+            HandleIncrProperty(ev)
+          { The requestor deleted the property we wrote, which is how it asks
+            for the next chunk of an INCR transfer we are sending. The property
+            here is whatever the requestor named, on its own window, so match
+            against the in-flight transfers rather than our own atoms. }
+          else if ev.xproperty.state = PropertyDelete then
+          begin
+            incrsend := FindIncrSend(ev.xproperty.window, ev.xproperty.atom);
+            if incrsend <> nil then
+              SendNextIncrChunk(incrsend);
+          end;
+          ExpireIncrSends;
         end
 
     else
