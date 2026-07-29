@@ -154,7 +154,7 @@ begin
   begin
     FPascalEditor := AEditor;
     if Assigned(ALines) then
-      FPascalHighlighter.Tokenise(ALines.Text);
+      FPascalHighlighter.Tokenise(ALines);
   end;
 end;
 

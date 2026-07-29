@@ -86,6 +86,30 @@ type
   end;
 
 
+  { TTestHighlighterTStrings - the Tokenise(TStrings) overload must behave
+    identically to the Tokenise(string) path (GitHub issue #187) }
+
+  TTestHighlighterTStrings = class(TTestCase)
+  private
+    FHL: TPascalHighlighter;
+    FRef: TPascalHighlighter;
+    FList: TStringList;
+    procedure AssertSameTokens(const AContext: string);
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    { Single-line source produces identical tokens via both entry points }
+    procedure TestSingleLineMatchesStringPath;
+    { Multi-line source produces identical tokens via both entry points }
+    procedure TestMultiLineMatchesStringPath;
+    { Multi-line brace comment survives the TStrings path }
+    procedure TestMultiLineCommentMatchesStringPath;
+    { An empty list clears all previous token state }
+    procedure TestEmptyListClearsState;
+  end;
+
+
 implementation
 
 { TTestPascalHighlighter }
@@ -446,7 +470,90 @@ begin
   AssertTrue('override is hcKeyword2', foundOverride);
 end;
 
+{ TTestHighlighterTStrings }
+
+procedure TTestHighlighterTStrings.SetUp;
+begin
+  FHL := TPascalHighlighter.Create;
+  FRef := TPascalHighlighter.Create;
+  FList := TStringList.Create;
+end;
+
+procedure TTestHighlighterTStrings.TearDown;
+begin
+  FList.Free;
+  FRef.Free;
+  FHL.Free;
+end;
+
+procedure TTestHighlighterTStrings.AssertSameTokens(const AContext: string);
+var
+  line, i: Integer;
+  a, b: THighlightTokenArray;
+begin
+  { FRef holds the reference result from Tokenise(string);
+    FHL holds the result from Tokenise(TStrings) }
+  AssertEquals(AContext + ': line count', FRef.LineCount, FHL.LineCount);
+  for line := 0 to FRef.LineCount - 1 do
+  begin
+    a := FRef.GetLineTokens(line);
+    b := FHL.GetLineTokens(line);
+    AssertEquals(Format('%s: line %d token count', [AContext, line]),
+      Length(a), Length(b));
+    for i := 0 to Length(a) - 1 do
+    begin
+      AssertEquals(Format('%s: line %d token %d Column', [AContext, line, i]),
+        a[i].Column, b[i].Column);
+      AssertEquals(Format('%s: line %d token %d Length', [AContext, line, i]),
+        a[i].Length, b[i].Length);
+      AssertTrue(Format('%s: line %d token %d Category', [AContext, line, i]),
+        a[i].Category = b[i].Category);
+    end;
+  end;
+end;
+
+procedure TTestHighlighterTStrings.TestSingleLineMatchesStringPath;
+begin
+  FList.Add('unit foo;');
+  FRef.Tokenise(FList.Text);
+  FHL.Tokenise(FList);
+  AssertSameTokens('single line');
+end;
+
+procedure TTestHighlighterTStrings.TestMultiLineMatchesStringPath;
+begin
+  FList.Add('unit foo;');
+  FList.Add('interface');
+  FList.Add('var x: Integer; // trailing comment');
+  FList.Add('implementation');
+  FList.Add('end.');
+  FRef.Tokenise(FList.Text);
+  FHL.Tokenise(FList);
+  AssertSameTokens('multi line');
+end;
+
+procedure TTestHighlighterTStrings.TestMultiLineCommentMatchesStringPath;
+begin
+  FList.Add('{ line one');
+  FList.Add('  line two');
+  FList.Add('  line three }');
+  FList.Add('begin end.');
+  FRef.Tokenise(FList.Text);
+  FHL.Tokenise(FList);
+  AssertSameTokens('multi-line comment');
+end;
+
+procedure TTestHighlighterTStrings.TestEmptyListClearsState;
+begin
+  FHL.Tokenise('unit foo;');
+  AssertTrue('has state before', FHL.LineCount > 0);
+  FHL.Tokenise(FList);
+  AssertEquals('state cleared', 0, FHL.LineCount);
+end;
+
+
 initialization
   RegisterTest(TTestPascalHighlighter);
+  RegisterTest(TTestHighlighterTStrings);
 
 end.

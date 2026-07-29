@@ -83,10 +83,12 @@ type
     procedure AddToken(ALine, AColumn, ALength: Integer; ACategory: THighlightCategory);
     procedure EnsureLineCount(ACount: Integer);
     procedure DoTokenise(const AText: string); virtual; abstract;
+    procedure DoTokenise(const ALines: TStrings); virtual;
   public
     constructor Create; virtual;
     destructor Destroy; override;
     procedure Tokenise(const AText: string);
+    procedure Tokenise(const ALines: TStrings);
     function LineCount: Integer;
     function GetLineTokens(ALine: Integer): THighlightTokenArray;
     function GetLineTokenCount(ALine: Integer): Integer;
@@ -179,11 +181,23 @@ begin
   Inc(p^.Count);
 end;
 
+procedure TEditorHighlighter.DoTokenise(const ALines: TStrings);
+begin
+  DoTokenise(ALines.Text);
+end;
+
 procedure TEditorHighlighter.Tokenise(const AText: string);
 begin
   ClearLines;
   if AText <> '' then
     DoTokenise(AText);
+end;
+
+procedure TEditorHighlighter.Tokenise(const ALines: TStrings);
+begin
+  ClearLines;
+  if ALines.Count > 0 then
+    DoTokenise(ALines);
 end;
 
 function TEditorHighlighter.LineCount: Integer;
