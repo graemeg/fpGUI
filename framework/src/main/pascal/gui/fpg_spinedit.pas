@@ -717,17 +717,24 @@ begin
 end;
 
 procedure TfpgSpinEditFloat.EditKeyPress(Sender: TObject; var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
+var
+  f: extended;
 begin
   if (KeyCode = KeyReturn) or (KeyCode = KeyPEnter) then
-    if FEdit.Text = '' then
+  begin
+    { FEdit.Value parses safely: empty or invalid text yields 0 }
+    f := FEdit.Value;
+    if f < FMinValue then
+      f := FMinValue
+    else if f > FMaxValue then
+      f := FMaxValue;
+    if f <> FValue then
     begin
-      FValue      := 0.0;
-      FEdit.Value := FValue;
-    end
-    else if (StrToFloat(FEdit.Text) <= FMaxValue) and (StrToFloat(FEdit.Text) >= FMinValue) then
-      FValue      := StrToFloat(FEdit.Text)
-    else
-      FEdit.Value := FValue;
+      FValue := f;
+      DoOnChange;
+    end;
+    FEdit.Value := FValue;
+  end;
 
   if KeyCode = KeyUp then
     if FEdit.Value + Increment <= FMaxValue then
@@ -769,16 +776,21 @@ begin
 end;
 
 procedure TfpgSpinEditFloat.EditExit(Sender: TObject);
+var
+  f: extended;
 begin
-  if FEdit.Text = '' then
+  { FEdit.Value parses safely: empty or invalid text yields 0 }
+  f := FEdit.Value;
+  if f < FMinValue then
+    f := FMinValue
+  else if f > FMaxValue then
+    f := FMaxValue;
+  if f <> FValue then
   begin
-    FValue      := 0.0;
-    FEdit.Value := FValue;
-  end
-  else if (StrToFloat(FEdit.Text) <= FMaxValue) and (StrToFloat(FEdit.Text) >= FMinValue) then
-    FValue      := StrToFloat(FEdit.Text)
-  else
-    FEdit.Value := FValue;
+    FValue := f;
+    DoOnChange;
+  end;
+  FEdit.Value := FValue;
   EnableButtons;
 end;
 
@@ -1140,21 +1152,20 @@ begin
 end;
 
 procedure TfpgSpinEdit.EditKeyPress(Sender: TObject; var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
+var
+  n: integer;
 begin
   if (KeyCode = KeyReturn) or (KeyCode = KeyPEnter) then
-    if FEdit.Text = '' then
+  begin
+    { FEdit.Value parses safely: empty or invalid text yields 0 }
+    n := EnsureRange(FEdit.Value, FMinValue, FMaxValue);
+    if n <> FValue then
     begin
-      FValue      := 0;
-      FEdit.Value := FValue;
+      FValue := n;
       DoOnChange;
-    end
-    else if (StrToInt(FEdit.Text) <= FMaxValue) and (StrToInt(FEdit.Text) >= FMinValue) then
-    begin
-      FValue      := FEdit.Value;
-      DoOnChange;
-    end
-    else
-      FEdit.Value := FValue;
+    end;
+    FEdit.Value := FValue;
+  end;
 
   if KeyCode = KeyUp then
     if FEdit.Value + Increment <= FMaxValue then
@@ -1202,16 +1213,17 @@ begin
 end;
 
 procedure TfpgSpinEdit.EditExit(Sender: TObject);
+var
+  n: integer;
 begin
-  if FEdit.Text = '' then
+  { FEdit.Value parses safely: empty or invalid text yields 0 }
+  n := EnsureRange(FEdit.Value, FMinValue, FMaxValue);
+  if n <> FValue then
   begin
-    FValue      := 0;
-    FEdit.Value := FValue;
-  end
-  else if (StrToInt(FEdit.Text) <= FMaxValue) and (StrToInt(FEdit.Text) >= FMinValue) then
-    FValue      := FEdit.Value
-  else
-    FEdit.Value := FValue;
+    FValue := n;
+    DoOnChange;
+  end;
+  FEdit.Value := FValue;
   EnableButtons;
 end;
 

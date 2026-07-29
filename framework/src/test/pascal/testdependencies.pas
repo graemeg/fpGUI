@@ -35,6 +35,7 @@ uses
   tcmig_grid,
   tcgridstretch,
   tcmig_quickstart,
+  tcspinedit,
   tctimer,
   tcmsgcoalesce,
   tcprocessmessages,
