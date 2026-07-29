@@ -917,11 +917,28 @@ var
   ExePath: string;
   WorkDir: string;
   thd: TRunnerThread;
+  pb: TPasBuildProjectBackend;
+  ActiveFilePath: TfpgString;
+  ActiveMod: TPasBuildModule;
 begin
   if FRunnerThread <> nil then
   begin
     AddMessage('A program is already running. Stop it first (Ctrl+F2).');
     Exit;
+  end;
+
+  { Ensure ActiveModule reflects the file being edited, not just whatever
+    was selected last in the project tree. }
+  if (GProject <> nil) and (GProject.ProjectFormat = pfPasBuild) and (pcEditor.ActivePage <> nil) then
+  begin
+    pb := TPasBuildProjectBackend(GProject);
+    ActiveFilePath := pcEditor.ActivePage.Hint;
+    if ActiveFilePath <> '' then
+    begin
+      ActiveMod := pb.EnsureModuleForFile(ActiveFilePath);
+      if ActiveMod <> nil then
+        pb.ActiveModule := ActiveMod;
+    end;
   end;
 
   ExePath := ResolveProjectExecutablePath;
@@ -1007,6 +1024,7 @@ var
   thd: TBuilderThread;
   pb: TPasBuildProjectBackend;
   ModInfo: TAggregatorModuleInfo;
+  ActiveMod: TPasBuildModule;
   FilePath: TfpgString;
 begin
   if GProject.ProjectFormat <> pfPasBuild then
@@ -1056,18 +1074,22 @@ begin
   FDebugBuildPending := True;
 
   thd := TBuilderThread.Create(True);
-  if pb.IsAggregator and (pcEditor.ActivePage <> nil) then
+  { Ensure the active module matches the currently-edited file for both
+    aggregator and non-aggregator projects. For aggregators, also set the
+    BuildModule to build only that module. }
+  if pcEditor.ActivePage <> nil then
   begin
     FilePath := pcEditor.ActivePage.Hint;
     if FilePath <> '' then
     begin
-      ModInfo := pb.FindModuleInfoForFile(FilePath);
-      if ModInfo <> nil then
+      ActiveMod := pb.EnsureModuleForFile(FilePath);
+      if ActiveMod <> nil then
+        pb.ActiveModule := ActiveMod;
+      if pb.IsAggregator then
       begin
-        thd.BuildModule := ModInfo.Name;
-        { Align executable resolution with the build target so LaunchDebugSession
-          picks the right binary when the aggregator project is open. }
-        pb.ActiveModule := pb.FindModuleForFile(FilePath);
+        ModInfo := pb.FindModuleInfoForFile(FilePath);
+        if ModInfo <> nil then
+          thd.BuildModule := ModInfo.Name;
       end;
     end;
   end;
@@ -1103,21 +1125,18 @@ var
   ActiveFilePath: TfpgString;
   ActiveMod: TPasBuildModule;
 begin
-  { For aggregator projects: ensure ActiveModule reflects the file being edited,
-    not just whatever was selected last in the project tree. This mirrors the
-    build-module deduction in miDebugRun so the debug binary matches the build. }
-  if (GProject <> nil) and (GProject.ProjectFormat = pfPasBuild) then
+  { Ensure ActiveModule reflects the file being edited, not just whatever
+    was selected last in the project tree. This mirrors the build-module
+    deduction in miDebugRun so the debug binary matches the build. }
+  if (GProject <> nil) and (GProject.ProjectFormat = pfPasBuild) and (pcEditor.ActivePage <> nil) then
   begin
     pb2 := TPasBuildProjectBackend(GProject);
-    if pb2.IsAggregator and (pcEditor.ActivePage <> nil) then
+    ActiveFilePath := pcEditor.ActivePage.Hint;
+    if ActiveFilePath <> '' then
     begin
-      ActiveFilePath := pcEditor.ActivePage.Hint;
-      if ActiveFilePath <> '' then
-      begin
-        ActiveMod := pb2.FindModuleForFile(ActiveFilePath);
-        if ActiveMod <> nil then
-          pb2.ActiveModule := ActiveMod;
-      end;
+      ActiveMod := pb2.EnsureModuleForFile(ActiveFilePath);
+      if ActiveMod <> nil then
+        pb2.ActiveModule := ActiveMod;
     end;
   end;
 

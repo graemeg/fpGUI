@@ -55,6 +55,8 @@ type
     FProjectDir: TfpgString;     { absolute path to module directory }
     FSourceDirectory: TfpgString; { from <sourceDirectory>, default 'src/main/pascal' }
     FProjectType: TfpgString;    { 'application', 'library', 'pom' }
+    FMainSource: TfpgString;     { from <mainSource> }
+    FExecutableName: TfpgString; { from <executableName> }
     FDeclaredDeps: TStringList;  { formatted dependency display strings }
     FSubModules: TList;          { list of TAggregatorModuleInfo for nested pom modules }
   public
@@ -67,6 +69,8 @@ type
     property ProjectDir: TfpgString read FProjectDir write FProjectDir;
     property SourceDirectory: TfpgString read FSourceDirectory write FSourceDirectory;
     property ProjectType: TfpgString read FProjectType write FProjectType;
+    property MainSource: TfpgString read FMainSource write FMainSource;
+    property ExecutableName: TfpgString read FExecutableName write FExecutableName;
     property DeclaredDeps: TStringList read FDeclaredDeps;
     property SubModules: TList read FSubModules;
   end;
@@ -174,6 +178,11 @@ type
     procedure Resolve(const AProfiles: TfpgString); overload;
     function  FindModuleForFile(const AFilePath: TfpgString): TPasBuildModule;
     function  FindModuleInfoForFile(const AFilePath: TfpgString): TAggregatorModuleInfo;
+    { Like FindModuleForFile, but falls back to the aggregator module info
+      (parsed from the module's project.xml) when the module is not part of
+      the resolve data — e.g. modules marked activeByDefault="false". The
+      synthesised module is added to Modules so subsequent lookups hit it. }
+    function  EnsureModuleForFile(const AFilePath: TfpgString): TPasBuildModule;
     function  IsAggregator: Boolean;
     function  GetBuildDir: TfpgString;
     { Properties }
@@ -398,6 +407,12 @@ procedure TPasBuildProjectBackend.ParseAggregatorModules;
         ChildNode := Node.FindNode('sourceDirectory');
         if Assigned(ChildNode) and Assigned(ChildNode.FirstChild) then
           Result.SourceDirectory := UTF8Encode(ChildNode.FirstChild.NodeValue);
+        ChildNode := Node.FindNode('mainSource');
+        if Assigned(ChildNode) and Assigned(ChildNode.FirstChild) then
+          Result.MainSource := UTF8Encode(ChildNode.FirstChild.NodeValue);
+        ChildNode := Node.FindNode('executableName');
+        if Assigned(ChildNode) and Assigned(ChildNode.FirstChild) then
+          Result.ExecutableName := UTF8Encode(ChildNode.FirstChild.NodeValue);
       end;
 
       { Dependencies — same logic as ParseProjectXML }
@@ -1197,6 +1212,37 @@ function TPasBuildProjectBackend.FindModuleInfoForFile(
 begin
   Result := nil;
   SearchModules(FModuleInfos, Result);
+end;
+
+function TPasBuildProjectBackend.EnsureModuleForFile(
+  const AFilePath: TfpgString): TPasBuildModule;
+var
+  Info: TAggregatorModuleInfo;
+  ExeName: TfpgString;
+begin
+  Result := FindModuleForFile(AFilePath);
+  if Result <> nil then
+    Exit;
+
+  { Module not in resolve data — synthesise from the project.xml info tree }
+  Info := FindModuleInfoForFile(AFilePath);
+  if (Info = nil) or Info.IsAggregator then
+    Exit;
+
+  ExeName := Info.ExecutableName;
+  if (ExeName = '') and (Info.MainSource <> '') then
+    ExeName := ChangeFileExt(fpgExtractFileName(Info.MainSource), '');
+  if ExeName = '' then
+    Exit;
+
+  Result := TPasBuildModule.Create;
+  Result.Name := Info.Name;
+  Result.ProjectType := Info.ProjectType;
+  Result.ProjectDir := ExcludeTrailingPathDelimiter(Info.ProjectDir);
+  Result.MainSource := Info.MainSource;
+  Result.ExecutableName := ExeName;
+  Result.OutputDir := 'target';  { pasbuild default output directory }
+  FModules.Add(Result);
 end;
 
 function TPasBuildProjectBackend.IsAggregator: Boolean;
