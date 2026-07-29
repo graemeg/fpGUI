@@ -1280,6 +1280,8 @@ var
     end;
   end;
 
+var
+  candidate: string;
 begin
   Result := AFile;
   if fpgFileExists(AFile) then
@@ -1292,6 +1294,15 @@ begin
   relPath := AFile;
   if (Length(relPath) >= 2) and (relPath[1] = '.') and (relPath[2] = '/') then
     Delete(relPath, 1, 2);
+  { Prefer the module owning the running executable — several modules may
+    contain identically-named source files (e.g. frm_basic.pas). }
+  if pb.ActiveModule <> nil then
+  begin
+    candidate := IncludeTrailingPathDelimiter(pb.ActiveModule.ProjectDir)
+               + SetDirSeparators(relPath);
+    if fpgFileExists(candidate) then
+      Exit(candidate);
+  end;
   Result := SearchModules(pb.ModuleInfos);
   if Result = '' then
     Result := AFile;
