@@ -149,22 +149,23 @@ const
   { Sorted list of context-sensitive Pascal modifier/directive words.
     These are not reserved words but have structural meaning in class,
     object, interface, and procedure declarations. }
-  ModifierCount = 33;
+  ModifierCount = 41;
   Modifiers: array[0..ModifierCount - 1] of string = (
     'ABSTRACT', 'ASSEMBLER',
     'CDECL',
-    'DEPRECATED', 'DISPID', 'DYNAMIC',
+    'DEFAULT', 'DEPRECATED', 'DISPID', 'DYNAMIC',
     'EXPERIMENTAL', 'EXPORT', 'EXTERNAL',
     'FAR', 'FINAL', 'FORWARD',
-    'INTERRUPT', 'IOCHECK',
+    'IMPLEMENTS', 'INDEX', 'INTERRUPT', 'IOCHECK',
     'MESSAGE',
-    'NEAR', 'NORETURN',
+    'NEAR', 'NODEFAULT', 'NORETURN',
     'OVERLOAD', 'OVERRIDE',
     'PASCAL', 'PLATFORM', 'PRIVATE', 'PROTECTED', 'PUBLIC', 'PUBLISHED',
-    'REGISTER', 'REINTRODUCE',
-    'SAFECALL', 'STDCALL', 'STRICT',
+    'READ', 'READONLY', 'REGISTER', 'REINTRODUCE',
+    'SAFECALL', 'STDCALL', 'STORED', 'STRICT',
     'UNIMPLEMENTED',
-    'VARARGS', 'VIRTUAL'
+    'VARARGS', 'VIRTUAL',
+    'WRITE'
   );
 
 function BinarySearchModifier(const AText: string): Boolean;
