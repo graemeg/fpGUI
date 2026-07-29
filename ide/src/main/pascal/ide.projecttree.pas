@@ -49,6 +49,21 @@ function ResolveNodeFilePath(
   AIsAggregator: Boolean
 ): TfpgString;
 
+{ Inverse of ResolveNodeFilePath: given a full file path, find the leaf node
+  that represents it. Walks the whole tree under ARoot and resolves each leaf
+  with ResolveNodeFilePath, so the two directions can never disagree about how
+  a path is assembled.
+
+  Comparison is case-insensitive on Windows and case-sensitive elsewhere.
+
+  Returns nil when no node matches — the file may simply not be part of the
+  project tree (a dependency, or a file opened from outside the project). }
+function FindNodeForFilePath(
+  ARoot: TfpgTreeNode;
+  const AFilePath, AProjectDir, ASourceDir: TfpgString;
+  AIsAggregator: Boolean
+): TfpgTreeNode;
+
 { Recursively adds directory contents to a tree node.
   AExtensions: list of file extensions to include (e.g. '.pas', '.inc').
   Pass nil or empty list to include all files. }
@@ -157,6 +172,60 @@ begin
       Exit;
     Result := AProjectDir + DirPath + RelPath + ANode.Text;
   end;
+end;
+
+{ -------------------------------------------------------------------------- }
+{ FindNodeForFilePath                                                        }
+{ -------------------------------------------------------------------------- }
+
+function FindNodeForFilePath(
+  ARoot: TfpgTreeNode;
+  const AFilePath, AProjectDir, ASourceDir: TfpgString;
+  AIsAggregator: Boolean
+): TfpgTreeNode;
+var
+  Target: TfpgString;
+
+  function SamePath(const A, B: TfpgString): Boolean;
+  begin
+    {$IFDEF MSWINDOWS}
+    Result := SameText(A, B);
+    {$ELSE}
+    Result := A = B;
+    {$ENDIF}
+  end;
+
+  function Search(ANode: TfpgTreeNode): TfpgTreeNode;
+  var
+    Child: TfpgTreeNode;
+  begin
+    Result := nil;
+    if ANode = nil then
+      Exit;
+
+    Child := ANode.FirstSubNode;
+    while Child <> nil do
+    begin
+      if Child.Count > 0 then
+        Result := Search(Child)   { directory or category node — descend }
+      else if SamePath(ResolveNodeFilePath(Child, AProjectDir, ASourceDir,
+                         AIsAggregator), Target) then
+        Result := Child;
+
+      if Result <> nil then
+        Exit; //==>
+
+      Child := Child.Next;
+    end;
+  end;
+
+begin
+  Result := nil;
+  if (ARoot = nil) or (AFilePath = '') then
+    Exit;
+
+  Target := SetDirSeparators(AFilePath);
+  Result := Search(ARoot);
 end;
 
 { -------------------------------------------------------------------------- }

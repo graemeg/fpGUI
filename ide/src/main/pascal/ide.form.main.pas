@@ -353,6 +353,7 @@ type
     procedure   miNavigateForward(Sender: TObject);
     procedure   miNavigateToFile(Sender: TObject);
     procedure   miNavigateToSymbol(Sender: TObject);
+    procedure   miRevealInProjectTree(Sender: TObject);
     procedure   CheckGitIgnoreForIdeDir;
     procedure   uiCreateToolBar;
     procedure   uiCreateStatusBar;
@@ -2564,6 +2565,11 @@ begin
           miJumpToImplementation(nil);
           consumed := True;
         end;
+      keyS:  { Ctrl+Shift+S: select the current file in the project tree }
+        begin
+          miRevealInProjectTree(nil);
+          consumed := True;
+        end;
     end;
   end;
   { Alt shortcuts: F7 Find Usages, Left/Right navigate history }
@@ -4143,6 +4149,62 @@ begin
   end;
 end;
 
+{ Selects the file open in the active editor tab in the project tree, expanding
+  and scrolling to it. Mirrors the "select opened file" behaviour of Eclipse and
+  the JetBrains IDEs. }
+procedure TMainForm.miRevealInProjectTree(Sender: TObject);
+var
+  FilePath: TfpgString;
+  pb: TPasBuildProjectBackend;
+  n: TfpgTreeNode;
+  u: TUnit;
+  i: integer;
+begin
+  if pcEditor.PageCount = 0 then
+    Exit;
+  if pcEditor.ActivePage = nil then
+    Exit;
+
+  FilePath := pcEditor.ActivePage.Hint;
+  if FilePath = '' then
+    Exit;
+
+  n := nil;
+  if GProject.ProjectFormat = pfPasBuild then
+  begin
+    pb := TPasBuildProjectBackend(GProject);
+    n := FindNodeForFilePath(tvProject.RootNode, FilePath, pb.ProjectDir,
+      pb.SourceDirectory, pb.IsAggregator);
+  end
+  else
+  begin
+    { Legacy projects: nodes carry their TUnit in Data }
+    for i := 0 to GProject.UnitList.Count-1 do
+    begin
+      u := GProject.UnitList.Items[i];
+      if SameFileName(u.FileName, FilePath) then
+      begin
+        n := tvProject.RootNode.FindSubNode(u, True);
+        Break;
+      end;
+    end;
+  end;
+
+  if n = nil then
+  begin
+    { Not part of the project — say so rather than silently doing nothing }
+    UpdateStatus(Format('"%s" is not in the project tree', [ExtractFileName(FilePath)]));
+    Exit;
+  end;
+
+  pnlTool.ActivePage := tsProject;
+  { Clearing first forces SetSelection to re-run its expand/scroll path even
+    when the node is already the current selection but scrolled out of view. }
+  tvProject.Selection := nil;
+  tvProject.Selection := n;
+  tvProject.SetFocus;
+end;
+
 procedure TMainForm.CheckGitIgnoreForIdeDir;
 var
   GitIgnorePath: TfpgString;
@@ -4982,7 +5044,7 @@ begin
     AddSeparator;
     AddMenuItem('Save', rsKeyCtrl+'S', @miFileSave);
     AddMenuItem('Save As...', '', @miFileSaveAs);
-    AddMenuItem('Save All', rsKeyCtrl+rsKeyShift+'S', nil).Enabled := False;
+    AddMenuItem('Save All', '', nil).Enabled := False;
     AddSeparator;
     AddMenuItem('Close', rsKeyCtrl+'F4', @miFileClose);
     AddMenuItem('Quit', rsKeyCtrl+'Q', @btnQuitClicked);
@@ -5021,6 +5083,7 @@ begin
     AddMenuItem('Go to line...', rsKeyAlt+'G', @miGoToLineClick);
     AddMenuItem('Navigate to File...', rsKeyCtrl+rsKeyShift+'N', @miNavigateToFile);
     AddMenuItem('Navigate to Symbol...', rsKeyCtrl+rsKeyShift+'O', @miNavigateToSymbol);
+    AddMenuItem('Select File in Project Tree', rsKeyCtrl+rsKeyShift+'S', @miRevealInProjectTree);
     AddSeparator;
     AddMenuItem('Jump to Interface', rsKeyCtrl+rsKeyShift+'Up', @miJumpToInterface);
     AddMenuItem('Jump to Implementation', rsKeyCtrl+rsKeyShift+'Down', @miJumpToImplementation);
