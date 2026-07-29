@@ -1720,6 +1720,29 @@ begin
   result:= round(mousewheelacceleration(avalue*1.0));
 end;
 
+{ The search below works in bytes - Pos() returns a byte position and the
+  matched text is blanked out byte by byte to advance the scan. Caret and
+  selection positions, however, are character offsets. These convert at that
+  boundary; mixing the two puts the caret and the highlight in the wrong place
+  on any line containing non-ASCII text.
+
+  BytePosToCharPos takes a 1-based byte position and returns the 1-based
+  character position of the same point. }
+function BytePosToCharPos(const S: TfpgString; ABytePos: Integer): Integer;
+begin
+  if ABytePos <= 1 then
+    Exit(ABytePos);
+  if ABytePos > System.Length(S) + 1 then
+    ABytePos := System.Length(S) + 1;
+  Result := UTF8Length(PChar(S), ABytePos - 1) + 1;
+end;
+
+{ Character length of the needle, for turning a match start into a match end. }
+function CharLenOf(const S: TfpgString): Integer;
+begin
+  Result := UTF8Length(S);
+end;
+
 function TfpgBaseTextEdit.FindReplaceProc(TextToFind: TfpgString;
     FindOptions: TfpgFindOptions; Backward, ReplaceMode: Boolean;
     var ReplaceText: Boolean): Boolean;
@@ -1727,6 +1750,7 @@ var
   SrcBegin, SrcEnd, I, WordPos, ScrollX, ScrollY, Fill: Integer;
   SLine, SrcWord: TfpgString;
   FindPos: TPoint;
+  CharPos, CharEnd: Integer;
   AllowScroll, ContinueSrc: Boolean;
 begin
   Result := False;
@@ -1758,9 +1782,12 @@ begin
       WordPos := Pos(SrcWord, SLine);
       while WordPos > 0 do
       begin
-        if (I = CaretPos.Y) and (WordPos < CaretPos.X) then
+        { WordPos is a byte position but CaretPos.X is a character
+          position, so compare like with like. }
+        if (I = CaretPos.Y)
+           and (BytePosToCharPos(GetLineText(I), WordPos) < CaretPos.X) then
         begin
-          for Fill := WordPos to WordPos + Length(SrcWord) do
+          for Fill := WordPos to Min(WordPos + Length(SrcWord), System.Length(SLine)) do
             SLine[Fill] := '*';
           FindPos.x := FindPos.x + WordPos;
           WordPos := Pos(SrcWord, SLine);
@@ -1775,7 +1802,7 @@ begin
           if WordPos > 1 then
             if (SLine[WordPos - 1] in ['a'..'z', 'A'..'Z']) then
             begin
-              for Fill := WordPos to WordPos + Length(SrcWord) do
+              for Fill := WordPos to Min(WordPos + Length(SrcWord), System.Length(SLine)) do
                 SLine[Fill] := '*';
               FindPos.x := FindPos.x + WordPos;
               WordPos := Pos(SrcWord, SLine);
@@ -1784,24 +1811,28 @@ begin
           if WordPos + Length(SrcWord) <= Length(SLine) then
             if (SLine[WordPos + Length(SrcWord)] in ['a'..'z', 'A'..'Z']) then
             begin
-              for Fill := WordPos to WordPos + Length(SrcWord) do
+              for Fill := WordPos to Min(WordPos + Length(SrcWord), System.Length(SLine)) do
                 SLine[Fill] := '*';
               FindPos.x := FindPos.x + WordPos;
               WordPos := Pos(SrcWord, SLine);
               Continue;
             end;
         end;
-        FSelection.StartPos := fpgPoint(FindPos.X -1, I);
-        FSelection.EndPos   := fpgPoint(FindPos.X + Length(SrcWord) - 1, I);
+        { Convert the byte position of the match into character positions for
+          the caret, the selection and the horizontal scroll arithmetic. }
+        CharPos := BytePosToCharPos(GetLineText(I), FindPos.X);
+        CharEnd := CharPos + CharLenOf(SrcWord);
+        FSelection.StartPos := fpgPoint(CharPos - 1, I);
+        FSelection.EndPos   := fpgPoint(CharEnd - 1, I);
         FSelected := True;
         SetCaretPosV(I);
-        CaretPos.X := FindPos.x + Length(SrcWord) - 1;
+        CaretPos.X := CharEnd - 1;
         if AllowScroll then
         begin
           ScrollX := 0;
           ScrollY := FTopLine * FChrH;
-          if ((FindPos.x + Length(SrcWord)) * FChrW) - FChrW > GetClientRect.Width then
-            ScrollX := (FindPos.x * FChrW) - 2 * FChrW;
+          if (CharEnd * FChrW) - FChrW > GetClientRect.Width then
+            ScrollX := ((CharPos - 1) * FChrW) - 2 * FChrW;
           if (I < FTopLine) or (I > (FTopLine + FVisLines - 2)) then
             ScrollY := (I-10) * FChrH;  // move selection into view
           ScrollTo(ScrollX, ScrollY);
@@ -1819,7 +1850,7 @@ begin
           if Assigned(FOnFindText) then
             FOnFindText(Self, FindPos, AllowScroll);
         end;
-        for Fill := WordPos to WordPos + Length(SrcWord) do
+        for Fill := WordPos to Min(WordPos + Length(SrcWord), System.Length(SLine)) do
           SLine[Fill] := '*';
         WordPos := Pos(SrcWord, SLine);
         if not ContinueSrc then
@@ -1838,9 +1869,12 @@ begin
       WordPos := Pos(SrcWord, SLine);
       while WordPos > 0 do
       begin
-        if (I = CaretPos.Y) and (WordPos < CaretPos.X) then
+        { WordPos is a byte position but CaretPos.X is a character
+          position, so compare like with like. }
+        if (I = CaretPos.Y)
+           and (BytePosToCharPos(GetLineText(I), WordPos) < CaretPos.X) then
         begin
-          for Fill := WordPos to WordPos + Length(SrcWord) do
+          for Fill := WordPos to Min(WordPos + Length(SrcWord), System.Length(SLine)) do
             SLine[Fill] := '*';
           FindPos.x := FindPos.x + WordPos;
           WordPos := Pos(SrcWord, SLine);
@@ -1855,7 +1889,7 @@ begin
           if WordPos > 1 then
             if (SLine[WordPos - 1] in ['a'..'z', 'A'..'Z']) then
             begin
-              for Fill := WordPos to WordPos + Length(SrcWord) do
+              for Fill := WordPos to Min(WordPos + Length(SrcWord), System.Length(SLine)) do
                 SLine[Fill] := '*';
               FindPos.x := FindPos.x + WordPos;
               WordPos := Pos(SrcWord, SLine);
@@ -1864,24 +1898,28 @@ begin
           if WordPos + Length(SrcWord) <= Length(SLine) then
             if (SLine[WordPos + Length(SrcWord)] in ['a'..'z', 'A'..'Z']) then
             begin
-              for Fill := WordPos to WordPos + Length(SrcWord) do
+              for Fill := WordPos to Min(WordPos + Length(SrcWord), System.Length(SLine)) do
                 SLine[Fill] := '*';
               FindPos.x := FindPos.x + WordPos;
               WordPos := Pos(SrcWord, SLine);
               Continue;
             end;
         end;
-        FSelection.StartPos := fpgPoint(FindPos.x - 1, I);
-        FSelection.EndPos   := fpgPoint(FindPos.x + Length(SrcWord) - 1, I);
+        { Convert the byte position of the match into character positions for
+          the caret, the selection and the horizontal scroll arithmetic. }
+        CharPos := BytePosToCharPos(GetLineText(I), FindPos.x);
+        CharEnd := CharPos + CharLenOf(SrcWord);
+        FSelection.StartPos := fpgPoint(CharPos - 1, I);
+        FSelection.EndPos   := fpgPoint(CharEnd - 1, I);
         FSelected := True;
         CaretPos.Y := I;
-        CaretPos.X := FindPos.x + Length(SrcWord) - 1;
+        CaretPos.X := CharEnd - 1;
         if AllowScroll then
         begin
           ScrollX := 0;
           ScrollY := FTopLine * FChrH;
-          if ((FindPos.x + Length(SrcWord)) * FChrW) - FChrW > GetClientRect.Width then
-            ScrollX := (FindPos.x * FChrW) - (2 * FChrW);
+          if (CharEnd * FChrW) - FChrW > GetClientRect.Width then
+            ScrollX := ((CharPos - 1) * FChrW) - (2 * FChrW);
           if (I < FTopLine) or (I > (FTopLine + FVisLines - 2)) then
             ScrollY := (I-10) * FChrH;  // move selection into view
           ScrollTo(ScrollX, ScrollY);
@@ -1899,7 +1937,7 @@ begin
           if Assigned(FOnFindText) then
             FOnFindText(Self, FindPos, AllowScroll);
         end;
-        for Fill := WordPos to WordPos + Length(SrcWord) do
+        for Fill := WordPos to Min(WordPos + Length(SrcWord), System.Length(SLine)) do
           SLine[Fill] := '*';
         WordPos := Pos(SrcWord, SLine);
         if not ContinueSrc then
