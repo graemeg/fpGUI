@@ -536,10 +536,11 @@ var
   i: integer;
   mi: TfpgMenuItem;
 begin
-  s := KeycodeToText(keycode, shiftstate);
-
-  // handle MenuBar (Alt+?) shortcuts only
-  if (length(s) = 5) and (copy(s, 1, 4) = 'Alt+') then
+  { Handle MenuBar (Alt+?) shortcuts only. Test the modifiers directly rather
+    than formatting the keystroke and sniffing the text for an 'Alt+' prefix:
+    that prefix is the translatable resourcestring rsKeyAlt, and the old
+    length test could never match a multi-byte (UTF-8) accelerator. }
+  if fpgIsAccelShiftState(shiftstate) then
   begin
     s := KeycodeToText(keycode, []);
     i := SearchItemByAccel(s);

@@ -13,6 +13,7 @@ uses
   tctreeview,
   tcfpgbase,
   tcaccelerator,
+  tcmenuaccel,
   tcfontmanager,
   tcfontcacheremoval,
   tcfontdefinition,
