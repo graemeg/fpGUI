@@ -12,6 +12,7 @@ uses
   csvparser_test,
   tctreeview,
   tcfpgbase,
+  tcaccelerator,
   tcfontmanager,
   tcfontcacheremoval,
   tcfontdefinition,

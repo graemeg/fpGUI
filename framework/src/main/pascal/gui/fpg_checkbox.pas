@@ -25,11 +25,12 @@ uses
   SysUtils,
   fpg_base,
   fpg_main,
-  fpg_widget;
-  
+  fpg_widget,
+  fpg_accelerator_intf;
+
 type
 
-  TfpgBaseCheckBox = class(TfpgWidget)
+  TfpgBaseCheckBox = class(TfpgWidget, IfpgAcceleratorTarget)
   private
     FChecked: boolean;
     FOnChange: TNotifyEvent;
@@ -60,6 +61,10 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    { IfpgAcceleratorTarget }
+    function    GetAcceleratorChar: TfpgString;
+    function    CanAcceptAccelerator: boolean;
+    procedure   ExecuteAccelerator;
   end;
 
 
@@ -103,6 +108,9 @@ function CreateCheckBox(AOwner: TComponent; x, y: TfpgCoord; AText: string): Tfp
 
 implementation
 
+uses
+  fpg_stringutils;
+
 
 function CreateCheckBox(AOwner: TComponent; x, y: TfpgCoord; AText: string): TfpgCheckBox;
 begin
@@ -110,7 +118,7 @@ begin
   Result.Top    := y;
   Result.Left   := x;
   Result.Text   := AText;
-  Result.Width  := Result.Font.GetTextWidth(Result.Text) + 24;
+  Result.Width  := Result.Font.GetTextWidth(fpgStripAccelChars(Result.Text)) + 24;
 end;
 
 { TfpgBaseCheckBox }
@@ -225,6 +233,8 @@ begin
     LFlags := [txtLeft, txtVCenter]
   else
     LFlags := [txtLeft, txtVCenter, txtDisabled];
+  if fpgExtractAccelChar(FText) <> '' then
+    Include(LFlags, txtAccel);
   Canvas.DrawText(r, FText, LFlags);   { internally this still calls fpgStyle.DrawString(), so theming will be applied }
 
   if FFocused then
@@ -250,6 +260,23 @@ begin
   inherited HandleLMouseDown(x, y, shiftstate);
   FIsPressed := True;
   Repaint;
+end;
+
+function TfpgBaseCheckBox.GetAcceleratorChar: TfpgString;
+begin
+  Result := fpgExtractAccelChar(FText);
+end;
+
+function TfpgBaseCheckBox.CanAcceptAccelerator: boolean;
+begin
+  Result := Enabled and Visible and (not FReadOnly);
+end;
+
+procedure TfpgBaseCheckBox.ExecuteAccelerator;
+begin
+  if Focusable then
+    SetFocus;
+  Checked := not FChecked;
 end;
 
 procedure TfpgBaseCheckBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);

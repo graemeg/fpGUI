@@ -49,8 +49,11 @@ type
 
   TfpgCheckBoxFlags = set of (cbfChecked, cbfPressed, cbfEnabled, cbfReadOnly, cbfHasFocus);
 
+  { txtAccel makes DrawText treat '&' as an accelerator marker: the marker
+    itself is not painted, the character after it is underlined, and '&&'
+    paints a single literal ampersand. }
   TfpgTextFlags = set of (txtLeft, txtHCenter, txtRight, txtTop, txtVCenter,
-    txtBottom, txtWrap, txtDisabled, txtAutoSize);
+    txtBottom, txtWrap, txtDisabled, txtAutoSize, txtAccel);
 
   TMouseButton = (mbLeft, mbRight, mbMiddle);
 
@@ -610,6 +613,7 @@ uses
   fpg_style_plastic,
   fpg_style_fusion,
   fpg_tab,
+  fpg_stringutils,
   fpg_async;
 
 {$ifdef MSWINDOWS}
@@ -2154,25 +2158,45 @@ var
   buf: TfpgString;
   wraplst: TStringList;
   lEnabled: Boolean;
+  lText: TfpgString;
+  lAccel: TfpgString;
+  lAccelPos: PtrInt;
+  ax, ay, aw: integer;
+  lOldColor: TfpgColor;
 begin
   lEnabled := not (txtDisabled in AFlags);
+
+  { When accelerators are active the '&' markers must not take part in any
+    width, wrapping or alignment maths, so strip them up front and remember
+    which character ends up underlined. }
+  lAccel := '';
+  lAccelPos := 0;
+  if (txtAccel in AFlags) then
+  begin
+    lAccel := fpgExtractAccelChar(AText);
+    lText := fpgStripAccelChars(AText);
+    if lAccel <> '' then
+      lAccelPos := fpgAccelCharPos(AText);
+  end
+  else
+    lText := AText;
 
   // calculate longest word width to autosize properly
   wtxt := 0;
   if ((txtAutoSize in AFlags) or (w = 0)) then
   begin
     i := 1;
-    buf := ExtractSubstr(AText, i, txtWordDelims);
+    buf := ExtractSubstr(lText, i, txtWordDelims);
     while buf <> '' do
     begin
       wtxt := Max(wtxt, Font.GetTextWidth(buf));
-      buf := ExtractSubstr(AText, i, txtWordDelims);
+      buf := ExtractSubstr(lText, i, txtWordDelims);
     end;
   end;
   nw := Max(wtxt, w);
 
   wraplst := TStringList.Create;
-  wraplst.Text := AText;
+  wraplst.Text := lText;
 
   if (txtWrap in AFlags) then
   begin
@@ -2208,6 +2232,32 @@ begin
       ny := y + l;
 
     fpgStyle.DrawString(self, nx, ny, wraplst[i], lEnabled);
+
+    { Underline the accelerator character, if it falls on this line. Wrapping
+      may have pushed it onto a later line, so track a running character
+      offset rather than assuming it is on the first one. }
+    if (lAccelPos > 0) then
+    begin
+      if (lAccelPos <= UTF8Length(wraplst[i])) then
+      begin
+        ax := nx + Font.GetTextWidth(UTF8Copy(wraplst[i], 1, lAccelPos-1));
+        aw := Font.GetTextWidth(UTF8Copy(wraplst[i], lAccelPos, 1));
+        ay := ny + Font.GetAscent + 1;
+        { the underline must track the glyph colour, not whatever line
+          colour happened to be left set on the canvas }
+        lOldColor := Color;
+        if lEnabled then
+          SetColor(TextColor)
+        else
+          SetColor(clShadow1);
+        DrawLine(ax, ay, ax + aw, ay);
+        SetColor(lOldColor);
+        { drawn - stop looking on subsequent lines }
+        lAccelPos := 0;
+      end
+      else
+        Dec(lAccelPos, UTF8Length(wraplst[i]));
+    end;
   end;
 
   wraplst.Free;

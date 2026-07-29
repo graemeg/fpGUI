@@ -48,6 +48,15 @@ function  Pos8(const SearchForText, SearchInText: string): PtrInt;
 procedure Delete8(var S: string; Index, Size: PtrInt);
 procedure Insert8(const Source: string; var S: string; Index: PtrInt);
 
+{ Accelerator (mnemonic) helpers. An '&' marks the character following it as
+  the accelerator; a doubled '&&' is an escaped literal ampersand. }
+function  fpgExtractAccelChar(const AText: TfpgString): TfpgString;
+function  fpgStripAccelChars(const AText: TfpgString): TfpgString;
+{ 1-based character index of the accelerator within the *stripped* text, or
+  0 when there is no accelerator. Used to position the underline. }
+function  fpgAccelCharPos(const AText: TfpgString): PtrInt;
+function  fpgIsAccelShiftState(const AShiftState: TShiftState): boolean;
+
 function  fpgCharAt(const s: TfpgString; Index: PtrInt): TfpgChar; inline;
 function  fpgAppendPathDelim(const Path: TfpgString): TfpgString;
 function  fpgRemovePathDelim(const Path: TfpgString): TfpgString;
@@ -385,6 +394,113 @@ end;
 function fpgCharAt(const s: TfpgString; Index: PtrInt): TfpgChar;
 begin
   Result := UTF8Copy(s, Index, 1);
+end;
+
+function fpgExtractAccelChar(const AText: TfpgString): TfpgString;
+var
+  i: PtrInt;
+  len: PtrInt;
+  c: TfpgString;
+begin
+  Result := '';
+  len := UTF8Length(AText);
+  i := 1;
+  while i <= len do
+  begin
+    c := UTF8Copy(AText, i, 1);
+    if c = '&' then
+    begin
+      { a trailing '&' has nothing to mark, so it is ignored }
+      if i = len then
+        Exit;
+      if UTF8Copy(AText, i+1, 1) = '&' then
+      begin
+        { '&&' is an escaped literal ampersand - skip both and keep looking }
+        Inc(i, 2);
+        Continue;
+      end;
+      Result := UTF8Copy(AText, i+1, 1);
+      Exit;
+    end;
+    Inc(i);
+  end;
+end;
+
+function fpgStripAccelChars(const AText: TfpgString): TfpgString;
+var
+  i: PtrInt;
+  len: PtrInt;
+  c: TfpgString;
+begin
+  Result := '';
+  len := UTF8Length(AText);
+  i := 1;
+  while i <= len do
+  begin
+    c := UTF8Copy(AText, i, 1);
+    if c = '&' then
+    begin
+      if i = len then
+      begin
+        { drop a lone trailing '&' }
+        Inc(i);
+        Continue;
+      end;
+      if UTF8Copy(AText, i+1, 1) = '&' then
+      begin
+        { '&&' collapses to a single literal ampersand }
+        Result := Result + '&';
+        Inc(i, 2);
+        Continue;
+      end;
+      { drop the marker itself, keep the character it marks }
+      Inc(i);
+      Continue;
+    end;
+    Result := Result + c;
+    Inc(i);
+  end;
+end;
+
+function fpgAccelCharPos(const AText: TfpgString): PtrInt;
+var
+  i: PtrInt;
+  len: PtrInt;
+  outpos: PtrInt;
+  c: TfpgString;
+begin
+  Result := 0;
+  len := UTF8Length(AText);
+  i := 1;
+  { outpos tracks the index within the stripped text that i maps to }
+  outpos := 1;
+  while i <= len do
+  begin
+    c := UTF8Copy(AText, i, 1);
+    if c = '&' then
+    begin
+      if i = len then
+        Exit;
+      if UTF8Copy(AText, i+1, 1) = '&' then
+      begin
+        { '&&' collapses to one literal ampersand in the stripped text }
+        Inc(i, 2);
+        Inc(outpos);
+        Continue;
+      end;
+      Result := outpos;
+      Exit;
+    end;
+    Inc(i);
+    Inc(outpos);
+  end;
+end;
+
+function fpgIsAccelShiftState(const AShiftState: TShiftState): boolean;
+begin
+  { Alt must be the only one of Shift/Alt/Ctrl that is down, otherwise
+    combinations like Ctrl+Alt+S would wrongly fire an Alt+S accelerator. }
+  Result := (AShiftState * [ssShift, ssAlt, ssCtrl]) = [ssAlt];
 end;
 
 function fpgAppendPathDelim(const Path: TfpgString): TfpgString;

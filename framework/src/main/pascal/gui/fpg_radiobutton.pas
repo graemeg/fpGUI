@@ -25,11 +25,12 @@ uses
   SysUtils,
   fpg_base,
   fpg_main,
-  fpg_widget;
+  fpg_widget,
+  fpg_accelerator_intf;
 
 type
 
-  TfpgRadioButton = class(TfpgWidget)
+  TfpgRadioButton = class(TfpgWidget, IfpgAcceleratorTarget)
   private
     FAutoSize: boolean;
     FChecked: boolean;
@@ -59,6 +60,10 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    { IfpgAcceleratorTarget }
+    function    GetAcceleratorChar: TfpgString;
+    function    CanAcceptAccelerator: boolean;
+    procedure   ExecuteAccelerator;
     property    Font: TfpgFontResourceBase read FFont;
   published
     property    Align;
@@ -93,6 +98,9 @@ function CreateRadioButton(AOwner: TComponent; x, y: TfpgCoord; AText: string): 
 
 implementation
 
+uses
+  fpg_stringutils;
+
 
 function CreateRadioButton(AOwner: TComponent; x, y: TfpgCoord; AText: string): TfpgRadioButton;
 begin
@@ -100,7 +108,7 @@ begin
   Result.Top    := y;
   Result.Left   := x;
   Result.Text   := AText;
-  Result.Width  := Result.Font.GetTextWidth(Result.Text) + 24;
+  Result.Width  := Result.Font.GetTextWidth(fpgStripAccelChars(Result.Text)) + 24;
 end;
 
 { TfpgRadioButton }
@@ -187,7 +195,7 @@ procedure TfpgRadioButton.DoAdjustWidth;
 begin
   if AutoSize then
   begin
-    Width := Font.GetTextWidth(FText) + 24; // 24 is extra padding for image
+    Width := Font.GetTextWidth(fpgStripAccelChars(FText)) + 24; // 24 is extra padding for image
     UpdatePosition;
   end;
 end;
@@ -241,6 +249,8 @@ begin
     LFlags := [txtLeft, txtVCenter]
   else
     LFlags := [txtLeft, txtVCenter, txtDisabled];
+  if fpgExtractAccelChar(FText) <> '' then
+    Include(LFlags, txtAccel);
   Canvas.DrawText(r, FText, LFlags);   { internally this still calls fpgStyle.DrawString(), so theming will be applied }
 
   if FFocused then
@@ -267,6 +277,25 @@ begin
   inherited HandleLMouseDown(x, y, shiftstate);
   FIsPressed := True;
   Repaint;
+end;
+
+function TfpgRadioButton.GetAcceleratorChar: TfpgString;
+begin
+  Result := fpgExtractAccelChar(FText);
+end;
+
+function TfpgRadioButton.CanAcceptAccelerator: boolean;
+begin
+  Result := Enabled and Visible;
+end;
+
+procedure TfpgRadioButton.ExecuteAccelerator;
+begin
+  if Focusable then
+    SetFocus;
+  { selecting an already-selected radio button is a no-op, same as a click }
+  if not FChecked then
+    Checked := True;
 end;
 
 procedure TfpgRadioButton.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);

@@ -30,14 +30,15 @@ uses
   fpg_base,
   fpg_main,
   fpg_widget,
-  fpg_command_intf;
+  fpg_command_intf,
+  fpg_accelerator_intf;
 
 type
 
   TImageLayout = (ilImageLeft, ilImageTop, ilImageRight, ilImageBottom);
 
 
-  TfpgBaseButton = class(TfpgWidget, ICommandHolder)
+  TfpgBaseButton = class(TfpgWidget, ICommandHolder, IfpgAcceleratorTarget)
   private
     FCommand: ICommand;
     FImageLayout: TImageLayout;
@@ -78,6 +79,10 @@ type
     FAllowMultiLineText: boolean;
     procedure   SetFontDesc(const AValue: string); override;
     procedure   SetShowImage(AValue: Boolean);
+    { Text as actually painted - with any '&' accelerator markers resolved. }
+    function    GetDisplayText: TfpgString; virtual;
+    { Text flags for painting, including txtAccel when an accelerator is set. }
+    function    GetTextFlags: TfpgTextFlags; virtual;
     procedure   CalculatePositions(var ImageX, ImageY, TextX, TextY : integer);
     procedure   DoCalculatePreferredSize(var ASize: TfpgSize); override;
     procedure   HandlePaint; override;
@@ -118,6 +123,10 @@ type
     procedure   Click;
     function    GetCommand: ICommand;   // ICommandHolder interface
     procedure   SetCommand(ACommand: ICommand); // ICommandHolder interface
+    { IfpgAcceleratorTarget }
+    function    GetAcceleratorChar: TfpgString;
+    function    CanAcceptAccelerator: boolean;
+    procedure   ExecuteAccelerator;
   end;
 
 
@@ -191,6 +200,7 @@ implementation
 
 uses
   fpg_iconstore,
+  fpg_stringutils,
   fpg_form; {$Note Try and remove this fpg_form dependency.}
 
 function CreateButton(AOwner: TComponent; x, y, w: TfpgCoord; AText: string;
@@ -241,7 +251,7 @@ begin
   end
   else
   begin
-    textWidth := Font.GetTextWidth(Text);
+    textWidth := Font.GetTextWidth(GetDisplayText);
     textHeight := Font.GetHeight;
     // Only single line texts will be placed correctly.
     // Normally Font.TextHeight should be used (not yet implemented)
@@ -432,7 +442,7 @@ begin
   end
   else
   begin
-    textWidth := Font.GetTextWidth(FText);
+    textWidth := Font.GetTextWidth(GetDisplayText);
     textHeight := Font.GetHeight;
   end;
 
@@ -712,13 +722,23 @@ begin
     if FDown then
      r.OffsetRect(offset.x, offset.y);
 
-    lTextFlags := [txtHCenter, txtVCenter, txtWrap];
+    lTextFlags := [txtHCenter, txtVCenter, txtWrap] + GetTextFlags;
     if not Enabled then
       lTextFlags += [txtDisabled];
     Canvas.DrawText(r, Text, lTextFlags);  { DrawText does use fpgStyle }
   end
   else
-    fpgStyle.DrawString(Canvas, tx+offset.x, ty+offset.y, Text, Enabled);
+  begin
+    lTextFlags := GetTextFlags;
+    if not Enabled then
+      lTextFlags += [txtDisabled];
+    if txtAccel in lTextFlags then
+      { DrawText handles the accelerator underline; it still routes through
+        fpgStyle.DrawString internally, so theming is preserved }
+      Canvas.DrawText(tx+offset.x, ty+offset.y, Text, lTextFlags)
+    else
+      fpgStyle.DrawString(Canvas, tx+offset.x, ty+offset.y, Text, Enabled);
+  end;
 end;
 
 procedure TfpgBaseButton.DoPush;
@@ -863,6 +883,36 @@ begin
     if Enabled then
       Repaint;
   end;
+end;
+
+function TfpgBaseButton.GetDisplayText: TfpgString;
+begin
+  Result := fpgStripAccelChars(FText);
+end;
+
+function TfpgBaseButton.GetTextFlags: TfpgTextFlags;
+begin
+  Result := [];
+  if fpgExtractAccelChar(FText) <> '' then
+    Include(Result, txtAccel);
+end;
+
+function TfpgBaseButton.GetAcceleratorChar: TfpgString;
+begin
+  Result := fpgExtractAccelChar(FText);
+end;
+
+function TfpgBaseButton.CanAcceptAccelerator: boolean;
+begin
+  Result := Enabled and Visible;
+end;
+
+procedure TfpgBaseButton.ExecuteAccelerator;
+begin
+  { Match what a mouse click does: give the button focus, then fire it. }
+  if Focusable then
+    SetFocus;
+  Click;
 end;
 
 procedure TfpgBaseButton.Click;

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>examples-gui-accelerators</name>
+
+  <build>
+    <mainSource>acceltest.lpr</mainSource>
+    <sourceDirectory>.</sourceDirectory>
+    <executableName>acceltest</executableName>
+  </build>
+
+  <moduleDependencies>
+    <module>../../../framework</module>
+  </moduleDependencies>
+</project>

@@ -132,6 +132,9 @@ type
     procedure   DoResize;
     procedure   DoShowHint(var AHint: TfpgString);
     procedure   DoKeyShortcut(const AOrigin: TfpgWidget; const keycode: word; const shiftstate: TShiftState; var consumed: boolean; const IsChildOfOrigin: boolean = False); virtual;
+    { Offers keycode to self as an accelerator. Returns True if self implements
+      IfpgAcceleratorTarget, is willing, and its accelerator matched. }
+    function    DoAcceleratorKey(const keycode: word): boolean; virtual;
     procedure   HandlePaint; virtual;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); virtual;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); virtual;
@@ -229,6 +232,8 @@ uses
   fpg_menu,
   fpg_form,   { for OnKeyPress handling }
   fpg_window, { for Finding the Toplevel Window }
+  fpg_accelerator_intf,
+  fpg_stringutils,
   fpg_utils;
 
 procedure TfpgWidget.DoPreferredSizeChanged;
@@ -1828,6 +1833,30 @@ begin
     FOnShowHint(self, AHint);
 end;
 
+function TfpgWidget.DoAcceleratorKey(const keycode: word): boolean;
+var
+  target: IfpgAcceleratorTarget;
+  accel: TfpgString;
+begin
+  Result := False;
+  if not GetInterface(IfpgAcceleratorTarget, target) then
+    Exit; //==>
+  if not target.CanAcceptAccelerator then
+    Exit; //==>
+
+  accel := target.GetAcceleratorChar;
+  if accel = '' then
+    Exit; //==>
+
+  { Compare against the unmodified key so the accelerator matches regardless
+    of the Alt modifier, and case-insensitively. }
+  if UpperCase(accel) <> UpperCase(KeycodeToText(keycode, [])) then
+    Exit; //==>
+
+  target.ExecuteAccelerator;
+  Result := True;
+end;
+
 procedure TfpgWidget.DoKeyShortcut(const AOrigin: TfpgWidget;
   const keycode: word; const shiftstate: TShiftState; var consumed: boolean; const IsChildOfOrigin: boolean = False);
 var
@@ -1835,6 +1864,17 @@ var
   wg: TfpgWidget;
   i: integer;
 begin
+  { Can self answer an Alt+<letter> accelerator? Alt must be the exclusive
+    modifier, so Ctrl+Alt+S never fires an Alt+S accelerator. }
+  if fpgIsAccelShiftState(shiftstate) then
+  begin
+    if DoAcceleratorKey(keycode) then
+    begin
+      consumed := True;
+      Exit;
+    end;
+  end;
+
   { process children of self }
   for i := 0 to ComponentCount-1 do
   begin

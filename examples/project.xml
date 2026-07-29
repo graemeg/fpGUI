@@ -15,6 +15,7 @@
 
     <!-- all "gui" examples -->
     <module>gui/aboutdialog</module>
+    <module>gui/accelerators</module>
     <module>gui/alignment</module>
     <module>gui/alignment_resize</module>
     <module>gui/animation</module>
