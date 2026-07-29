@@ -25,18 +25,21 @@ uses
   SysUtils,
   fpg_base,
   fpg_main,
-  fpg_widget;
+  fpg_widget,
+  fpg_accelerator_intf;
 
 type
 
 
-  TfpgCustomLabel = class(TfpgWidget)
+  TfpgCustomLabel = class(TfpgWidget, IfpgAcceleratorTarget)
   private
     FAutoSize: boolean;
     FAlignment: TAlignment;
     FLayout: TLayout;
     FWrapText: boolean;
     FLineSpace: integer;
+    FFocusWidget: TfpgWidget;
+    procedure   SetFocusWidget(const AValue: TfpgWidget);
     procedure   SetWrapText(const AValue: boolean);
     procedure   SetAlignment(const AValue: TAlignment);
     procedure   SetLayout(const AValue: TLayout);
@@ -47,8 +50,14 @@ type
   protected
     FText: TfpgString;
     FTextHeight: integer;
+    procedure   Notification(AComponent: TComponent; Operation: TOperation); override;
     procedure   DoCalculatePreferredSize(var ASize: TfpgSize); override;
     procedure   HandlePaint; override;
+    { Text as actually painted - with any '&' accelerator markers resolved. }
+    function    GetDisplayText: TfpgString; virtual;
+    { The widget an accelerator on this label gives focus to. When nil the
+      label has no accelerator, even if its text contains an '&'. }
+    property    FocusWidget: TfpgWidget read FFocusWidget write SetFocusWidget;
     property    WrapText: boolean read FWrapText write SetWrapText default False;
     property    Alignment: TAlignment read FAlignment write SetAlignment default taLeftJustify;
     property    AutoSize: boolean read FAutoSize write SetAutoSize default False;
@@ -59,6 +68,10 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     property    TextHeight: integer read FTextHeight;
+    { IfpgAcceleratorTarget }
+    function    GetAcceleratorChar: TfpgString;
+    function    CanAcceptAccelerator: boolean;
+    procedure   ExecuteAccelerator;
   end;
 
 
@@ -70,6 +83,7 @@ type
     property    AutoSize;
     property    BackgroundColor;
     property    Enabled;
+    property    FocusWidget;
     property    FontDesc;
     property    Height;
     property    Hint;
@@ -107,6 +121,9 @@ function CreateLabel(AOwner: TComponent; x, y: TfpgCoord; AText: string; w: Tfpg
 
 implementation
 
+uses
+  fpg_stringutils;
+
 
 function CreateLabel(AOwner: TComponent; x, y: TfpgCoord; AText: string; w: TfpgCoord; h: TfpgCoord;
           HAlign: TAlignment; VAlign: TLayout; ALineSpace: integer): TfpgLabel;
@@ -124,7 +141,7 @@ begin
   Result.Layout:= VAlign;
   if w = 0 then
   begin
-    Result.Width := Result.Font.GetTextWidth(Result.Text);
+    Result.Width := Result.Font.GetTextWidth(fpgStripAccelChars(Result.Text));
     Result.AutoSize := True;
   end
   else
@@ -132,6 +149,54 @@ begin
 end;
 
 { TfpgCustomLabel }
+
+procedure TfpgCustomLabel.SetFocusWidget(const AValue: TfpgWidget);
+begin
+  if FFocusWidget = AValue then
+    Exit; //==>
+  FFocusWidget := AValue;
+  if FFocusWidget <> nil then
+    { FocusWidget is a plain reference we do not own, so ask to be told when
+      it is destroyed - otherwise we would be left pointing at freed memory }
+    FFocusWidget.FreeNotification(self);
+end;
+
+procedure TfpgCustomLabel.Notification(AComponent: TComponent; Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+  if (Operation = opRemove) and (AComponent = FFocusWidget) then
+    FFocusWidget := nil;
+end;
+
+function TfpgCustomLabel.GetDisplayText: TfpgString;
+begin
+  Result := fpgStripAccelChars(FText);
+end;
+
+function TfpgCustomLabel.GetAcceleratorChar: TfpgString;
+begin
+  { a label is only an accelerator target when it has something to focus }
+  if FFocusWidget = nil then
+    Result := ''
+  else
+    Result := fpgExtractAccelChar(FText);
+end;
+
+function TfpgCustomLabel.CanAcceptAccelerator: boolean;
+begin
+  { the label itself is never focused - what matters is whether the widget it
+    points at can actually take focus }
+  Result := Visible and Assigned(FFocusWidget)
+      and FFocusWidget.Enabled and FFocusWidget.Visible;
+end;
+
+procedure TfpgCustomLabel.ExecuteAccelerator;
+begin
+  { Matching the VCL: a label's accelerator only moves focus, it never
+    activates the target. }
+  if Assigned(FFocusWidget) and FFocusWidget.Focusable then
+    FFocusWidget.SetFocus;
+end;
 
 procedure TfpgCustomLabel.SetWrapText(const AValue: boolean);
 begin
@@ -188,7 +253,7 @@ procedure TfpgCustomLabel.ResizeLabel;
 begin
   if FAutoSize and (not FWrapText) then
   begin
-    Width := Font.GetTextWidth(FText);
+    Width := Font.GetTextWidth(GetDisplayText);
     Height:= Font.GetHeight;
   end
   else if (FPreferredSize.W = 0) and (FPreferredSize.H = 0) then
@@ -237,7 +302,7 @@ begin
     meaning no explicit size was set. Calculate purely from text content. }
   if Assigned(Font) then
   begin
-    ASize.W := Font.GetTextWidth(FText);
+    ASize.W := Font.GetTextWidth(GetDisplayText);
     ASize.H := Font.GetHeight;
   end
   else
@@ -261,6 +326,10 @@ begin
   lTxtFlags:= [];
   if not Enabled then
     Include(lTxtFlags, txtDisabled);
+
+  { only underline the accelerator when there is something for it to focus }
+  if (FFocusWidget <> nil) and (fpgExtractAccelChar(FText) <> '') then
+    Include(lTxtFlags, txtAccel);
 
   if FWrapText then
     Include(lTxtFlags, txtWrap);

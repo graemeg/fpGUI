@@ -23,6 +23,7 @@ uses
   fpg_form,
   fpg_button,
   fpg_label,
+  fpg_edit,
   fpg_checkbox,
   fpg_radiobutton;
 
@@ -31,6 +32,8 @@ type
   private
     lblIntro: TfpgLabel;
     lblStatus: TfpgLabel;
+    lblName: TfpgLabel;
+    edName: TfpgEdit;
     btnScan: TfpgButton;
     btnClear: TfpgButton;
     btnAmp: TfpgButton;
@@ -90,11 +93,11 @@ end;
 procedure TMainForm.AfterCreate;
 begin
   WindowTitle := 'Accelerator (Alt+key) demo';
-  SetPosition(100, 100, 400, 300);
+  SetPosition(100, 100, 400, 340);
 
   lblIntro := TfpgLabel.Create(self);
   lblIntro.SetPosition(12, 10, 380, 32);
-  lblIntro.Text := 'Press the underlined letter with Alt.'
+  lblIntro.Text := 'Press the underlined letter with Alt. Alt+N focuses the edit.'
       + LineEnding + 'Ctrl+Alt or Shift+Alt must NOT trigger them.';
 
   btnScan := TfpgButton.Create(self);
@@ -113,29 +116,40 @@ begin
   btnAmp.Text := 'Black && &White';
   btnAmp.OnClick := @btnAmpClick;
 
+  { A label's accelerator moves focus to its FocusWidget - it never activates
+    it. Without a FocusWidget assigned a label has no accelerator at all, and
+    the '&' is painted literally. }
+  lblName := TfpgLabel.Create(self);
+  lblName.SetPosition(12, 98, 60, 22);
+  lblName.Text := '&Name:';
+
+  edName := TfpgEdit.Create(self);
+  edName.SetPosition(78, 95, 160, 24);
+  lblName.FocusWidget := edName;
+
   chkVerbose := TfpgCheckBox.Create(self);
-  chkVerbose.SetPosition(12, 100, 200, 22);
+  chkVerbose.SetPosition(12, 140, 200, 22);
   chkVerbose.Text := '&Verbose output';
   chkVerbose.OnChange := @chkVerboseChanged;
 
   rbFast := TfpgRadioButton.Create(self);
-  rbFast.SetPosition(12, 130, 200, 22);
+  rbFast.SetPosition(12, 170, 200, 22);
   rbFast.Text := '&Fast scan';
   rbFast.GroupIndex := 1;
   rbFast.OnChange := @rbChanged;
 
   rbThorough := TfpgRadioButton.Create(self);
-  rbThorough.SetPosition(12, 155, 200, 22);
+  rbThorough.SetPosition(12, 195, 200, 22);
   rbThorough.Text := '&Thorough scan';
   rbThorough.GroupIndex := 1;
   rbThorough.OnChange := @rbChanged;
 
   lblStatus := TfpgLabel.Create(self);
-  lblStatus.SetPosition(12, 195, 380, 22);
+  lblStatus.SetPosition(12, 235, 380, 22);
   lblStatus.Text := 'Status: waiting...';
 
   btnQuit := TfpgButton.Create(self);
-  btnQuit.SetPosition(282, 240, 100, 26);
+  btnQuit.SetPosition(282, 280, 100, 26);
   btnQuit.Text := '&Quit';
   btnQuit.OnClick := @btnQuitClick;
 end;

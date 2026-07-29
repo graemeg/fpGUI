@@ -20,6 +20,8 @@ uses
   fpg_form,
   fpg_button,
   fpg_checkbox,
+  fpg_label,
+  fpg_edit,
   fpg_panel,
   fpg_stringutils;
 
@@ -84,6 +86,26 @@ type
     procedure TestCheckBoxAccelToggles;
   end;
 
+  { TfpgLabel.FocusWidget - an accelerator on a label focuses another widget }
+  TTestLabelFocusWidget = class(TTestCase)
+  private
+    FForm: TfpgForm;
+    FLabel: TfpgLabel;
+    FEdit: TfpgEdit;
+    function    SendKey(const AKey: word; const AShiftState: TShiftState): boolean;
+  protected
+    procedure   SetUp; override;
+    procedure   TearDown; override;
+  published
+    procedure TestAccelFocusesFocusWidget;
+    procedure TestNoFocusWidgetMeansNoAccelerator;
+    procedure TestCtrlAltDoesNotFocus;
+    procedure TestWrongLetterDoesNotFocus;
+    procedure TestDisabledTargetIsNotFocused;
+    procedure TestFreeingTargetClearsFocusWidget;
+    procedure TestLabelWithoutAmpersandHasNoAccelerator;
+  end;
+
 
 procedure RegisterTests;
 
@@ -99,6 +121,7 @@ begin
   RegisterTest(TTestAccelParsing);
   RegisterTest(TTestAccelShiftState);
   RegisterTest(TTestAccelDispatch);
+  RegisterTest(TTestLabelFocusWidget);
 end;
 
 type
@@ -368,6 +391,101 @@ begin
   CheckTrue(cb.Checked, 'checkbox should have toggled on');
   CheckTrue(SendKey(keyV, [ssAlt]));
   CheckFalse(cb.Checked, 'checkbox should have toggled back off');
+end;
+
+
+{ TTestLabelFocusWidget }
+
+procedure TTestLabelFocusWidget.SetUp;
+begin
+  if not fpgApplication.IsInitialized then
+    fpgApplication.Initialize;
+  FForm := TfpgForm.Create(nil);
+  FLabel := TfpgLabel.Create(FForm);
+  FLabel.Text := '&Name:';
+  FEdit := TfpgEdit.Create(FForm);
+  FLabel.FocusWidget := FEdit;
+end;
+
+procedure TTestLabelFocusWidget.TearDown;
+begin
+  FForm.Free;   { owns the label and edit }
+end;
+
+function TTestLabelFocusWidget.SendKey(const AKey: word; const AShiftState: TShiftState): boolean;
+var
+  consumed: boolean;
+begin
+  consumed := False;
+  TfpgWidgetFriend(FForm).DoKeyShortcut(nil, AKey, AShiftState, consumed);
+  Result := consumed;
+end;
+
+procedure TTestLabelFocusWidget.TestAccelFocusesFocusWidget;
+begin
+  CheckFalse(FEdit.Focused, 'precondition: edit not focused');
+  CheckTrue(SendKey(keyN, [ssAlt]), 'Alt+N should be consumed');
+  CheckTrue(FEdit.Focused, 'the edit should have received focus');
+end;
+
+procedure TTestLabelFocusWidget.TestNoFocusWidgetMeansNoAccelerator;
+begin
+  { a label with no FocusWidget has nothing to activate, so it must not
+    swallow the keystroke - something else on the form may want it }
+  FLabel.FocusWidget := nil;
+  CheckFalse(SendKey(keyN, [ssAlt]), 'Alt+N must not be consumed');
+  CheckFalse(FEdit.Focused);
+end;
+
+procedure TTestLabelFocusWidget.TestCtrlAltDoesNotFocus;
+begin
+  CheckFalse(SendKey(keyN, [ssCtrl, ssAlt]), 'Ctrl+Alt+N must not be consumed');
+  CheckFalse(FEdit.Focused);
+end;
+
+procedure TTestLabelFocusWidget.TestWrongLetterDoesNotFocus;
+begin
+  CheckFalse(SendKey(keyQ, [ssAlt]));
+  CheckFalse(FEdit.Focused);
+end;
+
+procedure TTestLabelFocusWidget.TestDisabledTargetIsNotFocused;
+begin
+  { no point focusing a widget the user cannot interact with }
+  FEdit.Enabled := False;
+  CheckFalse(SendKey(keyN, [ssAlt]), 'Alt+N must not be consumed');
+  CheckFalse(FEdit.Focused);
+end;
+
+procedure TTestLabelFocusWidget.TestFreeingTargetClearsFocusWidget;
+var
+  otherForm: TfpgForm;
+  otherEdit: TfpgEdit;
+begin
+  { Use a target owned by a DIFFERENT form. Sharing the label's owner would
+    notify it anyway through ownership, masking a missing FreeNotification;
+    with a separate owner the label is only told if it explicitly asked. }
+  { A second form, rather than an unowned widget: freeing an unowned TfpgEdit
+    crashes inside fpGUI itself, independently of FocusWidget. A different
+    owner is enough - ownership notification only reaches the label's own
+    owner, so this still fails without FreeNotification. }
+  otherForm := TfpgForm.Create(nil);
+  otherEdit := TfpgEdit.Create(otherForm);
+  FLabel.FocusWidget := otherEdit;
+  CheckSame(otherEdit, FLabel.FocusWidget, 'precondition: target assigned');
+
+  otherForm.Free;
+
+  CheckNull(FLabel.FocusWidget, 'FocusWidget should have been nilled');
+  { and the now-targetless label must not claim the accelerator }
+  CheckFalse(SendKey(keyN, [ssAlt]));
+end;
+
+procedure TTestLabelFocusWidget.TestLabelWithoutAmpersandHasNoAccelerator;
+begin
+  FLabel.Text := 'Name:';
+  CheckFalse(SendKey(keyN, [ssAlt]));
+  CheckFalse(FEdit.Focused);
 end;
 
 
