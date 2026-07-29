@@ -2886,8 +2886,11 @@ begin
     for I := L to Col do
       SLine := Sline + ' ';
   end;
-  BufS1 := Copy(SLine, 1, Col);
-  BufS2 := Copy(SLine, Col + 1, Length(SLine) - Col);
+  { Col is a character offset (see the UTF8Length test above), so split on
+    character boundaries - a byte-based Copy would slice through multi-byte
+    characters on any line containing non-ASCII text. }
+  BufS1 := UTF8Copy(SLine, 1, Col);
+  BufS2 := UTF8Copy(SLine, Col + 1, UTF8Length(SLine) - Col);
   SLine := BufS1 + S + BufS2;
   FSelected := True;
   { Handles both Windows and *nix line endings - maybe there is a better way? }
@@ -2895,7 +2898,7 @@ begin
   if I > 0 then
   begin
     BufS := '';
-    FSelection.StartPos := fpgPoint(Length(BufS1), Row);
+    FSelection.StartPos := fpgPoint(UTF8Length(BufS1), Row);
     while I > 0 do
     begin
       BufS := Copy(SLine, 1, I - 1);
@@ -2903,7 +2906,7 @@ begin
       Delete(SLine, 1, I+1);
       I := pos(#13#10, SLine);
       SetCaretPosV(Row);
-      SetCaretPosH(Length(BufS));
+      SetCaretPosH(UTF8Length(BufS));
       FSelection.EndPos := CaretPos;
       Row := Row + 1;
     end;
@@ -2911,7 +2914,7 @@ begin
     begin
       FLines[Row] := SLine;
       SetCaretPosV(Row);
-      SetCaretPosH(Length(SLine) - Length(BufS2));
+      SetCaretPosH(UTF8Length(SLine) - UTF8Length(BufS2));
       FSelection.EndPos := CaretPos;
     end;
     Invalidate;
@@ -2922,7 +2925,7 @@ begin
     if I > 0 then
     begin
       BufS := '';
-      FSelection.StartPos := fpgPoint(Length(BufS1), Row);
+      FSelection.StartPos := fpgPoint(UTF8Length(BufS1), Row);
       while I > 0 do
       begin
         BufS := Copy(SLine, 1, I - 1);
@@ -2930,7 +2933,7 @@ begin
         Delete(SLine, 1, I);
         I := pos(#10, SLine);
         SetCaretPosV(Row);
-        SetCaretPosH(Length(BufS));
+        SetCaretPosH(UTF8Length(BufS));
         FSelection.EndPos := CaretPos;
         Row := Row + 1;
       end;
@@ -2938,7 +2941,7 @@ begin
       begin
         FLines[Row] := SLine;
         SetCaretPosV(Row);
-        SetCaretPosH(Length(SLine) - Length(BufS2));
+        SetCaretPosH(UTF8Length(SLine) - UTF8Length(BufS2));
         FSelection.EndPos := CaretPos;
       end;
       Invalidate;
@@ -2947,8 +2950,8 @@ begin
       SetCaretPosV(Row);
       if Row < FLines.Count then
         FLines[Row] := SLine;
-      SetCaretPosH(Col + Length(S));
-      FSelection.StartPos := fpgPoint(Length(BufS1), Row);
+      SetCaretPosH(Col + UTF8Length(S));
+      FSelection.StartPos := fpgPoint(UTF8Length(BufS1), Row);
       FSelection.EndPos   := fpgPoint(CaretPos.X, Row);
       Invalidate;
     end;
@@ -3271,14 +3274,18 @@ begin
   if StartLine > pred(FLines.Count) then Exit;
   if EndLine > pred(FLines.Count) then
     EndLine := pred(FLines.Count);
+  { Selection positions are character offsets, not byte offsets, so all the
+    slicing here must be UTF8-aware. Using Copy/Length would cut multi-byte
+    characters short - a line containing e.g. 'café €' would lose one byte per
+    non-ASCII character off the end of the selection. }
   SLine := GetLineText(StartLine);
   if StartLine < EndLine then
   begin
-    FirstPart := Copy(SLine, StartPos + 1, Length(SLine) - StartPos);
+    FirstPart := UTF8Copy(SLine, StartPos + 1, UTF8Length(SLine) - StartPos);
     SLine := GetLineText(EndLine);
-    if EndPos > Length(SLine) then
-      EndPos := Length(SLine);
-    LastPart := Copy(SLine, 1, EndPos);
+    if EndPos > UTF8Length(SLine) then
+      EndPos := UTF8Length(SLine);
+    LastPart := UTF8Copy(SLine, 1, EndPos);
     LineI := StartLine + 1;
     Result := FirstPart;
     for I := LineI to (EndLine - 1) do
@@ -3286,7 +3293,7 @@ begin
     Result := Result + LineEnding + LastPart;
   end
   else
-    Result := Copy(SLine, StartPos + 1, EndPos - StartPos);
+    Result := UTF8Copy(SLine, StartPos + 1, EndPos - StartPos);
 end;
 
 procedure TfpgBaseTextEdit.SaveToFile(const AFileName: TfpgString);
