@@ -880,17 +880,20 @@ begin
     end;
     if data <> nil then
       XFree(data);
-    { Offset is counted in 32-bit words, not bytes. When deleting as we read,
-      the consumed part is gone, so the next read starts at 0 again; otherwise
-      we advance past what we already have. The delete must be flushed: during
-      an INCR transfer it is the acknowledgement that asks for the next chunk. }
-    if ADelete then
-    begin
+    { Advance past what we just read. Offset is counted in 32-bit words, not
+      bytes.
+
+      Note this advances even when ADelete is set: X only deletes the property
+      when a read reaches the end of it, so a partial read leaves the data in
+      place. Resetting the offset to 0 here would re-read the same leading
+      chunk forever, appending it each time - which spins on the GUI thread
+      and, because the X server is single threaded, freezes the session. }
+    offset := offset + clong((bytes + 3) div 4);
+    { The delete only takes effect on the final read; flush it so that during
+      an INCR transfer it reaches the owner as the request for the next
+      chunk. }
+    if ADelete and (remaining = 0) then
       XFlush(xapplication.Display);
-      offset := 0;
-    end
-    else
-      offset := offset + clong((bytes + 3) div 4);
     { Safety net: every iteration must consume something. Without this a peer
       that keeps reporting bytes remaining while handing back none would spin
       here forever, and because the X server is single threaded that hangs the
