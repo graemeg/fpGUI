@@ -94,6 +94,16 @@ function FpgPasIsKeyword(const AText: string): Boolean;
   (override, virtual, abstract), calling conventions (stdcall, cdecl), etc. }
 function FpgPasIsModifier(const AText: string): Boolean;
 
+{ Enumeration of the keyword and modifier tables. Both are sorted arrays
+  searched by binary search, so a table that is unsorted or whose count does
+  not match its literal breaks lookups silently - including for entries that
+  were previously working. These accessors let the test suite assert those
+  invariants against the real data rather than a copy of it. }
+function FpgPasKeywordCount: Integer;
+function FpgPasKeyword(AIndex: Integer): string;
+function FpgPasModifierCount: Integer;
+function FpgPasModifier(AIndex: Integer): string;
+
 
 implementation
 
@@ -200,6 +210,32 @@ begin
   if AText = '' then
     Exit(False);
   Result := BinarySearchModifier(UpCase(AText));
+end;
+
+function FpgPasKeywordCount: Integer;
+begin
+  Result := KeywordCount;
+end;
+
+function FpgPasKeyword(AIndex: Integer): string;
+begin
+  if (AIndex < 0) or (AIndex >= KeywordCount) then
+    Result := ''
+  else
+    Result := Keywords[AIndex];
+end;
+
+function FpgPasModifierCount: Integer;
+begin
+  Result := ModifierCount;
+end;
+
+function FpgPasModifier(AIndex: Integer): string;
+begin
+  if (AIndex < 0) or (AIndex >= ModifierCount) then
+    Result := ''
+  else
+    Result := Modifiers[AIndex];
 end;
 
 { TFpgPascalTokeniser }

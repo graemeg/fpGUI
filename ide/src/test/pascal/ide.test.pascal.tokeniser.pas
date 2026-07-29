@@ -135,6 +135,18 @@ type
     procedure TestIsModifier_CaseInsensitive;
     procedure TestModifier_NotKeyword;
     procedure TestKeyword_NotModifier;
+
+    { --- Property directives --- }
+    procedure TestModifier_PropertyDirectiveTokens;
+    procedure TestIsModifier_PropertyDirectives;
+
+    { --- Lookup table invariants --- }
+    procedure TestKeywordTableIsSorted;
+    procedure TestModifierTableIsSorted;
+    procedure TestEveryKeywordIsFound;
+    procedure TestEveryModifierIsFound;
+    procedure TestKeywordTableHasNoDuplicates;
+    procedure TestModifierTableHasNoDuplicates;
   end;
 
 
@@ -927,6 +939,119 @@ begin
   AssertFalse('procedure not modifier', FpgPasIsModifier('procedure'));
   AssertFalse('class not modifier',     FpgPasIsModifier('class'));
   AssertFalse('interface not modifier', FpgPasIsModifier('interface'));
+end;
+
+{ --- Property directives --- }
+
+procedure TTestPascalTokeniser.TestModifier_PropertyDirectiveTokens;
+var
+  kinds: array of TFpgPasTokenKind;
+  texts: array of string;
+begin
+  CollectTokens('read', kinds, texts);
+  AssertEquals('read count', 1, Length(kinds));
+  AssertEquals('read kind', Ord(fptkModifier), Ord(kinds[0]));
+  AssertEquals('read text', 'read', texts[0]);
+
+  CollectTokens('write', kinds, texts);
+  AssertEquals('write kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('default', kinds, texts);
+  AssertEquals('default kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('nodefault', kinds, texts);
+  AssertEquals('nodefault kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('index', kinds, texts);
+  AssertEquals('index kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('stored', kinds, texts);
+  AssertEquals('stored kind', Ord(fptkModifier), Ord(kinds[0]));
+
+  CollectTokens('implements', kinds, texts);
+  AssertEquals('implements kind', Ord(fptkModifier), Ord(kinds[0]));
+end;
+
+procedure TTestPascalTokeniser.TestIsModifier_PropertyDirectives;
+begin
+  AssertTrue('read',       FpgPasIsModifier('read'));
+  AssertTrue('write',      FpgPasIsModifier('write'));
+  AssertTrue('default',    FpgPasIsModifier('default'));
+  AssertTrue('nodefault',  FpgPasIsModifier('nodefault'));
+  AssertTrue('index',      FpgPasIsModifier('index'));
+  AssertTrue('stored',     FpgPasIsModifier('stored'));
+  AssertTrue('implements', FpgPasIsModifier('implements'));
+  AssertTrue('readonly',   FpgPasIsModifier('readonly'));
+  { Mixed case must work too - lookup uppercases first }
+  AssertTrue('Read',  FpgPasIsModifier('Read'));
+  AssertTrue('WRITE', FpgPasIsModifier('WRITE'));
+end;
+
+{ --- Lookup table invariants ---
+
+  Both tables are sorted arrays searched with CompareStr. An entry inserted out
+  of order, or a count constant that disagrees with the literal, breaks lookups
+  for unrelated entries without any compiler error. These tests guard the table
+  itself rather than any single word. }
+
+procedure TTestPascalTokeniser.TestKeywordTableIsSorted;
+var
+  i: Integer;
+begin
+  for i := 1 to FpgPasKeywordCount-1 do
+    AssertTrue(Format('keyword table out of order at %d: "%s" follows "%s"',
+        [i, FpgPasKeyword(i), FpgPasKeyword(i-1)]),
+      CompareStr(FpgPasKeyword(i-1), FpgPasKeyword(i)) < 0);
+end;
+
+procedure TTestPascalTokeniser.TestModifierTableIsSorted;
+var
+  i: Integer;
+begin
+  for i := 1 to FpgPasModifierCount-1 do
+    AssertTrue(Format('modifier table out of order at %d: "%s" follows "%s"',
+        [i, FpgPasModifier(i), FpgPasModifier(i-1)]),
+      CompareStr(FpgPasModifier(i-1), FpgPasModifier(i)) < 0);
+end;
+
+{ Also catches a count constant larger than the literal: the accessor returns
+  '' for the overshoot, which is not findable. }
+procedure TTestPascalTokeniser.TestEveryKeywordIsFound;
+var
+  i: Integer;
+begin
+  for i := 0 to FpgPasKeywordCount-1 do
+    AssertTrue(Format('keyword %d ("%s") not found by lookup',
+        [i, FpgPasKeyword(i)]),
+      FpgPasIsKeyword(FpgPasKeyword(i)));
+end;
+
+procedure TTestPascalTokeniser.TestEveryModifierIsFound;
+var
+  i: Integer;
+begin
+  for i := 0 to FpgPasModifierCount-1 do
+    AssertTrue(Format('modifier %d ("%s") not found by lookup',
+        [i, FpgPasModifier(i)]),
+      FpgPasIsModifier(FpgPasModifier(i)));
+end;
+
+procedure TTestPascalTokeniser.TestKeywordTableHasNoDuplicates;
+var
+  i: Integer;
+begin
+  for i := 1 to FpgPasKeywordCount-1 do
+    AssertFalse(Format('duplicate keyword "%s" at %d', [FpgPasKeyword(i), i]),
+      FpgPasKeyword(i) = FpgPasKeyword(i-1));
+end;
+
+procedure TTestPascalTokeniser.TestModifierTableHasNoDuplicates;
+var
+  i: Integer;
+begin
+  for i := 1 to FpgPasModifierCount-1 do
+    AssertFalse(Format('duplicate modifier "%s" at %d', [FpgPasModifier(i), i]),
+      FpgPasModifier(i) = FpgPasModifier(i-1));
 end;
 
 initialization
