@@ -64,8 +64,12 @@ Install the X11 development libraries:
 
 [source,bash]
 ----
-sudo apt-get install libx11-dev libxft-dev
+sudo apt-get install libx11-dev libxft-dev libxext-dev
 ----
+
+`libxext-dev` provides `libXext.so`, which the X11 backend links against for the
+XSync extension. Distributions that ship only the runtime `libXext.so.6` will
+fail at link time with `cannot find -lXext`.
 
 ==== AggPas Canvas
 
