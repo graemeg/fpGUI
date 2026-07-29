@@ -82,6 +82,7 @@ type
     property    OnMouseExit;
     property    OnMouseMove;
     property    OnMouseUp;
+    property    OnResize;
     property    OnRowChange;
     property    OnShowHint;
   end;
@@ -185,6 +186,7 @@ type
     property    OnMouseExit;
     property    OnMouseMove;
     property    OnMouseUp;
+    property    OnResize;
     property    OnRowChange;
     property    OnShowHint;
   end;
