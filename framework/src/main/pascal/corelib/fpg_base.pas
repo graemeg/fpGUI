@@ -455,6 +455,12 @@ type
     procedure   DoDrawRectangle(x, y, w, h: TfpgCoord); virtual; abstract;
     procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord); virtual; abstract;
     procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); virtual; abstract;
+    { Direct opaque blit of image pixels into the canvas, ignoring any
+      mask/alpha and bypassing the transparency rasteriser. The default
+      implementation simply forwards to DoDrawImagePart so every backend
+      renders correctly; backends with a pixel buffer (e.g. THybridCanvas)
+      override it with a fast straight copy. }
+    procedure   DoBlitImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); virtual;
     procedure   DoDrawString(x, y: TfpgCoord; const txt: string); virtual; abstract;
     procedure   DoSetClipRect(const ARect: TfpgRect); virtual; abstract;
     function    DoGetClipRect: TfpgRect; virtual; abstract;
@@ -484,6 +490,8 @@ type
     procedure   ClipLine(var x1, y1, x2, y2: TfpgCoord; const AClipRect: TfpgRect; out FallsOutsideRegion: Boolean);
     procedure   DrawImage(x, y: TfpgCoord; img: TfpgImageBase);
     procedure   DrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
+    procedure   BlitImage(x, y: TfpgCoord; img: TfpgImageBase);
+    procedure   BlitImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
     procedure   DrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
     procedure   DrawPolygon(const Points: array of TPoint);
     procedure   DrawPolyLine(const Points: array of TPoint);
@@ -2931,6 +2939,24 @@ procedure TfpgCanvasBase.DrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi,
   yi, w, h: integer);
 begin
   DoDrawImagePart(x, y, img, xi, yi, w, h);
+end;
+
+procedure TfpgCanvasBase.DoBlitImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
+begin
+  { Default: no fast path available — render through the transparency path. }
+  DoDrawImagePart(x, y, img, xi, yi, w, h);
+end;
+
+procedure TfpgCanvasBase.BlitImage(x, y: TfpgCoord; img: TfpgImageBase);
+begin
+  if img = nil then
+    Exit; //==>
+  DoBlitImagePart(x, y, img, 0, 0, img.Width, img.Height);
+end;
+
+procedure TfpgCanvasBase.BlitImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
+begin
+  DoBlitImagePart(x, y, img, xi, yi, w, h);
 end;
 
 procedure TfpgCanvasBase.DrawArc(x, y, w, h: TfpgCoord; a1, a2: double);

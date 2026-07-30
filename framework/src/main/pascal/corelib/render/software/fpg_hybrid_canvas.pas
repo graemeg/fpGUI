@@ -72,6 +72,7 @@ type
     procedure DoDrawRectangle(x, y, w, h: TfpgCoord); override;
     procedure DoDrawLine(x1, y1, x2, y2: TfpgCoord); override;
     procedure DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); override;
+    procedure DoBlitImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); override;
     procedure DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
     procedure DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
     procedure DoDrawPolygon(const Points: array of TPoint); override;
@@ -463,6 +464,73 @@ begin
 
   if needFree then
     FreeMem(tempBuf);
+end;
+
+procedure THybridCanvas.DoBlitImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
+var
+  fimg: TfpgImage;
+  cb: agg_2D.RectD;
+  cx1, cy1, cx2, cy2: Integer;
+  rx, ry, rw, rh: Integer;
+  srcX, srcY: Integer;
+  d, py: Integer;
+  srcRow, dstRow: PLongWord;
+begin
+  { Prerequisites for the direct path. If unmet, defer to the AggPas/alpha
+    transparency path so the call always renders something sensible. }
+  if (FBufData = nil) or not (img is TfpgImage) then
+  begin
+    DoDrawImagePart(x, y, img, xi, yi, w, h);
+    Exit;
+  end;
+  fimg := TfpgImage(img);
+  if fimg.ColorDepth <> 32 then
+  begin
+    DoDrawImagePart(x, y, img, xi, yi, w, h);
+    Exit;
+  end;
+
+  rx := x + FDeltaX;
+  ry := y + FDeltaY;
+  rw := w;
+  rh := h;
+  srcX := xi;
+  srcY := yi;
+
+  { Clamp the source rect to the image bounds, shifting the destination so the
+    two stay aligned. }
+  if srcX < 0 then begin Inc(rx, -srcX); Inc(rw, srcX); srcX := 0; end;
+  if srcY < 0 then begin Inc(ry, -srcY); Inc(rh, srcY); srcY := 0; end;
+  if srcX + rw > fimg.Width  then rw := fimg.Width  - srcX;
+  if srcY + rh > fimg.Height then rh := fimg.Height - srcY;
+
+  { Clip the destination to the AggPas clip rect, advancing the source to match. }
+  cb := FAgg.clipBox;
+  cx1 := Round(cb.x1);
+  cy1 := Round(cb.y1);
+  cx2 := Round(cb.x2);
+  cy2 := Round(cb.y2);
+  if rx < cx1 then begin d := cx1 - rx; Inc(srcX, d); Dec(rw, d); rx := cx1; end;
+  if ry < cy1 then begin d := cy1 - ry; Inc(srcY, d); Dec(rh, d); ry := cy1; end;
+  if rx + rw > cx2 then rw := cx2 - rx;
+  if ry + rh > cy2 then rh := cy2 - ry;
+
+  { Clip the destination to the pixel buffer bounds. }
+  if rx < 0 then begin d := -rx; Inc(srcX, d); Dec(rw, d); rx := 0; end;
+  if ry < 0 then begin d := -ry; Inc(srcY, d); Dec(rh, d); ry := 0; end;
+  if rx + rw > FBufWidth  then rw := FBufWidth  - rx;
+  if ry + rh > FBufHeight then rh := FBufHeight - ry;
+
+  if (rw < 1) or (rh < 1) then
+    Exit;
+
+  { Straight copy, row by row — no alpha blending, no mask lookup. }
+  for py := 0 to rh - 1 do
+  begin
+    srcRow := PLongWord(PByte(fimg.ScanLine[srcY + py]) + srcX * 4);
+    dstRow := PLongWord(PByte(FBufData) + (ry + py) * FBufStride + rx * 4);
+    Move(srcRow^, dstRow^, rw * 4);
+  end;
 end;
 
 procedure THybridCanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
