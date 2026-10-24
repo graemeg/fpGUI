@@ -408,7 +408,8 @@ uses
 {$I ide.hvificons.inc}
 
 const
-  cTitle = 'Maximus IDE - %s';
+  cTitleNoProject = 'Maximus IDE';
+  cTitle = cTitleNoProject + ' - %s';
   cFileFilterTemplate  = '%s (%s)|%s';
   cSourceFiles = '*.pas;*.pp;*.lpr;*.dpr;*.inc';
   cProjectFiles = '*.project;project.xml';
@@ -3381,7 +3382,10 @@ end;
 
 procedure TMainForm.UpdateWindowTitle;
 begin
-  WindowTitle := Format(cTitle, [GProject.ProjectName]);
+  if GProject.ProjectName <> '' then
+    WindowTitle := Format(cTitle, [GProject.ProjectName])
+  else
+    WindowTitle := cTitleNoProject;
 end;
 
 procedure TMainForm.HighlightWithTokens(AHighlighter: TEditorHighlighter;
@@ -5242,7 +5246,7 @@ var
 begin
   Name := 'MainForm';
   SetPosition(310, 206, 638, 428);
-  WindowTitle := 'fpGUI Maximus IDE - %s';
+  WindowTitle := 'Maximus IDE';
   WindowPosition := wpOneThirdDown;
   MinWidth := 580;
   MinHeight := 400;
