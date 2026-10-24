@@ -23,7 +23,7 @@
 
 unit fpg_cocoa_wakechannel;
 
-{$mode objfpc}{$H+}
+{$I fpg_defines.inc}
 
 interface
 
