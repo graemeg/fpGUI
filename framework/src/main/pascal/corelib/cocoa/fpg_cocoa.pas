@@ -1003,17 +1003,19 @@ end;
 
 function TfpgCocoaWindow.DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
 var
-  winFrame: NSRect;
+  contentRect: NSRect;
 begin
   Result := AScreenPos;
   if not HandleIsValid then
     Exit;
 
-  winFrame := FWinHandle.frame;
-  Result.X := AScreenPos.X + Round(winFrame.origin.x);
+  { Widget coordinates are relative to the content area, so exclude the
+    title bar by converting the window frame to its content rect }
+  contentRect := FWinHandle.contentRectForFrameRect(FWinHandle.frame);
+  Result.X := AScreenPos.X + Round(contentRect.origin.x);
   // Convert Cocoa bottom-left to fpGUI top-left
   Result.Y := AScreenPos.Y + Round(NSScreen.mainScreen.frame.size.height -
-                                    winFrame.origin.y - winFrame.size.height);
+                                    contentRect.origin.y - contentRect.size.height);
 end;
 
 procedure TfpgCocoaWindow.DoSetWindowTitle(const ATitle: string);
