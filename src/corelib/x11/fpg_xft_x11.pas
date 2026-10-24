@@ -32,8 +32,6 @@ uses
 const
   {$IF Defined(DARWIN)}
     libXft = 'libXft.dylib';
-    {$LINKLIB libXft}
-    {$LINKLIB libfontconfig}
   {$ELSE}
     libXft = 'libXft.so';
   {$IFEND}
