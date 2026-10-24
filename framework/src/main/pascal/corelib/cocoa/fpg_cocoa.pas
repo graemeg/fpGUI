@@ -760,16 +760,27 @@ end;
 
 procedure TfpgCocoaWindow.DoUpdateWindowPosition;
 var
-  r: NSRect;
+  contentRect: NSRect;
+  frameRect: NSRect;
+  w, h: TfpgCoord;
 begin
+  { Apply fpGUI's position and size to the native window, as the X11 and
+    GDI backends do. FSize is the content area; FPosition is the frame's
+    top-left corner, matching what windowDidMove reports. }
   if not HandleIsValid then
     Exit;
-  r := FWinHandle.frame;
-  FPosition.X := Round(r.origin.x);
+  w := FSize.W;
+  if w < 1 then
+    w := 1;
+  h := FSize.H;
+  if h < 1 then
+    h := 1;
+  contentRect := NSMakeRect(0, 0, w, h);
+  frameRect := FWinHandle.frameRectForContentRect(contentRect);
   // Cocoa uses bottom-left origin, fpGUI uses top-left
-  FPosition.Y := Round(NSScreen.mainScreen.frame.size.height - r.origin.y - r.size.height);
-  FSize.W := Round(r.size.width);
-  FSize.H := Round(r.size.height);
+  frameRect.origin.x := FPosition.X;
+  frameRect.origin.y := NSScreen.mainScreen.frame.size.height - FPosition.Y - frameRect.size.height;
+  FWinHandle.setFrame_display(frameRect, True);
 end;
 
 procedure TfpgCocoaWindow.DoAllocateWindowHandle(AParent: TfpgWidgetBase);
@@ -812,6 +823,10 @@ begin
 
   if not Assigned(FWinHandle) then
     raise Exception.Create('Failed to create Cocoa window');
+
+  // Keep FPosition as the frame's top-left, consistent with windowDidMove
+  FWinHandle.setFrameTopLeftPoint(NSMakePoint(FPosition.X,
+    NSScreen.mainScreen.frame.size.height - FPosition.Y));
 
   // Configure popup windows to be visible and functional
   if (WindowType = wtPopup) or (WindowType = wtChild) then
@@ -979,10 +994,11 @@ begin
 
   // Convert fpGUI top-left to Cocoa bottom-left
   screenHeight := NSScreen.mainScreen.frame.size.height;
-  cocoaY := screenHeight - y - FSize.H;
+  cocoaY := screenHeight - y;
   newOrigin := NSMakePoint(x, cocoaY);
 
-  FWinHandle.setFrameOrigin(newOrigin);
+  // (x, y) is the frame's top-left corner, matching windowDidMove
+  FWinHandle.setFrameTopLeftPoint(newOrigin);
 end;
 
 function TfpgCocoaWindow.DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
