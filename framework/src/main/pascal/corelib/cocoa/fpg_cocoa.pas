@@ -841,7 +841,12 @@ begin
     wtPopup:
       styleMask := NSBorderlessWindowMask;  // Popup windows (menus, tooltips) have no decorations
     wtModalForm:
-      styleMask := NSTitledWindowMask or NSClosableWindowMask;  // Modal forms have title and close button
+      begin
+        // Modal forms have title and close button
+        styleMask := NSTitledWindowMask or NSClosableWindowMask;
+        if waSizeable in FWindowAttributes then
+          styleMask := styleMask or NSResizableWindowMask;
+      end;
     wtWindow:
       begin
         // Normal windows get full decorations
