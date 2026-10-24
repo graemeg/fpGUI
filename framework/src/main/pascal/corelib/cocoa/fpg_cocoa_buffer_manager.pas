@@ -33,9 +33,11 @@ type
   TCocoaBufferManager = class(TInterfacedObject, IBufferManager)
   private
     FView: TfpgCocoaView;
+    FWindow: TfpgCocoaWindow;
     FBuffer: Pointer;
     FBufWidth: Integer;
     FBufHeight: Integer;
+    FBufScale: Integer;
   public
     constructor Create;
     destructor Destroy; override;
@@ -69,6 +71,7 @@ begin
   FBuffer := nil;
   FBufWidth := 0;
   FBufHeight := 0;
+  FBufScale := 1;
 end;
 
 destructor TCocoaBufferManager.Destroy;
@@ -82,17 +85,26 @@ var
   win: TfpgCocoaWindow;
 begin
   win := TfpgCocoaWindow(AWindow);
+  FWindow := win;
   FView := win.View;
 end;
 
 procedure TCocoaBufferManager.DetachWindow;
 begin
   FView := nil;
+  FWindow := nil;
 end;
 
 procedure TCocoaBufferManager.AllocateBuffer(AWidth, AHeight: Integer;
   out AData: Pointer; out AStride: Integer);
 begin
+  { The canvas sizes the buffer in device pixels using the window's
+    backing scale; remember it so drawRect maps the buffer onto points. }
+  if Assigned(FWindow) then
+    FBufScale := FWindow.BackingScale
+  else
+    FBufScale := 1;
+
   { Free existing buffer if dimensions changed }
   if Assigned(FBuffer) and ((FBufWidth <> AWidth) or (FBufHeight <> AHeight)) then
     FreeBuffer;
@@ -142,7 +154,7 @@ begin
     means lockFocus does not provide a valid NSGraphicsContext. The
     correct pattern is to hand the data to the view and let Cocoa call
     drawRect: in the display cycle, where a valid CGContext exists. }
-  FView.setImageBuffer(FBuffer, FBufWidth, FBufHeight);
+  FView.setImageBuffer(FBuffer, FBufWidth, FBufHeight, FBufScale);
 
   { Mark the view as needing display and force an immediate
     redraw so the update appears without waiting for the next

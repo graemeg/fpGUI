@@ -36,6 +36,7 @@ uses
   tcgridstretch,
   tcmig_quickstart,
   tccanvasblit,
+  tchybridcanvasscale,
   tcspinedit,
   tctimer,
   tcmsgcoalesce,

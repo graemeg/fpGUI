@@ -52,6 +52,7 @@ type
     FAscent: Integer;
     FDescent: Integer;
     FLineHeight: Integer;
+    FRenderScale: Integer;
     FEnginePtr: Pointer;       { ^font_engine_freetype_int32 }
     FCacheManagerPtr: Pointer;  { ^font_cache_manager }
     procedure EnsureInitialised;
@@ -79,6 +80,9 @@ type
     property Ascent: Integer read FAscent;
     property Descent: Integer read FDescent;
     property LineHeight: Integer read FLineHeight;
+    { Multiplier applied to the rasterised pixel size (HiDPI rendering).
+      Set before SetFont. Metrics are reported at the scaled size. }
+    property RenderScale: Integer read FRenderScale write FRenderScale;
   end;
 
 
@@ -122,6 +126,7 @@ begin
   FAscent := 0;
   FDescent := 0;
   FCurrentItalic := False;
+  FRenderScale := 1;
   FEnginePtr := nil;
   FCacheManagerPtr := nil;
 end;
@@ -289,7 +294,7 @@ begin
     PFontEngine(FEnginePtr)^.hinting_(True);
     PFontEngine(FEnginePtr)^.flip_y_(True);
     PFontEngine(FEnginePtr)^.height_(
-      sz * fpgApplication.Screen_dpi / 72);
+      sz * fpgApplication.Screen_dpi / 72 * FRenderScale);
 
     { Read metrics from face->size->metrics (populated by FT_Set_Pixel_Sizes).
       These are 26.6 fixed-point values scaled by units_per_EM, which matches

@@ -57,7 +57,13 @@ type
     FBufStride: Integer;
     FBufWidth: Integer;
     FBufHeight: Integer;
+    { Device pixels per logical unit (2 on Retina). FBufWidth, FBufHeight
+      and the Agg2D clip box are in device pixels; all drawing coordinates
+      passed in by widgets are logical and scaled here. }
+    FScale: Integer;
     procedure EnsureWindowAttached;
+    procedure AttachAgg;
+    procedure BlitScaled(AImg: TfpgImageBase; ARx, ARy, ARw, ARh, ASrcX, ASrcY: Integer);
   protected
     { Text rendering — into buffer via glyph cache }
     procedure DoDrawString(x, y: TfpgCoord; const txt: string); override;
@@ -94,6 +100,10 @@ type
     constructor Create(awidget: TfpgWidgetBase); override;
     destructor  Destroy; override;
     procedure   GradientFill(ARect: TfpgRect; AStart, AStop: TfpgColor; ADirection: TGradientDirection); override;
+    { Render into a caller-owned BGRA buffer (offscreen rendering, tests).
+      AWidth/AHeight are in device pixels; AScale is the device pixels per
+      logical unit. }
+    procedure   AttachBuffer(AData: Pointer; AWidth, AHeight, AStride, AScale: Integer);
   end;
 
 
@@ -147,6 +157,7 @@ begin
   FBufStride := 0;
   FBufWidth := 0;
   FBufHeight := 0;
+  FScale := 1;
   if Assigned(CreateBufferManager) then
     FBufferManager := CreateBufferManager();
 end;
@@ -183,21 +194,55 @@ begin
   FWindowAttached := True;
 end;
 
+procedure THybridCanvas.AttachAgg;
+begin
+  FAgg.attach(int8u_ptr(FBufData), FBufWidth, FBufHeight, FBufStride);
+  { attach resets the transform; logical-to-device scaling is the only
+    world transform the canvas uses }
+  if FScale > 1 then
+    FAgg.scale(FScale, FScale);
+end;
+
+procedure THybridCanvas.AttachBuffer(AData: Pointer; AWidth, AHeight,
+  AStride, AScale: Integer);
+begin
+  FBufData := AData;
+  FBufWidth := AWidth;
+  FBufHeight := AHeight;
+  FBufStride := AStride;
+  if AScale < 1 then
+    AScale := 1;
+  FScale := AScale;
+  AttachAgg;
+end;
+
 
 { --- Text rendering (into buffer via glyph cache) --- }
 
 procedure THybridCanvas.DoDrawString(x, y: TfpgCoord; const txt: string);
 var
   cb: agg_2D.RectD;
+  fnt: TfpgFontResourceBase;
+  baseline: Integer;
 begin
   if (Length(txt) < 1) or (FBufData = nil) or not Assigned(FFont) then
     Exit;
+  { At a backing scale > 1, draw with a variant of the font rasterised at
+    the device size so text is crisp; layout keeps using FFont's logical
+    metrics. }
+  fnt := FFont;
+  if FScale > 1 then
+    fnt := FFont.GetScaledResource(FScale);
+  if fnt <> FFont then
+    baseline := (y + FDeltaY) * FScale + fnt.GetAscent
+  else
+    baseline := (y + FDeltaY + FFont.GetAscent) * FScale;
   { AY passed to DrawTextToBuffer is the baseline (top + ascent).
     The clip box from Agg2D is forwarded so text clips to the same region
     as 2D operations — required for selection-highlight redraws in TfpgEdit. }
   cb := FAgg.clipBox;
-  FFont.DrawTextToBuffer(PByte(FBufData), FBufStride, FBufWidth, FBufHeight,
-    x + FDeltaX, y + FDeltaY + FFont.GetAscent, txt, FCurrentTextColor,
+  fnt.DrawTextToBuffer(PByte(FBufData), FBufStride, FBufWidth, FBufHeight,
+    (x + FDeltaX) * FScale, baseline, txt, FCurrentTextColor,
     Trunc(cb.x1), Trunc(cb.y1), Trunc(cb.x2), Trunc(cb.y2));
 end;
 
@@ -280,11 +325,11 @@ begin
     cx2 := Round(cb.x2);
     cy2 := Round(cb.y2);
 
-    { Apply window delta and compute fill rect }
-    rx := x + FDeltaX;
-    ry := y + FDeltaY;
-    rw := w;
-    rh := h;
+    { Apply window delta and compute fill rect in device pixels }
+    rx := (x + FDeltaX) * FScale;
+    ry := (y + FDeltaY) * FScale;
+    rw := w * FScale;
+    rh := h * FScale;
 
     { Clip to AggPas clip rect }
     if rx < cx1 then begin Dec(rw, cx1 - rx); rx := cx1; end;
@@ -312,8 +357,14 @@ begin
   begin
     { Transparent or no buffer — fall through to AggPas for proper blending }
     FAgg.noLine;
-    FAgg.rectangle(x + FDeltaX, y + FDeltaY,
-                   x + FDeltaX + w - 1, y + FDeltaY + h - 1, True);
+    if FScale = 1 then
+      FAgg.rectangle(x + FDeltaX, y + FDeltaY,
+                     x + FDeltaX + w - 1, y + FDeltaY + h - 1, True)
+    else
+      { alignPoint snaps to device pixel centres, which suits 1-pixel
+        strokes only; the equivalent logical offset scales correctly }
+      FAgg.rectangle(x + FDeltaX + 0.5, y + FDeltaY + 0.5,
+                     x + FDeltaX + w - 0.5, y + FDeltaY + h - 0.5, False);
   end;
 end;
 
@@ -341,10 +392,10 @@ begin
            or ((rgb shr 16) and $FF)        { B → byte 0 }
            or $FF000000;                    { A = $FF }
 
-  rx := x + FDeltaX;
-  ry := y + FDeltaY;
-  rw := w;
-  rh := h;
+  rx := (x + FDeltaX) * FScale;
+  ry := (y + FDeltaY) * FScale;
+  rw := w * FScale;
+  rh := h * FScale;
   { Clip to buffer bounds }
   if rx < 0 then begin Inc(rw, rx); rx := 0; end;
   if ry < 0 then begin Inc(rh, ry); ry := 0; end;
@@ -387,7 +438,13 @@ end;
 
 procedure THybridCanvas.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
 begin
-  FAgg.line(x1 + FDeltaX, y1 + FDeltaY, x2 + FDeltaX, y2 + FDeltaY, True);
+  if FScale = 1 then
+    FAgg.line(x1 + FDeltaX, y1 + FDeltaY, x2 + FDeltaX, y2 + FDeltaY, True)
+  else
+    { Centre on the logical pixel so a scaled stroke covers whole device
+      pixels (alignPoint would centre it on a device pixel instead) }
+    FAgg.line(x1 + FDeltaX + 0.5, y1 + FDeltaY + 0.5,
+              x2 + FDeltaX + 0.5, y2 + FDeltaY + 0.5, False);
 end;
 
 procedure THybridCanvas.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
@@ -466,6 +523,51 @@ begin
     FreeMem(tempBuf);
 end;
 
+procedure THybridCanvas.BlitScaled(AImg: TfpgImageBase; ARx, ARy, ARw, ARh,
+  ASrcX, ASrcY: Integer);
+var
+  cb: agg_2D.RectD;
+  ox, oy: Integer;
+  x1, y1, x2, y2: Integer;
+  px, py: Integer;
+  srcRow, dstPix: PLongWord;
+begin
+  { Nearest-neighbour copy: each logical source pixel fills an
+    FScale x FScale block of device pixels. ARx..ARh are logical, already
+    clamped to the image; clipping happens in device pixels. }
+  if (ARw < 1) or (ARh < 1) then
+    Exit;
+  ox := ARx * FScale;
+  oy := ARy * FScale;
+  x1 := ox;
+  y1 := oy;
+  x2 := ox + ARw * FScale;
+  y2 := oy + ARh * FScale;
+
+  cb := FAgg.clipBox;
+  if x1 < Round(cb.x1) then x1 := Round(cb.x1);
+  if y1 < Round(cb.y1) then y1 := Round(cb.y1);
+  if x2 > Round(cb.x2) then x2 := Round(cb.x2);
+  if y2 > Round(cb.y2) then y2 := Round(cb.y2);
+  if x1 < 0 then x1 := 0;
+  if y1 < 0 then y1 := 0;
+  if x2 > FBufWidth then x2 := FBufWidth;
+  if y2 > FBufHeight then y2 := FBufHeight;
+  if (x2 <= x1) or (y2 <= y1) then
+    Exit;
+
+  for py := y1 to y2 - 1 do
+  begin
+    srcRow := PLongWord(TfpgImage(AImg).ScanLine[ASrcY + (py - oy) div FScale]);
+    dstPix := PLongWord(PByte(FBufData) + py * FBufStride + x1 * 4);
+    for px := x1 to x2 - 1 do
+    begin
+      dstPix^ := srcRow[ASrcX + (px - ox) div FScale];
+      Inc(dstPix);
+    end;
+  end;
+end;
+
 procedure THybridCanvas.DoBlitImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
 var
   fimg: TfpgImage;
@@ -503,6 +605,12 @@ begin
   if srcY < 0 then begin Inc(ry, -srcY); Inc(rh, srcY); srcY := 0; end;
   if srcX + rw > fimg.Width  then rw := fimg.Width  - srcX;
   if srcY + rh > fimg.Height then rh := fimg.Height - srcY;
+
+  if FScale > 1 then
+  begin
+    BlitScaled(fimg, rx, ry, rw, rh, srcX, srcY);
+    Exit;
+  end;
 
   { Clip the destination to the AggPas clip rect, advancing the source to match. }
   cb := FAgg.clipBox;
@@ -588,8 +696,8 @@ var
   drawX, drawY: Integer;
 begin
   Result := 0;
-  drawX := X + FDeltaX;
-  drawY := Y + FDeltaY;
+  drawX := (X + FDeltaX) * FScale;
+  drawY := (Y + FDeltaY) * FScale;
   if (FBufData = nil) or (drawX < 0) or (drawY < 0) or
      (drawX >= FBufWidth) or (drawY >= FBufHeight) then
     Exit;
@@ -603,19 +711,27 @@ var
   px: PByte;
   rgb: TfpgColor;
   drawX, drawY: Integer;
+  dx, dy: Integer;
 begin
-  drawX := X + FDeltaX;
-  drawY := Y + FDeltaY;
-  if (FBufData = nil) or (drawX < 0) or (drawY < 0) or
-     (drawX >= FBufWidth) or (drawY >= FBufHeight) then
+  if FBufData = nil then
     Exit;
   rgb := fpgColorToRGB(AValue);
-  px := PByte(FBufData) + drawY * FBufStride + drawX * 4;
-  { TfpgColor ($AARRGGBB) to BGRA }
-  px[0] := rgb and $FF;           { B }
-  px[1] := (rgb shr 8) and $FF;   { G }
-  px[2] := (rgb shr 16) and $FF;  { R }
-  px[3] := 255;                   { A = fully opaque }
+  { A logical pixel covers an FScale x FScale block of device pixels }
+  for dy := 0 to FScale - 1 do
+    for dx := 0 to FScale - 1 do
+    begin
+      drawX := (X + FDeltaX) * FScale + dx;
+      drawY := (Y + FDeltaY) * FScale + dy;
+      if (drawX < 0) or (drawY < 0) or
+         (drawX >= FBufWidth) or (drawY >= FBufHeight) then
+        Continue;
+      px := PByte(FBufData) + drawY * FBufStride + drawX * 4;
+      { TfpgColor ($AARRGGBB) to BGRA }
+      px[0] := rgb and $FF;           { B }
+      px[1] := (rgb shr 8) and $FF;   { G }
+      px[2] := (rgb shr 16) and $FF;  { R }
+      px[3] := 255;                   { A = fully opaque }
+    end;
 end;
 
 procedure THybridCanvas.GradientFill(ARect: TfpgRect; AStart, AStop: TfpgColor; ADirection: TGradientDirection);
@@ -643,9 +759,10 @@ end;
 
 procedure THybridCanvas.DoSetClipRect(const ARect: TfpgRect);
 begin
-  FAgg.clipBox(ARect.Left + FDeltaX, ARect.Top + FDeltaY,
-               ARect.Left + FDeltaX + ARect.Width,
-               ARect.Top + FDeltaY + ARect.Height);
+  { The Agg2D clip box is in device pixels }
+  FAgg.clipBox((ARect.Left + FDeltaX) * FScale, (ARect.Top + FDeltaY) * FScale,
+               (ARect.Left + FDeltaX + ARect.Width) * FScale,
+               (ARect.Top + FDeltaY + ARect.Height) * FScale);
 end;
 
 function THybridCanvas.DoGetClipRect: TfpgRect;
@@ -653,8 +770,8 @@ var
   cb: agg_2D.RectD;
 begin
   cb := FAgg.clipBox;
-  Result.SetRect(Round(cb.x1), Round(cb.y1),
-                 Round(cb.x2 - cb.x1), Round(cb.y2 - cb.y1));
+  Result.SetRect(Round(cb.x1 / FScale), Round(cb.y1 / FScale),
+                 Round((cb.x2 - cb.x1) / FScale), Round((cb.y2 - cb.y1) / FScale));
 end;
 
 procedure THybridCanvas.DoAddClipRect(const ARect: TfpgRect);
@@ -691,16 +808,17 @@ begin
       This mirrors the original TAgg2D.AttachPartialImage approach. }
     if THybridCanvas(CanvasTarget).FBufData <> nil then
     begin
+      FScale := THybridCanvas(CanvasTarget).FScale;
       FBufStride := THybridCanvas(CanvasTarget).FBufStride;
-      FBufWidth := awidget.ActualWidth;
-      FBufHeight := awidget.ActualHeight;
+      FBufWidth := awidget.ActualWidth * FScale;
+      FBufHeight := awidget.ActualHeight * FScale;
       { Calculate byte offset into parent's buffer so position (0,0) maps
         to the widget's top-left pixel. Both FAgg and FBufData must use
         this same offset pointer so the glyph cache renders into the
         correct sub-region. }
       FBufData := PByte(THybridCanvas(CanvasTarget).FBufData)
-                  + FDeltaX * 4 + FDeltaY * FBufStride;
-      FAgg.attach(int8u_ptr(FBufData), FBufWidth, FBufHeight, FBufStride);
+                  + FDeltaX * FScale * 4 + FDeltaY * FScale * FBufStride;
+      AttachAgg;
       { Zero out deltas: partial-attach already positioned the buffer
         at the widget's origin, so draw calls use widget-local coords. }
       FDeltaX := 0;
@@ -747,8 +865,11 @@ begin
         Result := False;
         Exit;
       end;
-      { Check if the window was resized }
-      if (FBufWidth < FWidget.ActualWidth) or (FBufHeight < FWidget.ActualHeight) then
+      { Check if the window was resized, or moved to a screen with a
+        different backing scale }
+      if (FWidget.Window.BackingScale <> FScale) or
+         (FBufWidth < FWidget.ActualWidth * FScale) or
+         (FBufHeight < FWidget.ActualHeight * FScale) then
       begin
         if Assigned(FBufferManager) then
           FBufferManager.FreeBuffer;
@@ -776,15 +897,21 @@ begin
     the window is attached first (BeginDraw calls us before DoBeginDraw). }
   EnsureWindowAttached;
 
-  AllocW := FWidget.ActualWidth + ResizeThreshold;
-  AllocH := FWidget.ActualHeight + ResizeThreshold;
+  FScale := 1;
+  if Assigned(FWidget.Window) then
+    FScale := FWidget.Window.BackingScale;
+  if FScale < 1 then
+    FScale := 1;
+
+  AllocW := (FWidget.ActualWidth + ResizeThreshold) * FScale;
+  AllocH := (FWidget.ActualHeight + ResizeThreshold) * FScale;
 
   FBufferManager.AllocateBuffer(AllocW, AllocH, FBufData, FBufStride);
   FBufWidth := AllocW;
   FBufHeight := AllocH;
 
   { Attach the Agg2D rendering engine to our buffer }
-  FAgg.attach(int8u_ptr(FBufData), FBufWidth, FBufHeight, FBufStride);
+  AttachAgg;
 end;
 
 procedure THybridCanvas.DoRestoreFromBuffer(const ARect: TfpgRect);

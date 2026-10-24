@@ -94,6 +94,7 @@ type
     procedure windowDidMove(notification: NSNotification); message 'windowDidMove:';
     procedure windowDidBecomeKey(notification: NSNotification); message 'windowDidBecomeKey:';
     procedure windowDidResignKey(notification: NSNotification); message 'windowDidResignKey:';
+    procedure windowDidChangeBackingProperties(notification: NSNotification); message 'windowDidChangeBackingProperties:';
     function windowShouldClose(sender: id): ObjCBOOL; message 'windowShouldClose:';
   end;
 
@@ -104,11 +105,12 @@ type
     FImageData: Pointer;  // Pointer to the Agg2D image buffer
     FImageWidth: Integer;
     FImageHeight: Integer;
+    FImageScale: Integer;  // device pixels per point in the image buffer
     procedure drawRect(dirtyRect: NSRect); override;
     function  acceptsFirstResponder: ObjCBOOL; override;
     function  isFlipped: ObjCBOOL; override;
     procedure setWindow(AWindow: TfpgCocoaWindow); message 'setWindow:';
-    procedure setImageBuffer(AData: Pointer; AWidth, AHeight: Integer); message 'setImageBuffer:width:height:';
+    procedure setImageBuffer(AData: Pointer; AWidth, AHeight, AScale: Integer); message 'setImageBuffer:width:height:scale:';
 
     // Mouse events
     procedure mouseDown(event: NSEvent); override;
@@ -148,6 +150,7 @@ type
   public
     property    WinHandle: NSWindow read FWinHandle;
     property    View: TfpgCocoaView read FView;
+    function    BackingScale: Integer; override;
     procedure   ActivateWindow; override;
     procedure   CaptureMouse(AForWidget: TfpgWidgetBase); override;
     procedure   ReleaseMouse; override;
@@ -411,6 +414,21 @@ begin
   fpgPostMessage(nil, FWindow, FPGM_DEACTIVATE, msgp);
 end;
 
+procedure TfpgCocoaWindowDelegate.windowDidChangeBackingProperties(notification: NSNotification);
+var
+  msgp: TfpgMessageParams;
+begin
+  { Moved to a screen with a different backing scale (e.g. Retina to an
+    external non-Retina display). Repaint so the canvas reallocates its
+    buffer at the new scale. }
+  if not Assigned(FWindow) then
+    exit;
+  fillchar(msgp, sizeof(msgp), 0);
+  msgp.rect.Width := FWindow.FSize.W;
+  msgp.rect.Height := FWindow.FSize.H;
+  fpgPostMessage(nil, FWindow, FPGM_PAINT, msgp);
+end;
+
 function TfpgCocoaWindowDelegate.windowShouldClose(sender: id): ObjCBOOL;
 var
   msgp: TfpgMessageParams;
@@ -430,11 +448,14 @@ end;
 
 { TfpgCocoaView }
 
-procedure TfpgCocoaView.setImageBuffer(AData: Pointer; AWidth, AHeight: Integer);
+procedure TfpgCocoaView.setImageBuffer(AData: Pointer; AWidth, AHeight, AScale: Integer);
 begin
   FImageData := AData;
   FImageWidth := AWidth;
   FImageHeight := AHeight;
+  if AScale < 1 then
+    AScale := 1;
+  FImageScale := AScale;
 end;
 
 procedure TfpgCocoaView.drawRect(dirtyRect: NSRect);
@@ -446,6 +467,8 @@ var
   stride: Integer;
   fullRect: CGRect;
   nsCtx: NSGraphicsContext;
+  scale: Integer;
+  ptW, ptH: Double;
 begin
   { Called by Cocoa when the view needs to be redrawn.
     Do NOT trigger FPGM_PAINT from here — that causes an infinite loop.
@@ -487,10 +510,18 @@ begin
         bottom of the destination rect. In our isFlipped=True view the
         y-axis points downward, so without correction the image appears
         upside-down. Fix by flipping the CG context vertically. }
+      { The buffer holds FImageScale device pixels per point; drawing it
+        into a rect sized in points maps it 1:1 onto a Retina backing
+        store, so nothing is resampled. }
+      scale := FImageScale;
+      if scale < 1 then
+        scale := 1;
+      ptW := FImageWidth / scale;
+      ptH := FImageHeight / scale;
       CGContextSaveGState(ctx);
-      CGContextTranslateCTM(ctx, 0, FImageHeight);
+      CGContextTranslateCTM(ctx, 0, ptH);
       CGContextScaleCTM(ctx, 1, -1);
-      fullRect := CGRectMake(0, 0, FImageWidth, FImageHeight);
+      fullRect := CGRectMake(0, 0, ptW, ptH);
       CGContextDrawImage(ctx, fullRect, image);
       CGContextRestoreGState(ctx);
     end;
@@ -752,6 +783,16 @@ begin
 end;
 
 { TfpgCocoaWindow }
+
+function TfpgCocoaWindow.BackingScale: Integer;
+begin
+  if HandleIsValid then
+    Result := Round(FWinHandle.backingScaleFactor)
+  else
+    Result := Round(NSScreen.mainScreen.backingScaleFactor);
+  if Result < 1 then
+    Result := 1;
+end;
 
 function TfpgCocoaWindow.HandleIsValid: boolean;
 begin

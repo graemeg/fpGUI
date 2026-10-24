@@ -33,8 +33,11 @@ type
   private
     FGlyphCache: TGlyphCache;
     FValid: Boolean;
+    FScale: Integer;
+    FScaled: TfpgFreeTypeFontResource;
   public
     constructor Create(const AFontDesc: string); override;
+    constructor CreateScaled(const AFontDesc: string; AScale: Integer);
     destructor Destroy; override;
     function HandleIsValid: boolean; override;
     function GetAscent: integer; override;
@@ -44,6 +47,7 @@ type
     procedure DrawTextToBuffer(ABuf: PByte; AStride, ABufW, ABufH,
       AX, AY: Integer; const AText: string; AColor: TfpgColor;
       AClipX1, AClipY1, AClipX2, AClipY2: Integer); override;
+    function GetScaledResource(AScale: Integer): TfpgFontResourceBase; override;
   end;
 
 
@@ -55,14 +59,25 @@ implementation
 constructor TfpgFreeTypeFontResource.Create(const AFontDesc: string);
 begin
   inherited Create(AFontDesc);
+  if FScale < 1 then
+    FScale := 1;
   FGlyphCache := TGlyphCache.Create;
+  FGlyphCache.RenderScale := FScale;
   { SetFont triggers FreeType font loading and metric capture }
   FGlyphCache.SetFont(Self);
   FValid := (FGlyphCache.Ascent > 0) or (FGlyphCache.Descent > 0);
 end;
 
+constructor TfpgFreeTypeFontResource.CreateScaled(const AFontDesc: string;
+  AScale: Integer);
+begin
+  FScale := AScale;
+  Create(AFontDesc);
+end;
+
 destructor TfpgFreeTypeFontResource.Destroy;
 begin
+  FScaled.Free;
   FGlyphCache.Free;
   inherited Destroy;
 end;
@@ -98,6 +113,24 @@ procedure TfpgFreeTypeFontResource.DrawTextToBuffer(ABuf: PByte;
 begin
   FGlyphCache.DrawText(ABuf, AStride, ABufW, ABufH, AX, AY, AText, AColor,
     AClipX1, AClipY1, AClipX2, AClipY2);
+end;
+
+function TfpgFreeTypeFontResource.GetScaledResource(AScale: Integer): TfpgFontResourceBase;
+begin
+  Result := Self;
+  if (AScale <= 1) or (AScale = FScale) then
+    Exit;
+  { One scaled variant is kept; a window moving to a screen with a
+    different backing scale replaces it. }
+  if Assigned(FScaled) and (FScaled.FScale <> AScale) then
+  begin
+    FScaled.Free;
+    FScaled := nil;
+  end;
+  if not Assigned(FScaled) then
+    FScaled := TfpgFreeTypeFontResource.CreateScaled(FontDesc, AScale);
+  if FScaled.HandleIsValid then
+    Result := FScaled;
 end;
 
 

@@ -348,6 +348,11 @@ type
     procedure   DrawTextToBuffer(ABuf: PByte; AStride, ABufW, ABufH,
                   AX, AY: Integer; const AText: string; AColor: TfpgColor;
                   AClipX1, AClipY1, AClipX2, AClipY2: Integer); virtual;
+    { A variant of this font rasterised AScale times larger, used to draw
+      text into HiDPI (Retina) pixel buffers while layout keeps using this
+      resource's logical metrics. Owned by this resource. The default
+      returns Self (no scaled rendering support). }
+    function    GetScaledResource(AScale: Integer): TfpgFontResourceBase; virtual;
     property    FontDesc: string read FFontDesc;
   end;
 
@@ -755,6 +760,10 @@ type
     function    WindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
     function    GetClientRect: TfpgRect; virtual;
     function    GetBoundsRect: TfpgRect; virtual;
+    { Device pixels per logical unit for this window's backing store
+      (2 on a Retina display). Coordinates stay in logical units; pixel
+      buffer canvases render at this multiple. Default is 1. }
+    function    BackingScale: Integer; virtual;
     procedure   ActivateWindow; virtual; abstract;
     procedure   CaptureMouse(AForWidget:TfpgWidgetBase); virtual; abstract;
     procedure   ReleaseMouse; virtual; abstract;
@@ -2690,6 +2699,11 @@ begin
     TfpgWindowHack(PrimaryWidget).SetWindowParameters;
 end;
 
+function TfpgWindowBase.BackingScale: Integer;
+begin
+  Result := 1;
+end;
+
 function TfpgWindowBase.Right: TfpgCoord;
 begin
   Result := FPosition.X + FSize.W - 1;
@@ -3391,6 +3405,11 @@ procedure TfpgFontResourceBase.DrawTextToBuffer(ABuf: PByte;
 begin
   { Default no-op: native font resources (X11, GDI) do not render to
     pixel buffers. Override in AggCanvas font resources. }
+end;
+
+function TfpgFontResourceBase.GetScaledResource(AScale: Integer): TfpgFontResourceBase;
+begin
+  Result := Self;
 end;
 
 
