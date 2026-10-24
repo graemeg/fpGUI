@@ -71,6 +71,20 @@ sudo apt-get install libx11-dev libxft-dev libxext-dev
 XSync extension. Distributions that ship only the runtime `libXext.so.6` will
 fail at link time with `cannot find -lXext`.
 
+==== macOS
+
+Install the FreeType library, which the AggPas canvas uses for font rendering:
+
+[source,bash]
+----
+brew install freetype
+----
+
+The `macos` build profile adds the default Homebrew library locations
+(`/opt/homebrew/lib` on Apple Silicon, `/usr/local/lib` on Intel) to the linker
+search path. If FreeType is installed elsewhere, add the location to your
+`fpc.cfg` with `-Fl<path>`.
+
 ==== AggPas Canvas
 
 fpGUI uses the AggPas hybrid canvas on all platforms. Ensure the Liberation Sans font
@@ -90,6 +104,10 @@ pasbuild compile -m fpgui-framework -p unix,debug   # with debug symbols
 # Windows
 pasbuild compile -m fpgui-framework -p windows
 pasbuild compile -m fpgui-framework -p windows,debug  # with debug symbols
+
+# macOS
+pasbuild compile -m fpgui-framework -p macos
+pasbuild compile -m fpgui-framework -p macos,debug  # with debug symbols
 ----
 
 === Running Tests
@@ -107,6 +125,7 @@ To compile the entire project (framework, applications, examples, and tools):
 ----
 pasbuild compile -p unix
 pasbuild compile -p windows
+pasbuild compile -p macos
 ----
 
 === Compiling Individual Applications
