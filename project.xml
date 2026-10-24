@@ -95,6 +95,11 @@
       <defines>
          <define>cocoa</define>
       </defines>
+      <compilerOptions>
+        <!-- Homebrew library locations (Apple Silicon, Intel) for FreeType -->
+        <option>-Fl/opt/homebrew/lib</option>
+        <option>-Fl/usr/local/lib</option>
+      </compilerOptions>
     </profile>
 
   </profiles>
