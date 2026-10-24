@@ -199,7 +199,7 @@ begin
     Top := 55;
     Width := 240;
     Height := 35;
-    Text := 'Basic Layouts';
+    Text := '&Basic Layouts';
     FontDesc := '#Label1';
     OnClick := @btnBasicClicked;
   end;
@@ -210,7 +210,7 @@ begin
     Name := 'btnAlignment';
     // Using SetPosition() to test deprecated method still works
     SetPosition(20, 95, 240, 35);
-    Text := 'Cell Alignment';
+    Text := 'Cell &Alignment';
     FontDesc := '#Label1';
     OnClick := @btnAlignmentClicked;
   end;
@@ -223,7 +223,7 @@ begin
     Top := 135;
     Width := 240;
     Height := 35;
-    Text := 'Column & Row Spanning';
+    Text := '&Column && Row Spanning';
     FontDesc := '#Label1';
     OnClick := @btnSpanningClicked;
   end;
@@ -236,7 +236,7 @@ begin
     Top := 175;
     Width := 240;
     Height := 35;
-    Text := 'Growth Behavior';
+    Text := '&Growth Behavior';
     FontDesc := '#Label1';
     OnClick := @btnGrowthClicked;
   end;
@@ -249,7 +249,7 @@ begin
     Top := 215;
     Width := 240;
     Height := 35;
-    Text := 'Complex Form Example';
+    Text := 'Complex &Form Example';
     FontDesc := '#Label1';
     OnClick := @btnComplexClicked;
   end;
@@ -262,7 +262,7 @@ begin
     Top := 255;
     Width := 240;
     Height := 35;
-    Text := 'String Parser Examples';
+    Text := '&String Parser Examples';
     FontDesc := '#Label1';
     OnClick := @btnParserClicked;
   end;
@@ -275,7 +275,7 @@ begin
     Top := 295;
     Width := 240;
     Height := 35;
-    Text := 'Platform Button Ordering';
+    Text := '&Platform Button Ordering';
     FontDesc := '#Label1';
     OnClick := @btnButtonOrderClicked;
   end;
@@ -288,7 +288,7 @@ begin
     Top := 335;
     Width := 240;
     Height := 35;
-    Text := 'Docking Components';
+    Text := 'D&ocking Components';
     FontDesc := '#Label1';
     OnClick := @btnDockingClicked;
   end;
@@ -296,7 +296,7 @@ begin
   chkDebug := TfpgCheckBox.Create(Self);
   chkDebug.Left := 20;
   chkDebug.Top := 370;
-  chkDebug.Text := 'Enable layout debugging';
+  chkDebug.Text := 'Enable layout &debugging';
   chkDebug.Width := 220;
   chkDebug.Height := 20;
 
@@ -309,7 +309,7 @@ begin
     Top := 400;
     Width := 240;
     Height := 35;
-    Text := 'Quit';
+    Text := '&Quit';
     FontDesc := '#Label1';
     OnClick := @btnQuitClicked;
   end;
