@@ -94,6 +94,7 @@
       <id>macos</id>
       <defines>
          <define>cocoa</define>
+         <define>UseCThreads</define>
       </defines>
       <compilerOptions>
         <!-- Homebrew library locations (Apple Silicon, Intel) for FreeType -->
