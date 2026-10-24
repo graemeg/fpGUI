@@ -141,12 +141,19 @@ var
   FPG_DEFAULT_FIXED: string = 'Courier New';
   FPG_DEFAULT_FIXED_FONT_DESC: string = 'Courier New-10';
   {$ENDIF}
-  {$IFDEF UNIX}
+  {$IF DEFINED(DARWIN)}
+  { Shipped with every macOS as single-face .ttf files in
+    /System/Library/Fonts/Supplemental/ (the font cache skips .ttc collections) }
+  FPG_DEFAULT_FONT_DESC: string = 'Arial-10:antialias=true';
+  FPG_DEFAULT_SANS: string = 'Arial';
+  FPG_DEFAULT_FIXED: string = 'Courier New';
+  FPG_DEFAULT_FIXED_FONT_DESC: string = 'Courier New-10';
+  {$ELSEIF DEFINED(UNIX)}
   FPG_DEFAULT_FONT_DESC: string = 'Liberation Sans-10:antialias=true';
   FPG_DEFAULT_SANS: string = 'Liberation Sans';
   FPG_DEFAULT_FIXED: string = 'Liberation Mono';
   FPG_DEFAULT_FIXED_FONT_DESC: string = 'Liberation Mono-10';
-  {$ENDIF}
+  {$IFEND}
 
 const
   UserNamedColorStart   = 128;
