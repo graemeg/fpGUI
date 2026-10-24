@@ -94,7 +94,7 @@ type
     procedure windowDidMove(notification: NSNotification); message 'windowDidMove:';
     procedure windowDidBecomeKey(notification: NSNotification); message 'windowDidBecomeKey:';
     procedure windowDidResignKey(notification: NSNotification); message 'windowDidResignKey:';
-    function windowShouldClose(sender: id): Boolean; message 'windowShouldClose:';
+    function windowShouldClose(sender: id): ObjCBOOL; message 'windowShouldClose:';
   end;
 
   { Custom NSView subclass for handling rendering and events }
@@ -105,8 +105,8 @@ type
     FImageWidth: Integer;
     FImageHeight: Integer;
     procedure drawRect(dirtyRect: NSRect); override;
-    function  acceptsFirstResponder: Boolean; override;
-    function  isFlipped: Boolean; override;
+    function  acceptsFirstResponder: ObjCBOOL; override;
+    function  isFlipped: ObjCBOOL; override;
     procedure setWindow(AWindow: TfpgCocoaWindow); message 'setWindow:';
     procedure setImageBuffer(AData: Pointer; AWidth, AHeight: Integer); message 'setImageBuffer:width:height:';
 
@@ -411,7 +411,7 @@ begin
   fpgPostMessage(nil, FWindow, FPGM_DEACTIVATE, msgp);
 end;
 
-function TfpgCocoaWindowDelegate.windowShouldClose(sender: id): Boolean;
+function TfpgCocoaWindowDelegate.windowShouldClose(sender: id): ObjCBOOL;
 var
   msgp: TfpgMessageParams;
 begin
@@ -502,12 +502,12 @@ begin
   CGColorSpaceRelease(colorSpace);
 end;
 
-function TfpgCocoaView.acceptsFirstResponder: Boolean;
+function TfpgCocoaView.acceptsFirstResponder: ObjCBOOL;
 begin
   Result := True;  // Allow view to receive keyboard events
 end;
 
-function TfpgCocoaView.isFlipped: Boolean;
+function TfpgCocoaView.isFlipped: ObjCBOOL;
 begin
   Result := True;  // Use top-left origin like fpGUI expects
 end;
