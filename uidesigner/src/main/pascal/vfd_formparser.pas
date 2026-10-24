@@ -259,7 +259,7 @@ begin
     ns := ns + s[n];
     Inc(n);
   end;
-  Result := StrToIntDef(ns, clWindowBackground);
+  Result := StrToIntDef(ns, Integer(clWindowBackground));
   Delete(s, 1, length(ns));
   SkipSpaces(s);
   CheckSymbol(s, ')');
