@@ -166,7 +166,15 @@ uses
   {$IFDEF UNIX}
   BaseUnix,
   {$ENDIF}
-  pdr_linux_ptrace, pdr_opdf_adapter, pdr_arch_adapters;
+  {$IFDEF LINUX}
+  pdr_linux_ptrace,
+  {$ENDIF}
+  pdr_opdf_adapter, pdr_arch_adapters;
+
+{ The debugger currently only drives Linux x86 targets }
+{$IF DEFINED(LINUX) and (DEFINED(CPUX86_64) or DEFINED(CPUI386))}
+  {$DEFINE IDE_DEBUGGER_SUPPORTED}
+{$IFEND}
 
 
 { TIDEDebugAdapter }
@@ -199,9 +207,17 @@ begin
   if FState <> idsIdle then
     EndSession;
 
+  {$IFNDEF IDE_DEBUGGER_SUPPORTED}
+  SendOutput('Debugging is not supported on this CPU/platform (' +
+    {$I %FPCTARGETCPU%} + '-' + {$I %FPCTARGETOS%} + ')');
+  Exit;
+  {$ENDIF}
+
   try
     { Create platform-specific adapters — same wiring as PDR CLI }
+    {$IFDEF IDE_DEBUGGER_SUPPORTED}
     FProcessController := TLinuxPtraceAdapter.Create;
+    {$ENDIF}
     FDebugInfoReader := TOPDFReaderAdapter.Create;
     {$IFDEF CPUX86_64}
     FArchAdapter := TArchX86_64Adapter.Create(FProcessController);
