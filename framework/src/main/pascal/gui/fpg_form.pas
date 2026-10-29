@@ -486,6 +486,9 @@ var
   end;
 
 begin
+  { Must be initialised - it is compared against every child below, even when
+    the form has no menu bar. Stale stack contents could skip a real widget. }
+  menu := nil;
   // find the first TfpgMenuBar - if it exits
   wg := FindMenuBar(self);
   if (wg <> nil) then
