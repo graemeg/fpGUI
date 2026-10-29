@@ -49,6 +49,13 @@ function fpgGetBit(const AData: Byte; ABit: byte): boolean; overload; inline;
 procedure fpgSetBit(var AData: Longint; ABit: Longint; const AValue: boolean); inline;
 function fpgIntToBin(AValue: uint64; ADigits: byte=64): string;
 
+{ Returns the candidate application-local font folders for AExeName, in
+  priority order: Contents/Resources/fonts/ when running inside a macOS .app
+  bundle, then a fonts/ folder next to the executable. The folders might not exist. }
+procedure fpgGetAppFontDirectories(const AExeName: TfpgString; AList: TStrings);
+{ Recursively appends all *.ttf and *.otf files found under ADirectory to AList. }
+procedure fpgFindFontFiles(const ADirectory: TfpgString; AList: TStrings);
+
 
  // RTL wrapper filesystem functions with platform independant encoding
  // These functions are common for all platforms and rely on fpgXXXPlatformEncoding
@@ -346,6 +353,53 @@ begin
       Result[ADigits] := '0';
     AValue := AValue shr 1;
     dec(ADigits);
+  end;
+end;
+
+procedure fpgGetAppFontDirectories(const AExeName: TfpgString; AList: TStrings);
+var
+  lExeDir: TfpgString;
+  {$IFDEF DARWIN}
+  lMacOSDir: TfpgString;
+  lContentsDir: TfpgString;
+  {$ENDIF}
+begin
+  lExeDir := fpgExtractFilePath(AExeName);
+  {$IFDEF DARWIN}
+  { <name>.app/Contents/MacOS/<exe> -> <name>.app/Contents/Resources/fonts/ }
+  lMacOSDir := ExcludeTrailingPathDelimiter(lExeDir);
+  lContentsDir := fpgExtractFileDir(lMacOSDir);
+  if SameText(fpgExtractFileName(lMacOSDir), 'MacOS') and
+     SameText(fpgExtractFileName(lContentsDir), 'Contents') and
+     SameText(fpgExtractFileExt(fpgExtractFileDir(lContentsDir)), '.app') then
+    AList.Add(lContentsDir + PathDelim + 'Resources' + PathDelim + 'fonts' + PathDelim);
+  {$ENDIF}
+  AList.Add(lExeDir + 'fonts' + PathDelim);
+end;
+
+procedure fpgFindFontFiles(const ADirectory: TfpgString; AList: TStrings);
+var
+  sr: TSearchRec;
+  lDir: TfpgString;
+  lExt: TfpgString;
+begin
+  lDir := fpgAppendPathDelim(ADirectory);
+  // The extra 'or' includes Normal attribute files under Windows. faAnyFile doesn't return those.
+  if fpgFindFirst(lDir + AllFilesMask, faAnyFile or $00000080, sr) = 0 then
+  begin
+    repeat
+      if (sr.Name = '.') or (sr.Name = '..') or (sr.Name = '') then
+        Continue;
+      if (sr.Attr and faDirectory) <> 0 then
+        fpgFindFontFiles(lDir + sr.Name, AList)
+      else
+      begin
+        lExt := lowercase(fpgExtractFileExt(sr.Name));
+        if (lExt = '.ttf') or (lExt = '.otf') then
+          AList.Add(lDir + sr.Name);
+      end;
+    until fpgFindNext(sr) <> 0;
+    FindClose(sr);
   end;
 end;
 

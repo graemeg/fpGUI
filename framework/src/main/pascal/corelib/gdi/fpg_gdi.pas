@@ -390,6 +390,7 @@ uses
   fpg_window,
   fpg_wakeChannel,
   fpg_gdi_wakechannel,
+  fpg_utils,
   math;
 
 
@@ -431,6 +432,15 @@ function GetMonitorInfoW(hMonitor: HMONITOR; lpmi: Pointer): BOOL;
 function EnumDisplayMonitors(hdc: HDC; lprcClip: LPRECT;
     lpfnEnum: TMonitorEnumCallback; dwData: LPARAM): BOOL;
     stdcall; external 'user32.dll' name 'EnumDisplayMonitors';
+
+{$IFNDEF wince}
+{ Private font registration API — not in the FPC 3.2 RTL Windows unit }
+const
+  FR_PRIVATE = $10;
+
+function AddFontResourceExW(lpszFilename: LPCWSTR; fl: DWORD; pdv: Pointer): longint;
+    stdcall; external 'gdi32.dll' name 'AddFontResourceExW';
+{$ENDIF}
 
 // some required keyboard functions
 {$INCLUDE fpg_keys_gdi.inc}
@@ -1636,6 +1646,35 @@ end;
     - Win 8.1+: SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
     - Vista/7:  SetProcessDPIAware
   Both are loaded dynamically to avoid hard dependencies on OS version. }
+{ Makes application-local fonts (see fpgGetAppFontDirectories) visible to
+  GDI by typeface name. FR_PRIVATE limits them to this process, needs no
+  admin rights, and Windows releases them when the process exits. }
+procedure RegisterAppFonts;
+{$IFNDEF wince}
+var
+  lDirs: TStringList;
+  lFiles: TStringList;
+  i: integer;
+begin
+  lDirs := TStringList.Create;
+  lFiles := TStringList.Create;
+  try
+    fpgGetAppFontDirectories(ParamStr(0), lDirs);
+    for i := 0 to lDirs.Count-1 do
+      fpgFindFontFiles(lDirs[i], lFiles);
+    for i := 0 to lFiles.Count-1 do
+      AddFontResourceExW(PWideChar(Utf8Decode(lFiles[i])), FR_PRIVATE, nil);
+  finally
+    lFiles.Free;
+    lDirs.Free;
+  end;
+end;
+{$ELSE}
+begin
+  // Not supported on WinCE
+end;
+{$ENDIF}
+
 procedure DeclareDPIAwareness;
 var
   hShCore: THandle;
@@ -1746,6 +1785,7 @@ var
 begin
   inherited Create(AParams);
   DeclareDPIAwareness;
+  RegisterAppFonts;
   FDisplay        := Windows.GetDC(0);
   FEffectiveDPI   := DetectEffectiveDPI(FDisplay);
 

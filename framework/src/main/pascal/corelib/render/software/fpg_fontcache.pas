@@ -68,7 +68,9 @@ type
   TFontCacheList = class(TObject)
   private
     FList: TObjectList;
+    FAppFontCount: integer;   { app-local fonts occupy the first FAppFontCount items }
     procedure   SearchForFont(const AFontPath: TfpgString);
+    function    ScanFontDirectory(const AFontPath: TfpgString; AInsertAt: integer): integer;
     function    BuildFontCacheItem(const AFontFile: TfpgString): TFontCacheItem;
     procedure   SetStyleIfExists(var AText: Ansistring; var AStyleFlags: integer; const AStyleName: AnsiString; const AStyleBit: integer);
   protected
@@ -79,6 +81,9 @@ type
     constructor Create;
     destructor  Destroy; override;
     procedure   BuildFontCache;
+    { Scans APath recursively for TTF/OTF files. They take precedence over
+      system fonts and over directories added later. Missing paths are ignored. }
+    procedure   AddFontDirectory(const APath: TfpgString);
     function    Add(const AObject: TFontCacheItem): integer;
     procedure   Clear;
     property    Count: integer read GetCount;
@@ -182,42 +187,34 @@ end;
 { TFontCacheList }
 
 procedure TFontCacheList.SearchForFont(const AFontPath: TfpgString);
-{$IFDEF AGG2D_USE_FREETYPE}
+begin
+  ScanFontDirectory(AFontPath, Count);
+end;
+
+{ Returns the number of fonts inserted at AInsertAt. }
+function TFontCacheList.ScanFontDirectory(const AFontPath: TfpgString; AInsertAt: integer): integer;
 var
-  sr: TSearchRec;
+  lFiles: TStringList;
   lFont: TFontCacheItem;
-  s: TfpgString;
+  i: integer;
 begin
-  // The extra 'or' includes Normal attribute files under Windows. faAnyFile doesn't return those.
-  // Reported to FPC as bug 9440 in Mantis.
-  if fpgFindFirst(AFontPath + AllFilesMask, faAnyFile or $00000080, sr) = 0 then
-  begin
-    repeat
-      // check if special files to skip
-      if (sr.Name = '.') or (sr.Name = '..') or (sr.Name = '') then
-        Continue;
-      // We got something, so lets continue
-      s := fpgFromOSEncoding(sr.Name);
-      if (sr.Attr and faDirectory) <> 0 then // found a directory
-        SearchForFont(fpgAppendPathDelim(AFontPath + s))
-      else
-      begin // we have a file
-        if (lowercase(fpgExtractFileExt(s)) = '.ttf') or
-           (lowercase(fpgExtractFileExt(s)) = '.otf') then
-        begin
-          lFont := BuildFontCacheItem(AFontPath + s);
-          Add(lFont);
-        end;
+  Result := 0;
+  lFiles := TStringList.Create;
+  try
+    fpgFindFontFiles(AFontPath, lFiles);
+    for i := 0 to lFiles.Count-1 do
+    begin
+      lFont := BuildFontCacheItem(lFiles[i]);
+      if Assigned(lFont) then
+      begin
+        FList.Insert(AInsertAt + Result, lFont);
+        Inc(Result);
       end;
-    until fpgFindNext(sr) <> 0;
+    end;
+  finally
+    lFiles.Free;
   end;
-  FindClose(sr);
 end;
-{$ELSE}
-begin
-  // No-op: Win32 font engine uses typeface names directly
-end;
-{$ENDIF}
 
 function TFontCacheList.BuildFontCacheItem(const AFontFile: TfpgString): TFontCacheItem;
 {$IFDEF AGG2D_USE_FREETYPE}
@@ -226,7 +223,11 @@ var
   s: Ansistring;
   flags: integer;
 begin
-  FT_New_Face(m_library, PChar(AFontFile), 0, face_ptr);
+  Result := nil;
+  face_ptr := nil;
+  { Skip unreadable or corrupt font files }
+  if FT_New_Face(m_library, PChar(AFontFile), 0, face_ptr) <> 0 then
+    Exit;
   Result := TFontCacheItem.Create(AFontFile);
   Result.FamilyName := face_ptr^.family_name;
 
@@ -311,6 +312,14 @@ begin
     FT_Init_FreeType(m_library);
 
     lPathList := TStringList.Create;
+
+    { Application-local fonts first, so they take precedence over system fonts }
+    FAppFontCount := 0;
+    fpgGetAppFontDirectories(ParamStr(0), lPathList);
+    for i := 0 to lPathList.Count-1 do
+      AddFontDirectory(lPathList[i]);
+    lPathList.Clear;
+
     {$IFDEF WINDOWS}
     { Windows system fonts directory (e.g. C:\Windows\Fonts\) }
     lPath := GetEnvironmentVariable('WINDIR');
@@ -355,6 +364,33 @@ begin
 end;
 {$ENDIF}
 
+procedure TFontCacheList.AddFontDirectory(const APath: TfpgString);
+{$IFDEF AGG2D_USE_FREETYPE}
+var
+  lOwnLibrary: boolean;
+begin
+  if not fpgDirectoryExists(APath) then
+    Exit;
+  { BuildFontCache already holds a FreeType library while it scans }
+  lOwnLibrary := m_library = nil;
+  if lOwnLibrary then
+    FT_Init_FreeType(m_library);
+  try
+    Inc(FAppFontCount, ScanFontDirectory(fpgAppendPathDelim(APath), FAppFontCount));
+  finally
+    if lOwnLibrary then
+    begin
+      FT_Done_FreeType(m_library);
+      m_library := nil;
+    end;
+  end;
+end;
+{$ELSE}
+begin
+  // No-op: Win32 font engine uses typeface names directly
+end;
+{$ENDIF}
+
 function TFontCacheList.Add(const AObject: TFontCacheItem): integer;
 begin
   Result := FList.Add(AObject);
@@ -363,6 +399,7 @@ end;
 procedure TFontCacheList.Clear;
 begin
   FList.Clear;
+  FAppFontCount := 0;
 end;
 
 function TFontCacheList.IndexOf(const AObject: TFontCacheItem): integer;

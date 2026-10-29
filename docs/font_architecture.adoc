@@ -945,6 +945,61 @@ Application         FontManager           TfpgFontResource      Platform (Xft/GD
 
 ---
 
+== Application-Local Fonts
+
+An application can ship its own TTF/OTF files and use them without installing
+them on the system. This allows identical text rendering on every platform.
+
+=== Search Locations
+
+The following folders are searched, in priority order, before any system font folder:
+
+. `<name>.app/Contents/Resources/fonts/` - macOS only, when the executable runs inside an application bundle.
+. `<executable folder>/fonts/` - all platforms.
+
+Both folders are scanned recursively. Missing folders are ignored, and unreadable
+or corrupt font files are skipped.
+
+=== Precedence
+
+Application-local fonts take precedence over system fonts of the same family.
+For example, a bundled `LiberationSans-Regular.ttf` is used instead of an
+installed Liberation Sans.
+
+=== Platform Behaviour
+
+* *Linux, FreeBSD and macOS* - `TFontCacheList.BuildFontCache` (`fpg_fontcache.pas`)
+  scans the application folders first. `TFontCacheList.Find` returns the first
+  match, so application fonts win.
+* *Windows* - the GDI font engine resolves fonts by typeface name and does not use
+  the font cache. `TfpgGDIApplication.Create` registers each application font with
+  `AddFontResourceExW(..., FR_PRIVATE, nil)`. The registration is private to the
+  process, requires no administrator rights, and is released when the process exits.
+
+=== Selecting the Bundled Font as Default
+
+Shipping a font does not change the default font names. Set the default font
+variables from `fpg_base.pas` before `fpgApplication.Initialize`, because the
+default style and font aliases (`#Label1`, `#Edit1`, etc.) are created during
+initialisation:
+
+[source,pascal]
+----
+begin
+  FPG_DEFAULT_SANS := 'Liberation Sans';
+  FPG_DEFAULT_FONT_DESC := 'Liberation Sans-10:antialias=true';
+  FPG_DEFAULT_FIXED := 'Liberation Mono';
+  FPG_DEFAULT_FIXED_FONT_DESC := 'Liberation Mono-10';
+  fpgApplication.Initialize;
+  ...
+end.
+----
+
+NOTE: The default font size on Windows is 8pt, compared with 10pt on Linux and
+macOS. Set the size explicitly, as above, for consistent layouts across platforms.
+
+---
+
 == Summary
 
 The fpGUI font architecture provides:

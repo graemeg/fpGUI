@@ -17,6 +17,7 @@ uses
   tcfontmanager,
   tcfontcacheremoval,
   tcfontdefinition,
+  tcappfonts,
   tclayoutmanager,
   tcflowlayout,
   tcborderlayout,
