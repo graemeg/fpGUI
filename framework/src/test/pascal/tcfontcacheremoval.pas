@@ -115,7 +115,7 @@ begin
   initialCacheSize := FFontManager.GetCacheSize;
 
   { Use a specific font descriptor }
-  fontDesc := 'Liberation Sans-14';
+  fontDesc := FPG_DEFAULT_SANS + '-14';
 
   { Get font - this adds it to cache }
   font := FFontManager.GetFont(fontDesc);
@@ -144,9 +144,9 @@ begin
   initialSize := FFontManager.GetCacheSize;
 
   { Add three different fonts }
-  FFontManager.GetFont('Liberation Sans-12');
-  FFontManager.GetFont('Liberation Sans-14');
-  FFontManager.GetFont('Liberation Sans-16');
+  FFontManager.GetFont(FPG_DEFAULT_SANS + '-12');
+  FFontManager.GetFont(FPG_DEFAULT_SANS + '-14');
+  FFontManager.GetFont(FPG_DEFAULT_SANS + '-16');
 
   { Cache should have 3 more fonts }
   afterAdd3 := FFontManager.GetCacheSize;
@@ -173,19 +173,19 @@ begin
   initialSize := FFontManager.GetCacheSize;
 
   { Add first font }
-  font1 := FFontManager.GetFont('Liberation Mono-12');
+  font1 := FFontManager.GetFont(FPG_DEFAULT_FIXED + '-12');
   afterFont1 := FFontManager.GetCacheSize;
   CheckEquals(initialSize + 1, afterFont1,
     'Cache should grow by 1 for new font');
 
   { Add second different font }
-  FFontManager.GetFont('Liberation Mono-14');
+  FFontManager.GetFont(FPG_DEFAULT_FIXED + '-14');
   afterFont2 := FFontManager.GetCacheSize;
   CheckEquals(initialSize + 2, afterFont2,
     'Cache should grow by 1 for another new font');
 
   { Request first font again - should NOT grow cache }
-  font1Again := FFontManager.GetFont('Liberation Mono-12');
+  font1Again := FFontManager.GetFont(FPG_DEFAULT_FIXED + '-12');
   afterFont1Again := FFontManager.GetCacheSize;
   CheckEquals(afterFont2, afterFont1Again,
     'Cache should not grow when requesting existing font');
@@ -209,27 +209,27 @@ begin
   initialSize := FFontManager.GetCacheSize;
 
   { Request font with normal case }
-  font1 := FFontManager.GetFont('Liberation Mono-12');
+  font1 := FFontManager.GetFont(FPG_DEFAULT_FIXED + '-12');
   CheckNotNull(font1, 'Font1 should be created');
   CheckEquals(initialSize + 1, FFontManager.GetCacheSize,
     'Cache should grow by 1 for new font');
 
   { Request same font with different case - should get same object }
-  font2 := FFontManager.GetFont('Liberation MONO-12');
+  font2 := FFontManager.GetFont(UpperCase(FPG_DEFAULT_FIXED) + '-12');
   CheckTrue(font1 = font2,
     'Different case should return same cached object');
   CheckEquals(initialSize + 1, FFontManager.GetCacheSize,
     'Cache should not grow - normalization should find existing font');
 
   { Request with lowercase - should still get same object }
-  font3 := FFontManager.GetFont('liberation mono-12');
+  font3 := FFontManager.GetFont(LowerCase(FPG_DEFAULT_FIXED) + '-12');
   CheckTrue(font1 = font3,
     'Lowercase should return same cached object');
   CheckEquals(initialSize + 1, FFontManager.GetCacheSize,
     'Cache should still not grow');
 
   { Request with bold attribute in different order }
-  font4 := FFontManager.GetFont('Liberation Mono-12:bold');
+  font4 := FFontManager.GetFont(FPG_DEFAULT_FIXED + '-12:bold');
   CheckTrue(font1 <> font4,
     'Different attributes should return different object');
   CheckEquals(initialSize + 2, FFontManager.GetCacheSize,

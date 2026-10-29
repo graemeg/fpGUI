@@ -61,11 +61,15 @@ begin
   // This makes tests DPI-independent by ensuring logical pixels = actual pixels
   if fpgApplication <> nil then
     TfpgMigPlatformDefaults.SetBaseDPI(fpgApplication.Screen_dpi);
+  // Expected positions assume GNOME defaults (6px insets and gaps), so pin
+  // the platform to keep the tests independent of the host OS
+  TfpgMigPlatformDefaults.SetPlatform(PLATFORM_GNOME);
 end;
 
 procedure TTestMigLayout.TearDown;
 begin
   // restore for other tests
+  TfpgMigPlatformDefaults.SetPlatform(TfpgMigPlatformDefaults.GetCurrentPlatform);
   TfpgMigPlatformDefaults.SetBaseDPI(FMigDefaultBaseDpi);
   inherited TearDown;
 end;
