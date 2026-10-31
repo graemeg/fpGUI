@@ -248,6 +248,12 @@ function fpgSelectColorDialog(APresetColor: TfpgColor = clBlack): TfpgColor;
 function fpgInputQuery(const ACaption, APrompt: TfpgString; var Value: TfpgString): Boolean;
 function fpgIntegerQuery(const ACaption, APrompt: TfpgString; var Value: Integer; const MaxValue: Integer; const MinValue: Integer = 0): Boolean;
 
+{ Splits AText into ALines so that each line fits within ALineWidth pixels when
+  drawn with AFont. Lines are broken at spaces where possible, otherwise in the
+  middle of a word. AWidth returns the width of the widest line. }
+procedure fpgWrapText(const AText: String; ALines: TStrings; AFont: TfpgFontResourceBase;
+    const ALineWidth: Integer; out AWidth: Integer);
+
 
 implementation
 
@@ -263,7 +269,7 @@ uses
   ;
 
 
-procedure WrapText(const AText: String; ALines: TStrings; AFont: TfpgFontResourceBase;
+procedure fpgWrapText(const AText: String; ALines: TStrings; AFont: TfpgFontResourceBase;
     const ALineWidth: Integer; out AWidth: Integer);
 var
   maxw: integer;
@@ -276,28 +282,36 @@ var
   var
     w: integer;
     m: integer;
+    k: integer;
   begin
     s2  := s;
     w   := AFont.GetTextWidth(s2);
     if w > ALineWidth then
     begin
-      while w > ALineWidth do
+      // A single character that is wider than the line can't be split further.
+      while (w > ALineWidth) and (UTF8Length(s) > 1) do
       begin
+        // Find the longest prefix that fits, but always keep at least one
+        // character so that progress is guaranteed.
         m := UTF8Length(s);
-        repeat
-          Dec(m);
-          s2  := UTF8Copy(s,1,m);
-          w   := AFont.GetTextWidth(s2);
-        until w <= ALineWidth;
-        if w > maxw then
-          maxw := w;
-
-        // are we in the middle of a word. If so find the beginning of word.
-        while UTF8Copy(s2, m, m+1) <> ' ' do
+        while (m > 1) and (w > ALineWidth) do
         begin
           Dec(m);
           s2  := UTF8Copy(s,1,m);
+          w   := AFont.GetTextWidth(s2);
         end;
+
+        // Are we in the middle of a word? If so, break at the last space
+        // instead. If there is no space, break the word where it no longer fits.
+        k := m;
+        while (k > 1) and (UTF8Copy(s2, k, 1) <> ' ') do
+          Dec(k);
+        if k > 1 then
+          m := k;
+        s2  := UTF8Copy(s,1,m);
+        w   := AFont.GetTextWidth(s2);
+        if w > maxw then
+          maxw := w;
 
         ALines.Add(s2);
         s   := UTF8Copy(s, m+1, UTF8length(s));
@@ -552,7 +566,7 @@ procedure TfpgMessageBox.SetMessage(AMessage: string);
 var
   outw: integer;
 begin
-  WrapText(AMessage, FLines, FFont, FMaxLineWidth, outw);
+  fpgWrapText(AMessage, FLines, FFont, FMaxLineWidth, outw);
 
   // Use 96 DPI baseline values - ScaleDPI will scale when form is shown
   // dialog width with 10 pixel border on both sides

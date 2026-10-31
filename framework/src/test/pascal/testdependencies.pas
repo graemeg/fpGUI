@@ -39,6 +39,7 @@ uses
   tccanvasblit,
   tchybridcanvasscale,
   tcspinedit,
+  tcwraptext,
   tctimer,
   tcmsgcoalesce,
   tcprocessmessages,

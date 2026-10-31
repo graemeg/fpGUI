@@ -86,7 +86,7 @@ begin
   if not Assigned(FInformativeText) then
     FInformativeText := TStringList.Create;
 
-  WrapText(AValue, FInformativeText, FFont, FMaxLineWidth, outw);
+  fpgWrapText(AValue, FInformativeText, FFont, FMaxLineWidth, outw);
   // adjust dialog's height
   Height := lblName1.Bottom + (FLineHeight*FInformativeText.Count) + FTextY + 45;
 end;
