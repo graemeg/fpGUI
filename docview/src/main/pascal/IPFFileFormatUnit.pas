@@ -2,6 +2,10 @@ Unit IPFFileFormatUnit;
 
 {$mode objfpc}{$H+}
 
+// The UInt32Array style types are declared as array[0..0] and indexed beyond
+// that bound by design, so range checking must stay off for this unit.
+{$R-}
+
 interface
 
 // Definition of IPF file header and other structures

@@ -22,6 +22,10 @@ Unit SearchTable;
 
 {$mode objfpc}{$H+}
 
+// The UInt32Array style types are declared as array[0..0] and indexed beyond
+// that bound by design, so range checking must stay off for this unit.
+{$R-}
+
 interface
 
 uses
@@ -114,7 +118,8 @@ var
   TopicIndex: longint;
 begin
   TopicIndex:= StartingIndex;
-  while b > 0 do
+  // Ignore flags for topics that don't exist (corrupt or badly encoded data).
+  while ( b > 0 ) and ( TopicIndex < _TopicCount ) do
   begin
     if b and $80 > 0 then
       Results^[ TopicIndex ] := 1;
@@ -125,6 +130,8 @@ end;
 
 // Decompress RLE compressed data starting at p,
 // running til pDataEnd. Update topic entries in Results.
+// Decoding stops at a block that is truncated by the end of the record,
+// so data beyond pDataEnd is never read.
 procedure TSearchTable.DoRLESearch( p: pbyte;
                                     pDataEnd: pointer;
                                     Results: UInt32ArrayPointer );
@@ -135,6 +142,8 @@ var
   thebyte: byte;
   byte1, byte2: byte;
 begin
+  if p >= pDataEnd then
+    exit;
   assert( pbyte( p )^ = 1, 'Unexpected RLE type' );
   inc( p ); // skip header, always 1?
 
@@ -148,12 +157,16 @@ begin
     if thebyte = $80 then
     begin
       // escape
+      if p >= pDataEnd then
+        exit;
       thebyte := p^;
       inc( p );
 
       if thebyte = 0 then
       begin
         // 16 bit repeat of zeroes??
+        if p + 2 > pDataEnd then
+          exit;
         N := pUInt16( p )^ + 1;
         inc( p, 2 );
         inc( TopicIndex, N );
@@ -161,6 +174,8 @@ begin
       else
       begin
         // n+1 repeats of next 2 bytes???
+        if p + 2 > pDataEnd then
+          exit;
         N := thebyte + 1;
         byte1 := p^;
         inc( p );
@@ -187,6 +202,8 @@ begin
       if thebyte and $80 > 0 then
       begin
         // literal data
+        if p + N > pDataEnd then
+          exit;
         while N > 0 do
         begin
           Check1ByteOfFlags( p^,
@@ -200,6 +217,8 @@ begin
       else
       begin
         // repeat of next byte
+        if p >= pDataEnd then
+          exit;
         thebyte := p^;
         inc( p );
         while N > 0 do
@@ -265,10 +284,12 @@ begin
     3: // list of topics containing word
     begin
       ClearUInt32Array( Results, _TopicCount );
-      while pData < pDataEnd do
+      // A trailing odd byte is not a complete topic number.
+      while pData + 2 <= pDataEnd do
       begin
         TopicIndex:= pUInt16( pData )^;
-        Results^[ TopicIndex ] := 1;
+        if TopicIndex < _TopicCount then
+          Results^[ TopicIndex ] := 1;
         inc( pData, 2 );
       end;
     end;
@@ -277,10 +298,12 @@ begin
     begin
       FillUInt32Array( Results, _TopicCount, 1 );
 
-      while pData < pDataEnd do
+      // A trailing odd byte is not a complete topic number.
+      while pData + 2 <= pDataEnd do
       begin
         TopicIndex:= pUInt16( pData )^;
-        Results^[ TopicIndex ] := 0;
+        if TopicIndex < _TopicCount then
+          Results^[ TopicIndex ] := 0;
         inc( pData, 2 );
       end;
     end;
@@ -295,6 +318,8 @@ begin
       end
       else
       begin
+        if pData + 2 > pDataEnd then
+          exit;
         TopicIndex:= pUInt16( pData )^ * 8;
         inc( pData, 2  );
       end;
