@@ -2,7 +2,7 @@
 <packages>
 <package name="fpgui">
  <version major="2" minor="1" micro="0" build="0"/>
- <filename>fpgui-2.1.0.zip</filename>
+ <filename>fpgui-2.1.1.zip</filename>
  <author>Graeme Geldenhuys</author>
  <license>Modified LGPL</license>
  <email>graemeg@gmail.com</email>

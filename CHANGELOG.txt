@@ -2,6 +2,15 @@
   Release notes for fpGUI
   =======================
 
+v2.1.1 (2026-11-01)
+
+  - Bug fixes
+    * macOS: fix build failures with FPC 3.2.2 (issue #207). The Cocoa
+      wake channel unit now enables the objectivec1 mode switch, and the
+      macos profile adds the Homebrew library paths so FreeType links.
+    * macOS: default to the Arial and Courier New fonts, which ship with
+      the OS, instead of Liberation Sans/Mono.
+
 v2.1.0 (2026-04-27)
 
   - Event Loop Rearchitecture

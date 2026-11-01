@@ -13,12 +13,12 @@ FILETYPE 1
   {
    VALUE "CompanyName", "fpGUI Toolkit"
    VALUE "FileDescription", "fpGUI's INF Documentation Viewer"
-   VALUE "FileVersion", "2.1.0"
+   VALUE "FileVersion", "2.1.1"
    VALUE "InternalName", "docview"
    VALUE "LegalCopyright", "GNU Public License"
    VALUE "OriginalFilename", "docview"
    VALUE "ProductName", "fpGUI Toolkit"
-   VALUE "ProductVersion", "2.1.0"
+   VALUE "ProductVersion", "2.1.1"
   }
  }
  BLOCK "VarFileInfo"
