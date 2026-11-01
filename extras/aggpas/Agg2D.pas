@@ -1649,17 +1649,12 @@ begin
    24,
    32:
     begin
-    { Rendering Buffer }
-     if aStride < 0 then
-     begin
-       buffer := bitmap.ScanLine[aHeight - 1];
-       buffer -= aOffset;
-     end
-     else
-     begin
-       buffer := bitmap.ScanLine[0];
-       buffer += aOffset;
-     end;
+    { Rendering Buffer
+      Always pass the first byte of the attached area. A negative stride
+      (flip_y) is handled by rendering_buffer.attach, which locates row 0
+      at buf - (height-1)*stride itself. }
+     buffer := bitmap.ScanLine[0];
+     buffer += aOffset;
 
      m_rbuf.attach(
       buffer ,
