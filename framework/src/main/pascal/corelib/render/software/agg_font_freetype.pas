@@ -967,6 +967,13 @@ begin
 
        inc(m_num_faces );
 
+      { FreeType only auto-selects a Unicode charmap. Symbol fonts (eg: chess
+        or dingbat fonts) have none, which leaves every glyph unreachable.
+        Fall back to the first charmap the font provides. }
+       if (m_cur_face.charmap = NIL ) and
+          (m_cur_face.num_charmaps > 0 ) then
+        FT_Set_Charmap(m_cur_face ,m_cur_face.charmaps^ );
+
       end
      else
       begin
@@ -1236,6 +1243,13 @@ begin
  result:=false;
 
  m_glyph_index:=FT_Get_Char_Index(m_cur_face ,glyph_code );
+
+{ MS Symbol charmaps place 8-bit codes in the $F000 private use area }
+ if (m_glyph_index = 0 ) and
+    (glyph_code < $100 ) and
+    (m_cur_face.charmap <> NIL ) and
+    (m_cur_face.charmap.encoding = FT_ENCODING_MS_SYMBOL ) then
+  m_glyph_index:=FT_Get_Char_Index(m_cur_face ,$F000 + glyph_code );
 
  if m_hinting then
   m_last_error:=FT_Load_Glyph(m_cur_face ,m_glyph_index ,FT_LOAD_DEFAULT {FT_LOAD_FORCE_AUTOHINT} )

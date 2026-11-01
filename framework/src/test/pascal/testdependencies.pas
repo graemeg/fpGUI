@@ -46,7 +46,8 @@ uses
   tcpropertyread,
   tcasynctask,
   tchvif,
-  tchvif_writer;
+  tchvif_writer,
+  tcaggfreetype;
 
 implementation
 

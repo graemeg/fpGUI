@@ -37,7 +37,10 @@ uses
  agg_basics ;
 
 type
-  FT_Encoding = array[0..3] of char;
+  { FreeType declares FT_Encoding as a C enum whose values are 32-bit tags
+    built with FT_ENC_TAG (four characters packed big-endian). It must be
+    passed by value as an integer; an array of char is passed incorrectly. }
+  FT_Encoding = LongWord;
 
 const
 {$IFDEF AGG_WINDOWS}
@@ -100,20 +103,20 @@ const
   ft_glyph_format_outline   = $6F75746C; //outl 111 117 116 108
   ft_glyph_format_plotter   = $706C6F74; //plot 112 108 111 116
 
-  FT_ENCODING_NONE : FT_Encoding = (#0 ,#0 ,#0 ,#0 );
-  FT_ENCODING_MS_SYMBOL : FT_Encoding = 'symb';
-  FT_ENCODING_UNICODE : FT_Encoding = 'unic';
-  FT_ENCODING_MS_SJIS : FT_Encoding = 'sjis';
-  FT_ENCODING_MS_GB2312 : FT_Encoding = 'gb  ';
-  FT_ENCODING_MS_BIG5 : FT_Encoding = 'big5';
-  FT_ENCODING_MS_WANSUNG : FT_Encoding = 'wans';
-  FT_ENCODING_MS_JOHAB : FT_Encoding = 'joha';
-  FT_ENCODING_ADOBE_STANDARD : FT_Encoding = 'ADOB';
-  FT_ENCODING_ADOBE_EXPERT : FT_Encoding = 'ADBE';
-  FT_ENCODING_ADOBE_CUSTOM : FT_Encoding = 'ADBC';
-  FT_ENCODING_ADOBE_LATIN_1 : FT_Encoding = 'lat1';
-  FT_ENCODING_OLD_LATIN_2 : FT_Encoding = 'lat2';
-  FT_ENCODING_APPLE_ROMAN : FT_Encoding = 'armn';
+  FT_ENCODING_NONE = FT_Encoding(0);
+  FT_ENCODING_MS_SYMBOL = FT_Encoding($73796D62); // 'symb'
+  FT_ENCODING_UNICODE = FT_Encoding($756E6963); // 'unic'
+  FT_ENCODING_MS_SJIS = FT_Encoding($736A6973); // 'sjis'
+  FT_ENCODING_MS_GB2312 = FT_Encoding($67622020); // 'gb  '
+  FT_ENCODING_MS_BIG5 = FT_Encoding($62696735); // 'big5'
+  FT_ENCODING_MS_WANSUNG = FT_Encoding($77616E73); // 'wans'
+  FT_ENCODING_MS_JOHAB = FT_Encoding($6A6F6861); // 'joha'
+  FT_ENCODING_ADOBE_STANDARD = FT_Encoding($41444F42); // 'ADOB'
+  FT_ENCODING_ADOBE_EXPERT = FT_Encoding($41444245); // 'ADBE'
+  FT_ENCODING_ADOBE_CUSTOM = FT_Encoding($41444243); // 'ADBC'
+  FT_ENCODING_ADOBE_LATIN_1 = FT_Encoding($6C617431); // 'lat1'
+  FT_ENCODING_OLD_LATIN_2 = FT_Encoding($6C617432); // 'lat2'
+  FT_ENCODING_APPLE_ROMAN = FT_Encoding($61726D6E); // 'armn'
 
   ft_glyph_bbox_unscaled  = 0; //* return unscaled font units           */
   ft_glyph_bbox_subpixels = 0; //* return unfitted 26.6 coordinates     */
@@ -377,6 +380,8 @@ type
  function  FT_Done_Face(face : FT_Face_ptr ) : FT_Error; cdecl; external ft_lib name 'FT_Done_Face';
 
  function  FT_Select_Charmap(face : FT_Face_ptr; encoding : FT_Encoding ) : FT_Error; cdecl; external ft_lib name 'FT_Select_Charmap';
+
+ function  FT_Set_Charmap(face : FT_Face_ptr; charmap : FT_CharMap_ptr ) : FT_Error; cdecl; external ft_lib name 'FT_Set_Charmap';
 
  function  FT_Get_Char_Index(face : FT_Face_ptr; charcode : FT_ULong ) : FT_UInt; cdecl; external ft_lib name 'FT_Get_Char_Index';
 

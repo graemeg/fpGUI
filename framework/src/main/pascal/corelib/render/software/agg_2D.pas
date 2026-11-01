@@ -615,6 +615,7 @@ type
 
    procedure addLine(x1 ,y1 ,x2 ,y2 : double );
    procedure updateRasterizerGamma;
+   procedure textInkExtent(const str : AnsiString; var lo ,hi : double );
    procedure renderImage(
               img : Image_ptr;
               x1 ,y1 ,x2 ,y2 : int;
@@ -2480,6 +2481,71 @@ begin
 end;
 
 { TEXTWIDTH }
+{ TEXTINKEXTENT }
+{ Vertical extent of the glyphs in str, relative to the baseline with y
+  pointing up, in font engine units. lo and hi are left unchanged when the
+  string has no glyphs with ink. }
+procedure Agg2D.textInkExtent(const str : AnsiString; var lo ,hi : double );
+{$IFDEF AGG2D_NO_FONT}
+begin
+end;
+{$ELSE}
+var
+ glyph : glyph_cache_ptr;
+ str_ : PChar;
+ charlen : int;
+ y1 ,y2 ,minY ,maxY : double;
+ found : boolean;
+
+begin
+ found:=false;
+ minY :=0.0;
+ maxY :=0.0;
+ str_ :=PChar(str );
+
+ while str_^ <> #0 do
+  begin
+   glyph:=m_fontCacheManager.glyph(UTF8CharToUnicode(str_ ,charlen ) );
+   inc(str_ ,charlen );
+
+   if (glyph <> NIL ) and
+      (glyph.bounds.y2 > glyph.bounds.y1 ) then
+    begin
+     if m_fontEngine._flip_y then
+      begin
+       y1:=-glyph.bounds.y2;
+       y2:=-glyph.bounds.y1;
+
+      end
+     else
+      begin
+       y1:=glyph.bounds.y1;
+       y2:=glyph.bounds.y2;
+
+      end;
+
+     if not found or (y1 < minY ) then
+      minY:=y1;
+
+     if not found or (y2 > maxY ) then
+      maxY:=y2;
+
+     found:=true;
+
+    end;
+
+  end;
+
+ if found then
+  begin
+   lo:=minY;
+   hi:=maxY;
+
+  end;
+
+end;
+{$ENDIF}
+
 function Agg2D.textWidth(str : AnsiString ) : double;
 {$IFDEF AGG2D_NO_FONT}
 begin
@@ -2540,7 +2606,7 @@ begin
 end;
 {$ELSE}
 var
- dx ,dy ,asc ,start_x ,start_y : double;
+ dx ,dy ,lo ,asc ,start_x ,start_y : double;
 
  glyph : glyph_cache_ptr;
 
@@ -2570,18 +2636,30 @@ begin
 
  end;
 
- asc  :=fontHeight;
+ { Vertical alignment uses the cap-height (the 'H' glyph) sitting on the
+   baseline, so all strings in a font share a baseline. Fonts without a
+   usable 'H' (eg: symbol fonts) fall back to the ink extent of the text. }
+ lo :=0.0;
+ asc:=fontHeight;
  glyph:=m_fontCacheManager.glyph(int32u('H' ) );
 
- if glyph <> NIL then
-  asc:=glyph.bounds.y2 - glyph.bounds.y1;
+ if (glyph <> NIL ) and
+    (glyph.glyph_index <> 0 ) and
+    (glyph.bounds.y2 - glyph.bounds.y1 > m_fontEngine._height * 0.2 ) then
+  asc:=glyph.bounds.y2 - glyph.bounds.y1
+ else
+  textInkExtent(str ,lo ,asc );
 
  if m_fontCacheType = RasterFontCache then
-  asc:=screenToWorld(asc );
+  begin
+   lo :=screenToWorld(lo );
+   asc:=screenToWorld(asc );
+
+  end;
 
  case m_textAlignY of
   AlignCenter :
-   dy:=-asc * 0.5;
+   dy:=-(lo + asc ) * 0.5;
 
   AlignTop :
    dy:=-asc;
