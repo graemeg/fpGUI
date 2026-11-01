@@ -4,6 +4,16 @@
   <author>Graeme Geldenhuys</author>
   <license>BSD-3-Clause</license>
 
+  <!-- Registry listing metadata (used by 'pasbuild publish') -->
+  <description>fpGUI Toolkit: a cross-platform GUI toolkit for Free Pascal, written entirely in Object Pascal</description>
+  <repoUrl>https://github.com/graemeg/fpGUI</repoUrl>
+  <keywords>
+    <keyword>gui</keyword>
+    <keyword>widgets</keyword>
+    <keyword>toolkit</keyword>
+    <keyword>cross-platform</keyword>
+  </keywords>
+
   <build>
     <projectType>library</projectType>
 
