@@ -2,7 +2,7 @@
 <project>
   <name>fpgui-framework</name>
   <author>Graeme Geldenhuys</author>
-  <license>BSD-3-Clause</license>
+  <license>LGPL-2.1-or-later WITH Classpath-exception-2.0</license>
 
   <!-- Registry listing metadata (used by 'pasbuild publish') -->
   <description>fpGUI Toolkit: a cross-platform GUI toolkit for Free Pascal, written entirely in Object Pascal</description>
@@ -30,6 +30,12 @@
     <resources>
       <filtering>true</filtering>
     </resources>
+
+    <!-- Ship the licence texts the unit headers refer to -->
+    <sourcePackage>
+      <include>COPYING.modifiedLGPL.txt</include>
+      <include>COPYING.LGPL2.txt</include>
+    </sourcePackage>
   </build>
 
   <test>
