@@ -399,7 +399,7 @@ begin
           AList.Add(lDir + sr.Name);
       end;
     until fpgFindNext(sr) <> 0;
-    FindClose(sr);
+    SysUtils.FindClose(sr);
   end;
 end;
 
