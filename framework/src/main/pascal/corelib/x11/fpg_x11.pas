@@ -3214,6 +3214,7 @@ var
   IconPixmap: TPixmap;
   WMHints: PXWMHints;
   IsToplevel: Boolean;
+  bg: TfpgColor;
 begin
   if HandleIsValid then
     Exit; //==>
@@ -3244,6 +3245,18 @@ begin
       xapplication.FClientLeaderAtom := XInternAtom(xapplication.Display, 'WM_CLIENT_LEADER', TBool(False));
     end;
   end;
+
+  if Owner is TfpgWidget then
+    bg := TfpgWidget(Owner).BackgroundColor
+  else
+    bg := clWindowBackground;
+  if bg <> clNone then
+  begin
+    attr.background_pixel := fpgColorToX(bg);
+    mask := mask or CWBackPixel;
+  end;
+  attr.bit_gravity := NorthWestGravity;
+  mask := mask or CWBitGravity;
 
   if FSize.W = 0 then
     FSize.W := 1;
