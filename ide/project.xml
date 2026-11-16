@@ -24,6 +24,16 @@
   </moduleDependencies>
 
 <!--
+    OPDF debugger support (opt-in).
+
+    Disabled by default: no released FPC (3.2.2 or 3.3.1) emits OPDF debug
+    info yet, so the IDE builds with the stub debugger. To enable it, use an
+    FPC with OPDF support, uncomment the dependencies below and build with
+    the 'opdf' profile, e.g.: pasbuild compile -m fpgui-ide -p unix,opdf
+
+    (PasBuild does not yet support dependencies inside a profile, hence the
+    manual step.)
+
   <dependencies>
     <dependency>
       <name>opdf-lib</name>
@@ -39,5 +49,14 @@
     </dependency>
   </dependencies>
 -->
+
+  <profiles>
+    <profile>
+      <id>opdf</id>
+      <defines>
+        <define>OPDF_DEBUG</define>
+      </defines>
+    </profile>
+  </profiles>
 
 </project>
